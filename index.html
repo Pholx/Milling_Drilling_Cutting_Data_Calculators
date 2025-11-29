@@ -133,8 +133,9 @@
             border-radius: 8px;
         }
 
-        /* Toggling Tips Box */
+        /* Toggling Tips Box (DOLD SOM STANDARD) */
         .tips-container { 
+            display: none; /* Dold som standard */
             margin-top: 28px;
             border: 2px solid var(--warning); 
             border-radius: 20px;
@@ -196,6 +197,31 @@
         .reset-btn:hover { transform: translateY(-1px); }
         .reset-btn:active { transform: translateY(2px); }
         
+        /* NY CSS FÖR DÖLJANDE AV AVANCERADE FUNKTIONER */
+        .advanced-features-toggle {
+            margin-bottom: 24px;
+            padding: 15px;
+            border-radius: 16px;
+            background: #eef2ff; 
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        .advanced-features-toggle input[type="checkbox"] {
+            transform: scale(1.4);
+            cursor: pointer;
+        }
+        
+        /* Denna klass döljer avancerade fält som standard. */
+        .advanced-hidden-element, .advanced-result {
+            display: none;
+        }
+
         /* Media query för mobil-vy */
         @media (max-width: 480px) {
             .app { margin: 10px; padding: 20px; }
@@ -234,7 +260,11 @@
             <button class="tab" onclick="switchTab('brotschning')">⚙️ Brotschning</button>
             <button class="tab" onclick="switchTab('svarvning')">🔄 Svarvning</button>
         </div>
-
+        
+        <div class="advanced-features-toggle">
+            <span>Visa Avancerade Funktioner</span>
+            <input type="checkbox" id="advanced-features-checkbox" onchange="toggleAdvancedFeatures()">
+        </div>
         <div id="frasning" class="tab-content active">
             <div class="input-group">
                 <div class="input-row">
@@ -258,17 +288,17 @@
                         <option value="keram">Keram/CBN</option>
                     </select>
                 </div>
-                <div class="input-row">
-                    <label class="label"><span class="icon">⚙️</span>Dia</label>
-                    <input type="number" id="frasning-diameter" value="12" step="0.1" min="0.5">
-                    <span class="unit">mm</span>
-                </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">⚡</span>Vc</label>
                     <input type="number" id="frasning-vc" value="" step="1" min="1" placeholder="Auto">
                     <span class="unit">m/min</span>
                 </div>
                 <div class="input-row">
+                    <label class="label"><span class="icon">⚙️</span>Dia</label>
+                    <input type="number" id="frasning-diameter" value="12" step="0.1" min="0.5">
+                    <span class="unit">mm</span>
+                </div>
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🔪</span>ap</label>
                     <input type="number" id="frasning-ap" value="5" step="0.5" min="0.1">
                     <span class="unit">mm</span>
@@ -283,7 +313,7 @@
                     <input type="number" id="frasning-tander" value="4" step="1" min="1">
                     <span class="unit">st</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🍽️</span>fz</label>
                     <input type="number" id="frasning-fz" value="0.060" step="0.001" min="0.001">
                     <span class="unit">mm/t</span>
@@ -293,23 +323,23 @@
                     <input type="number" id="frasning-max-rpm" value="" step="10" min="1" placeholder="Valfritt">
                     <span class="unit">r/min</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🛑</span>MaxVf</label>
                     <input type="number" id="frasning-max-vf" value="" step="100" min="100" placeholder="Maskin Max">
                     <span class="unit">mm/min</span>
                 </div>
-                </div>
+            </div>
             
             <div class="auto-calc">
                 <div class="auto-row">
                     <span class="auto-label">🎯 Vc Auto</span>
                     <span class="auto-value" id="frasning-vcAuto">220</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">Kc (Spec. Kraft)</span>
                     <span class="auto-value" id="frasning-kc">1500 N/mm²</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">⚙️ fz-justering</span>
                     <span class="auto-value" id="frasning-justeringFz">100%</span>
                 </div>
@@ -335,15 +365,15 @@
                     <span class="result-label"><span class="icon">✨</span> Matning Fin</span>
                     <span class="result-value" id="frasning-matning-fin">1400</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">🧮</span> Avv. Volym (Q)</span>
                     <span class="result-value" id="frasning-avverkad-volym">144.5 cm³/min</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">⚡</span> Effekt (Pc)</span>
                     <span class="result-value" id="frasning-effekt">3.61 kW</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">🔩</span> Vridmoment (M)</span>
                     <span class="result-value" id="frasning-vridmoment">5.9 Nm</span>
                 </div>
@@ -373,17 +403,17 @@
                         <option value="keram">Keram/CBN</option>
                     </select>
                 </div>
-                <div class="input-row">
-                    <label class="label"><span class="icon">⚙️</span>Dia</label>
-                    <input type="number" id="planfrasning-diameter" value="63" step="1" min="10">
-                    <span class="unit">mm</span>
-                </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">⚡</span>Vc</label>
                     <input type="number" id="planfrasning-vc" value="" step="1" min="1" placeholder="Auto">
                     <span class="unit">m/min</span>
                 </div>
                 <div class="input-row">
+                    <label class="label"><span class="icon">⚙️</span>Dia</label>
+                    <input type="number" id="planfrasning-diameter" value="63" step="1" min="10">
+                    <span class="unit">mm</span>
+                </div>
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🔪</span>ap</label>
                     <input type="number" id="planfrasning-ap" value="1.5" step="0.1" min="0.1">
                     <span class="unit">mm</span>
@@ -398,7 +428,7 @@
                     <input type="number" id="planfrasning-tander" value="6" step="1" min="1">
                     <span class="unit">st</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🍽️</span>fz</label>
                     <input type="number" id="planfrasning-fz" value="0.18" step="0.01" min="0.01">
                     <span class="unit">mm/t</span>
@@ -408,23 +438,23 @@
                     <input type="number" id="planfrasning-max-rpm" value="" step="10" min="1" placeholder="Valfritt">
                     <span class="unit">r/min</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🛑</span>MaxVf</label>
                     <input type="number" id="planfrasning-max-vf" value="" step="100" min="100" placeholder="Maskin Max">
                     <span class="unit">mm/min</span>
                 </div>
-                </div>
+            </div>
             
             <div class="auto-calc">
                 <div class="auto-row">
                     <span class="auto-label">🎯 Vc Auto</span>
                     <span class="auto-value" id="planfrasning-vcAuto">220</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">Kc (Spec. Kraft)</span>
                     <span class="auto-value" id="planfrasning-kc">1500 N/mm²</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">⚙️ fz-justering</span>
                     <span class="auto-value" id="planfrasning-justeringFz">100%</span>
                 </div>
@@ -446,15 +476,15 @@
                     <span class="result-label"><span class="icon">🚀</span> Matning</span>
                     <span class="result-value" id="planfrasning-matning">1198</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">🧮</span> Avv. Volym (Q)</span>
                     <span class="result-value" id="planfrasning-avverkad-volym">90.6 cm³/min</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">⚡</span> Effekt (Pc)</span>
                     <span class="result-value" id="planfrasning-effekt">2.27 kW</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">🔩</span> Vridmoment (M)</span>
                     <span class="result-value" id="planfrasning-vridmoment">19.4 Nm</span>
                 </div>
@@ -484,15 +514,15 @@
                         <option value="keram">Keram/CBN</option>
                     </select>
                 </div>
+                <div class="input-row advanced-hidden-element">
+                    <label class="label"><span class="icon">⚡</span>Vc</label>
+                    <input type="number" id="gangfrasning-vc" value="" step="1" min="1" placeholder="Auto">
+                    <span class="unit">m/min</span>
+                </div>
                 <div class="input-row">
                     <label class="label"><span class="icon">⚙️</span>Dia</label>
                     <input type="number" id="gangfrasning-diameter" value="10" step="0.1" min="1">
                     <span class="unit">mm</span>
-                </div>
-                <div class="input-row">
-                    <label class="label"><span class="icon">⚡</span>Vc</label>
-                    <input type="number" id="gangfrasning-vc" value="" step="1" min="1" placeholder="Auto">
-                    <span class="unit">m/min</span>
                 </div>
                 <div class="input-row">
                     <label class="label"><span class="icon">📐</span>Ingr</label>
@@ -504,7 +534,7 @@
                     <input type="number" id="gangfrasning-tander" value="3" step="1" min="1">
                     <span class="unit">st</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🍽️</span>fz</label>
                     <input type="number" id="gangfrasning-fz" value="0.08" step="0.01" min="0.01">
                     <span class="unit">mm/t</span>
@@ -514,23 +544,23 @@
                     <input type="number" id="gangfrasning-max-rpm" value="" step="10" min="1" placeholder="Valfritt">
                     <span class="unit">r/min</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🛑</span>MaxVf</label>
                     <input type="number" id="gangfrasning-max-vf" value="" step="100" min="100" placeholder="Maskin Max">
                     <span class="unit">mm/min</span>
                 </div>
-                </div>
+            </div>
             
             <div class="auto-calc">
                 <div class="auto-row">
                     <span class="auto-label">🎯 Vc Auto</span>
                     <span class="auto-value" id="gangfrasning-vcAuto">85</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">Kc (Spec. Kraft)</span>
                     <span class="auto-value" id="gangfrasning-kc">1500 N/mm²</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">⚙️ fz-justering</span>
                     <span class="auto-value" id="gangfrasning-justeringFz">100%</span>
                 </div>
@@ -552,11 +582,11 @@
                     <span class="result-label"><span class="icon">🚀</span> Matning</span>
                     <span class="result-value" id="gangfrasning-matning">1053</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">⚡</span> Effekt (Pc)</span>
                     <span class="result-value" id="gangfrasning-effekt">~1.25 kW</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">🔩</span> Vridmoment (M)</span>
                     <span class="result-value" id="gangfrasning-vridmoment">~4.5 Nm</span>
                 </div>
@@ -601,12 +631,12 @@
                     <input type="number" id="borrning-diameter" value="4.3" step="0.05" min="0.5">
                     <span class="unit">mm</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">⚡</span>Vc</label>
                     <input type="number" id="borrning-vc" value="" step="1" min="1" placeholder="Auto">
                     <span class="unit">m/min</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🍽️</span>fz</label>
                     <input type="number" id="borrning-f" value="" step="0.005" min="0.001" placeholder="Auto">
                     <span class="unit">mm/v</span>
@@ -616,18 +646,18 @@
                     <input type="number" id="borrning-max-rpm" value="" step="10" min="1" placeholder="Valfritt">
                     <span class="unit">r/min</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🛑</span>MaxVf</label>
                     <input type="number" id="borrning-max-vf" value="" step="100" min="100" placeholder="Maskin Max">
                     <span class="unit">mm/min</span>
                 </div>
-                </div>
+            </div>
             <div class="auto-calc">
                 <div class="auto-row">
                     <span class="auto-label">🎯 Vc Auto</span>
                     <span class="auto-value" id="borrning-vcAuto">45</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">Kc (Spec. Kraft)</span>
                     <span class="auto-value" id="borrning-kc">2500 N/mm²</span>
                 </div>
@@ -635,11 +665,11 @@
                     <span class="auto-label">🔧 f bas</span>
                     <span class="auto-value" id="borrning-fzBas">0.140</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">📏 Material</span>
                     <span class="auto-value" id="borrning-materialFaktor">80%</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">📏 Längd</span>
                     <span class="auto-value" id="borrning-langdFaktor">100%</span>
                 </div>
@@ -657,15 +687,15 @@
                     <span class="result-label"><span class="icon">🚀</span> Matning</span>
                     <span class="result-value" id="borrning-matning">374</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">🧮</span> Avv. Volym (Q)</span>
                     <span class="result-value" id="borrning-avverkad-volym">5.5 cm³/min</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">⚡</span> Effekt (Pc)</span>
                     <span class="result-value" id="borrning-effekt">0.23 kW</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">🔩</span> Vridmoment (M)</span>
                     <span class="result-value" id="borrning-vridmoment">0.66 Nm</span>
                 </div>
@@ -700,7 +730,7 @@
                     <input type="number" id="brotschning-diameter" value="10" step="0.1" min="1">
                     <span class="unit">mm</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">⚡</span>Vc</label>
                     <input type="number" id="brotschning-vc" value="" step="1" min="1" placeholder="Auto">
                     <span class="unit">m/min</span>
@@ -710,7 +740,7 @@
                     <input type="number" id="brotschning-tander" value="6" step="1" min="4">
                     <span class="unit">st</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🍽️</span>fz</label>
                     <input type="number" id="brotschning-fz" value="" step="0.005" min="0.001" placeholder="Auto">
                     <span class="unit">mm/t</span>
@@ -720,12 +750,12 @@
                     <input type="number" id="brotschning-max-rpm" value="" step="10" min="1" placeholder="Valfritt">
                     <span class="unit">r/min</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🛑</span>MaxVf</label>
                     <input type="number" id="brotschning-max-vf" value="" step="100" min="100" placeholder="Maskin Max">
                     <span class="unit">mm/min</span>
                 </div>
-                </div>
+            </div>
             
             <div class="auto-calc">
                 <div class="auto-row">
@@ -736,7 +766,7 @@
                     <span class="auto-label">🔧 fz bas</span>
                     <span class="auto-value" id="brotschning-fzBas">0.060</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">📏 Material</span>
                     <span class="auto-value" id="brotschning-materialFaktor">100%</span>
                 </div>
@@ -744,7 +774,7 @@
                     <span class="auto-label">✅ fz justerad</span>
                     <span class="auto-value" id="brotschning-fzJust">0.060</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">⬇️ Rek. Borr Dia</span>
                     <span class="auto-value" id="brotschning-borrDia">9.80 mm</span>
                 </div>
@@ -758,7 +788,7 @@
                     <span class="result-label"><span class="icon">🚀</span> Matning</span>
                     <span class="result-value" id="brotschning-matning">1489</span>
                 </div>
-            </div>
+                </div>
         </div>
         
         <div id="svarvning" class="tab-content">
@@ -789,12 +819,12 @@
                     <input type="number" id="svarvning-diameter" value="50" step="1" min="1">
                     <span class="unit">mm</span>
                 </div>
-                <div class="input-row">
+                <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">⚡</span>Vc</label>
                     <input type="number" id="svarvning-vc" value="" step="1" min="1" placeholder="Auto">
                     <span class="unit">m/min</span>
                 </div>
-                <div class="input-row">
+                 <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🔪</span>ap</label>
                     <input type="number" id="svarvning-ap" value="2.0" step="0.1" min="0.1">
                     <span class="unit">mm</span>
@@ -809,19 +839,19 @@
                     <input type="number" id="svarvning-max-rpm" value="" step="10" min="1" placeholder="Valfritt">
                     <span class="unit">r/min</span>
                 </div>
-                 <div class="input-row">
+                 <div class="input-row advanced-hidden-element">
                     <label class="label"><span class="icon">🛑</span>MaxVf</label>
                     <input type="number" id="svarvning-max-vf" value="" step="100" min="100" placeholder="Maskin Max">
                     <span class="unit">mm/min</span>
                 </div>
-                </div>
+            </div>
             
             <div class="auto-calc">
                 <div class="auto-row">
                     <span class="auto-label">🎯 Vc Auto</span>
                     <span class="auto-value" id="svarvning-vcAuto">250</span>
                 </div>
-                <div class="auto-row">
+                <div class="auto-row advanced-hidden-element">
                     <span class="auto-label">Kc (Spec. Kraft)</span>
                     <span class="auto-value" id="svarvning-kc">1500 N/mm²</span>
                 </div>
@@ -835,15 +865,15 @@
                     <span class="result-label"><span class="icon">🚀</span> Matning (Vf)</span>
                     <span class="result-value" id="svarvning-matning">398</span>
                 </div>
-                 <div class="result-item">
+                 <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">🧮</span> Avv. Volym (Q)</span>
                     <span class="result-value" id="svarvning-avverkad-volym">75.0 cm³/min</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">⚡</span> Effekt (Pc)</span>
                     <span class="result-value" id="svarvning-effekt">1.88 kW</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item advanced-result">
                     <span class="result-label"><span class="icon">🔩</span> Vridmoment (M)</span>
                     <span class="result-value" id="svarvning-vridmoment">11.3 Nm</span>
                 </div>
@@ -876,13 +906,13 @@
 
         // Verktygsmaterial Multiplikatorer
         const toolMaterialMultipliers = {
-            hardmetall: 1.0, // Baslinje
-            hss: 0.40,       // JUSTERAD Vc-faktor: Upp från 0.35 för bättre balans.
+            hardmetall: 1.0, 
+            hss: 0.40,      
             keram: 2.5      
         };
         
         // NYTT: Borrnings-specifika justeringar
-        const HSS_FZ_DRILL_MULTIPLIER = 0.75; // Sänker fz med 25% för HSS-borrar
+        const HSS_FZ_DRILL_MULTIPLIER = 0.75; 
         // SLUT NYTT
 
         // --- DATA FÖR FRÄSNING / PLANFRÄSNING ---
@@ -1142,7 +1172,7 @@
         function calculateFrasning() {
             const D = parseFloat(document.getElementById('frasning-diameter').value) || 12;
             const vcInput = document.getElementById('frasning-vc').value.trim();
-            const ap = parseFloat(document.getElementById('frasning-ap').value) || 5;
+            const ap = parseFloat(document.getElementById('frasning-ap').value) || 5; 
             const aeD = parseFloat(document.getElementById('frasning-ingrepp').value) || 10;
             const Z = parseInt(document.getElementById('frasning-tander').value) || 4;
             const fzInput = parseFloat(document.getElementById('frasning-fz').value) || 0.060;
@@ -1151,7 +1181,6 @@
             const toolKey = document.getElementById('frasning-verktyg').value; 
             
             const maxRpmInput = document.getElementById('frasning-max-rpm').value.trim(); 
-            // NYTT: Hantera tomt fält som oändligt
             const maxVfInput = parseFloat(document.getElementById('frasning-max-vf').value) || Infinity; 
             
             const material = frasningData[materialKey] || { justering: 100, vcAuto: 220, kc: kcData.mjukt };
@@ -1194,7 +1223,7 @@
 
             if (Vf_Fin > maxVfInput) {
                 Vf_Fin_Final = maxVfInput;
-                vf_warning_fin = ` <span class="vf-capped-warning">(Max!)</span>`;
+                vf_warning_fin = ` <span class="vf-capped-warning">(Max!)`;
             }
             
             // NYA BERÄKNINGAR (Avverkad Volym, Effekt, Vridmoment) - baserat på CAPPED Vf
@@ -1206,7 +1235,7 @@
             const M_Nm = (Pc * 9550) / n_final;
 
             // UPPDATERA DISPLAY
-            document.getElementById('frasning-vcAuto').textContent = Vc_Auto_Adjusted.toFixed(0); // Uppdaterad Vc Auto
+            document.getElementById('frasning-vcAuto').textContent = Vc_Auto_Adjusted.toFixed(0); 
             document.getElementById('frasning-kc').textContent = kc.toFixed(0) + ' N/mm²';
             document.getElementById('frasning-justeringFz').textContent = material.justering + '%';
             document.getElementById('frasning-fzJust').textContent = fzMachineFeed_Grov.toFixed(3);
@@ -1225,7 +1254,7 @@
         function calculatePlanfrasning() {
             const D = parseFloat(document.getElementById('planfrasning-diameter').value) || 63;
             const vcInput = document.getElementById('planfrasning-vc').value.trim();
-            const ap = parseFloat(document.getElementById('planfrasning-ap').value) || 1.5;
+            const ap = parseFloat(document.getElementById('planfrasning-ap').value) || 1.5; 
             const Z = parseInt(document.getElementById('planfrasning-tander').value) || 6; 
             const fzInput = parseFloat(document.getElementById('planfrasning-fz').value) || 0.18;
             
@@ -1436,7 +1465,7 @@
             }
             
             // NYA BERÄKNINGAR (Grov uppskattning) - baserat på CAPPED Vf
-            const ap_nominal = 5; 
+            const ap_nominal = 5; // Använder en nominell ap för effektberäkning
             const ae_mm_nominal = D; 
             const Q_mm3_nominal = ap_nominal * ae_mm_nominal * Vf_Final;
             const Pc = (Q_mm3_nominal * kc) / (60 * 1000 * 1000); 
@@ -1630,8 +1659,58 @@
             if (tabName === 'borrning') calculateBorrning();
             if (tabName === 'brotschning') calculateBrotschning();
             if (tabName === 'svarvning') calculateSvarvning(); 
+            
+            // Återställ synligheten för avancerade funktioner vid flikbyte (Behåller kryssrutans tillstånd, men tvingar fram display-uppdatering)
+            toggleAdvancedFeatures(false); 
         }
         // --- SLUT PÅ NY FUNKTIONER FÖR TIPS RUTAN ---
+
+        
+        /**
+         * Togglar synligheten för avancerade input- och resultatfält.
+         */
+        function toggleAdvancedFeatures() {
+            const isChecked = document.getElementById('advanced-features-checkbox').checked;
+            
+            // Toggle all input wrappers and auto-calc rows (Vc, ap, fz, MaxVf, Kc, fz-justering)
+            document.querySelectorAll('.advanced-hidden-element').forEach(el => {
+                // Använd flex för input-rader
+                el.style.display = isChecked ? 'flex' : 'none'; 
+            });
+
+            // Toggle all result wrappers (Q, Pc, M)
+            document.querySelectorAll('.advanced-result').forEach(el => {
+                // Använd flex för resultat-rader
+                el.style.display = isChecked ? 'flex' : 'none'; 
+            });
+            
+            // *** NYTT: Toggle Tips container ***
+            const tipsContainer = document.querySelector('.tips-container');
+            if (tipsContainer) {
+                // Tips-containern är ett blockelement
+                tipsContainer.style.display = isChecked ? 'block' : 'none';
+                
+                // Om vi döljer tipsen, se till att de är ihopfällda för nästa gång
+                if (!isChecked) {
+                    const contentDiv = document.getElementById('tips-content-container');
+                    const toggleIcon = document.getElementById('tips-toggle-icon');
+                    contentDiv.classList.remove('expanded');
+                    toggleIcon.textContent = '+';
+                }
+            }
+            // *** SLUT NYTT ***
+            
+            // Utför omräkning
+            const activeTab = document.querySelector('.tab-content.active').id;
+            switch(activeTab) {
+                case 'frasning': calculateFrasning(); break;
+                case 'planfrasning': calculatePlanfrasning(); break;
+                case 'gangfrasning': calculateGangfrasning(); break;
+                case 'borrning': calculateBorrning(); break;
+                case 'brotschning': calculateBrotschning(); break;
+                case 'svarvning': calculateSvarvning(); break;
+            }
+        }
 
 
         // Event listeners (uppdaterade)
@@ -1677,11 +1756,11 @@
             document.getElementById('frasning-diameter').value = '12';
             document.getElementById('frasning-vc').value = '';
             document.getElementById('frasning-ap').value = '5';
-            document.getElementById('frasning-ingrepp').value = '10';
+            document.getElementById('frasning-ingrepp').value = '10'; // SYNLIGT
             document.getElementById('frasning-tander').value = '4';
             document.getElementById('frasning-fz').value = '0.060';
             document.getElementById('frasning-max-rpm').value = '';
-            document.getElementById('frasning-max-vf').value = ''; // TOM SOM STANDARD
+            document.getElementById('frasning-max-vf').value = ''; 
             
             // Planfräsning
             document.getElementById('planfrasning-material').value = 'mjukt';
@@ -1689,22 +1768,22 @@
             document.getElementById('planfrasning-diameter').value = '63';
             document.getElementById('planfrasning-vc').value = '';
             document.getElementById('planfrasning-ap').value = '1.5';
-            document.getElementById('planfrasning-ingrepp').value = '80'; 
+            document.getElementById('planfrasning-ingrepp').value = '80'; // SYNLIGT
             document.getElementById('planfrasning-tander').value = '6'; 
             document.getElementById('planfrasning-fz').value = '0.18';
             document.getElementById('planfrasning-max-rpm').value = '';
-            document.getElementById('planfrasning-max-vf').value = ''; // TOM SOM STANDARD
+            document.getElementById('planfrasning-max-vf').value = ''; 
             
             // Gängfräsning
             document.getElementById('gangfrasning-material').value = 'mjukt';
             document.getElementById('gangfrasning-verktyg').value = 'hardmetall'; 
             document.getElementById('gangfrasning-diameter').value = '10';
             document.getElementById('gangfrasning-vc').value = '';
-            document.getElementById('gangfrasning-ingrepp').value = '20';
+            document.getElementById('gangfrasning-ingrepp').value = '20'; // SYNLIGT
             document.getElementById('gangfrasning-tander').value = '3';
             document.getElementById('gangfrasning-fz').value = '0.08';
             document.getElementById('gangfrasning-max-rpm').value = '';
-            document.getElementById('gangfrasning-max-vf').value = ''; // TOM SOM STANDARD
+            document.getElementById('gangfrasning-max-vf').value = ''; 
             
             // Borrning
             document.getElementById('borrning-material').value = 'hart';
@@ -1714,8 +1793,8 @@
             document.getElementById('borrning-vc').value = '';
             document.getElementById('borrning-f').value = ''; 
             document.getElementById('borrning-max-rpm').value = ''; 
-            document.getElementById('borrning-max-vf').value = ''; // TOM SOM STANDARD
-
+            document.getElementById('borrning-max-vf').value = ''; 
+            
             // Brotschning
             document.getElementById('brotschning-material').value = 'mjukt';
             document.getElementById('brotschning-verktyg').value = 'hardmetall'; 
@@ -1724,8 +1803,8 @@
             document.getElementById('brotschning-tander').value = '6';
             document.getElementById('brotschning-fz').value = '';
             document.getElementById('brotschning-max-rpm').value = ''; 
-            document.getElementById('brotschning-max-vf').value = ''; // TOM SOM STANDARD
-
+            document.getElementById('brotschning-max-vf').value = ''; 
+            
             // Svarvning 
             document.getElementById('svarvning-material').value = 'mjukt';
             document.getElementById('svarvning-verktyg').value = 'hardmetall'; 
@@ -1734,7 +1813,10 @@
             document.getElementById('svarvning-ap').value = '2.0';
             document.getElementById('svarvning-f').value = '0.25';
             document.getElementById('svarvning-max-rpm').value = '';
-            document.getElementById('svarvning-max-vf').value = ''; // TOM SOM STANDARD
+            document.getElementById('svarvning-max-vf').value = ''; 
+            
+            // Återställ kryssrutan till DOLD
+            document.getElementById('advanced-features-checkbox').checked = false;
             
             // Utför beräkningar och uppdateringar
             setFrasningFzByDiameter();
@@ -1744,11 +1826,8 @@
             calculateBrotschning();
             calculateSvarvning(); 
             
-            // Stäng tipsrutan vid återställning
-            const contentDiv = document.getElementById('tips-content-container');
-            if (contentDiv.classList.contains('expanded')) {
-                toggleTipsBox(); 
-            }
+            // Uppdatera synlighet för avancerade funktioner (döljer allt avancerat + tips)
+            toggleAdvancedFeatures();
         }
 
         // Starta
@@ -1759,6 +1838,7 @@
         calculateBrotschning();
         calculateSvarvning(); 
         updateTipsBox('frasning'); // Ladda in initiala tips
+        toggleAdvancedFeatures(); // Sätt initialt läge (Dolt)
     </script>
 </body>
 </html>
