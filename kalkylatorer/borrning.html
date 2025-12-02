@@ -1,215 +1,247 @@
-<header class="calc-header">
-    <div class="tool-badge tool-hm" id="toolBadge">HM</div>
-    <h1>Borrkalkylator</h1>
-    <p class="subtitle">Borrning – Hårdmetall & Snabbstål</p>
-</header>
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skärdatakalkylator - Borrning (HM & HSS)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS-STYLING FÖR DENNA KALKYLATOR */
+        :root {
+            --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
+            --primary: #3b82f6; --primary-light: #dbeafe; --success: #10b981; 
+            --warning: #f59e0b; --danger: #ef4444; --border: #e2e8f0; 
+            --shadow: 0 20px 40px rgba(0,0,0,0.08); --radius: 16px;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
+                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        }
+        body.dark { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
+                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:0; transition:all .4s; }
+        .container { max-width:560px; margin:0 auto; background:var(--card); padding: 0; box-shadow:none; border-radius: 0;}
+        header { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:30px 24px; text-align:center; position:relative; }
+        h1 { font-size:1.8rem; font-weight:700; margin-bottom:8px; }
+        .subtitle { font-size:0.9rem; opacity:0.9; }
+        main { padding:32px 24px; }
 
-<main>
-    <div class="form-group">
-        <label for="toolType">Verktygsmaterial</label>
-        <select id="toolType">
-            <option value="HM">Hårdmetall (HM)</option>
-            <option value="HSS">Snabbstål (HSS)</option>
-        </select>
-    </div>
+        /* TOOL BADGE */
+        .tool-badge { position:absolute; top:16px; left:16px; padding:6px 14px;
+                      border-radius:50px; font-size:0.8rem; font-weight:700;
+                      text-transform:uppercase; letter-spacing:0.5px; }
+        .tool-hm { background:#1d4ed8; } .tool-hss { background:#ea580c; }
+        
+        /* FORM STYLING */
+        .form-group { margin-bottom: 24px; }
+        label { display:block; margin-bottom:8px; font-weight:600; font-size:0.95rem; }
+        select, input[type=number] { width:100%; padding:14px 16px; border:2px solid var(--border);
+            border-radius:12px; background:var(--card); color:var(--text); font-size:1rem;
+            transition:all .3s; }
+        select:focus, input[type=number]:focus { border-color:var(--primary); outline:none; }
+        
+        /* RESULTS STYLING */
+        .results { 
+            background: var(--primary-light); 
+            padding: 24px; 
+            border-radius: 12px; 
+            margin-top: 32px; 
+            color: var(--text);
+            transition: background .4s;
+        }
+        body.dark .results { 
+            background: #1e3a8a; 
+            color: white;
+        }
+        .results h2 { 
+            font-size: 1.4rem; 
+            font-weight: 700; 
+            margin-bottom: 16px; 
+            color: var(--primary); 
+            transition: color .4s;
+        }
+        body.dark .results h2 { color: #93c5fd; }
+        .result-line { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        body.dark .result-line { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .result-line:last-of-type { border-bottom: none; margin-bottom: 8px; }
+        .value { color: var(--text); font-weight: 700; }
+        .value.capped { color: var(--danger); }
+        .details { 
+            margin-top: 16px; 
+            padding-top: 12px; 
+            border-top: 1px solid var(--border); 
+            font-size: 0.85rem; 
+            color: var(--text-light);
+        }
+        .details p { margin-bottom: 4px; }
+    </style>
+</head>
+<body>
 
-    <div class="form-group">
-        <label for="material">Material</label>
-        <select id="material">
-            <option value="">-- Välj material --</option>
-            <option value="mjukt_stal">Stål: Mjukt (&lt; 1100 N/mm²)</option>
-            <option value="hart_stal">Stål: Hårt (&gt; 1100 N/mm²)</option>
-            <option value="rostfritt_austenit">Rostfritt: Austenitiskt (&lt; 850 N/mm²)</option>
-            <option value="toolox_44">Stål: Toolox 44 (&lt; 50 HRC)</option>
-            <option value="hardat_stal_65">Stål: Härdat (&lt;65 HRC)</option>
-            <option value="aluminium">Aluminium</option>
-            <option value="koppar">Koppar</option>
-        </select>
-    </div>
+<div class="container">
+    <header>
+        <div class="tool-badge tool-hm" id="toolBadge">HM</div>
+        <h1>Skärdatakalkylator</h1>
+        <p class="subtitle">Borrning – Hårdmetall & Snabbstål (0.5–25 mm)</p>
+    </header>
 
-    <div class="form-group">
-        <label for="length">Borrlängd (L/D)</label>
-        <select id="length">
-            <option value="">-- Välj längd --</option>
-            <option value="3xD">3xD</option>
-            <option value="5xD">5xD</option>
-            <option value="8xD">8xD</option>
-            <option value="10xD">10xD</option>
-            <option value="12xD">12xD</option>
-            <option value="15xD">15xD</option>
-        </select>
-    </div>
+    <main>
+        <div class="form-group">
+            <label for="toolType">Verktygsmaterial</label>
+            <select id="toolType">
+                <option value="HM">Hårdmetall (HM)</option>
+                <option value="HSS">Snabbstål (HSS)</option>
+            </select>
+        </div>
 
-    <div class="form-group">
-        <label for="diameter">Borrdiameter (mm)</label>
-        <input type="number" id="diameter" step="0.1" min="0.5" max="25" placeholder="t.ex. 8.5">
-    </div>
+        <div class="form-group">
+            <label for="material">Materialgrupp</label>
+            <select id="material">
+                <option value="P1">Stål - Olegerat</option>
+                <option value="P3">Stål - Seghärdat</option>
+                <option value="M1">Rostfritt - Martensitiskt</option>
+                <option value="K1">Gjutjärn - Gråjärn</option>
+                <option value="N1">Icke-järn - Aluminium</option>
+                <option value="S2">Högtemp - Titanlegeringar</option>
+            </select>
+        </div>
 
-    <div class="form-group">
-        <label for="maxRpm">Maskinens max varvtal (valfritt)</label>
-        <input type="number" id="maxRpm" step="1" placeholder="t.ex. 12000">
-    </div>
+        <div class="form-group">
+            <label for="length">Borrdjup/Diameter-kvot (L/D)</label>
+            <select id="length">
+                <option value="2D">Kort (L/D < 3)</option>
+                <option value="4D">Standard (3 < L/D < 5)</option>
+                <option value="6D">Lång (L/D > 5)</option>
+            </select>
+        </div>
 
-    <div class="results" id="results">
-        <p style="color:var(--text-light); text-align:center; padding:20px 0;">
-            Fyll i fälten ovan för att få skärdata
-        </p>
-    </div>
-</main>
+        <div class="form-group">
+            <label for="diameter">Diameter (D, mm)</label>
+            <input type="number" id="diameter" value="6.0" min="0.5" max="25" step="0.5">
+        </div>
+
+        <div class="form-group">
+            <label for="maxRpm">Maskinens max RPM</label>
+            <input type="number" id="maxRpm" value="10000" min="1000" step="1000">
+        </div>
+
+        <div class="results" id="results">
+            <p style="color:var(--text-light); text-align:center; padding:20px 0;">
+                Fyll i fälten ovan för att få skärdata
+            </p>
+        </div>
+    </main>
+</div>
 
 <script>
-    // === ALLA DATA (Oförändrad datamängd) ===
-    const materialDataHM = { 
-        "mjukt_stal": { name: "Stål: Mjukt (< 1100 N/mm²)", Fm: 1.0, Vc_safe: 60 },
-        "hart_stal": { name: "Stål: Hårt (> 1100 N/mm²)", Fm: 0.9, Vc_safe: 40 },
-        "toolox_44": { name: "Stål: Toolox 44 (< 50 HRC)", Fm: 0.7, Vc_safe: 20 },
-        "rostfritt_austenit": { name: "Rostfritt: Austenitiskt (< 850 N/mm²)", Fm: 0.9, Vc_safe: 30 },
-        "hardat_stal_65": { name: "Stål: Härdat (<65HRC)", Fm: 0.6, Vc_safe: 15 },
-        "aluminium": { name: "Aluminium", Fm: 1.4, Vc_safe: 200 },
-        "koppar": { name: "Koppar", Fm: 1.0, Vc_safe: 80 }
+    // JS-LOGIK
+    const materialDataHM = {
+        P1: { Vc: 120, Fn_2D: 0.15, Fn_4D: 0.12, Fn_6D: 0.10, name: "Stål - Olegerat" },
+        P3: { Vc: 80, Fn_2D: 0.10, Fn_4D: 0.08, Fn_6D: 0.07, name: "Stål - Seghärdat" },
+        M1: { Vc: 60, Fn_2D: 0.10, Fn_4D: 0.08, Fn_6D: 0.06, name: "Rostfritt" },
+        K1: { Vc: 150, Fn_2D: 0.20, Fn_4D: 0.15, Fn_6D: 0.12, name: "Gjutjärn" },
+        N1: { Vc: 200, Fn_2D: 0.30, Fn_4D: 0.25, Fn_6D: 0.20, name: "Aluminium" },
+        S2: { Vc: 30, Fn_2D: 0.06, Fn_4D: 0.05, Fn_6D: 0.04, name: "Titanlegeringar" },
     };
 
     const materialDataHSS = {
-        "mjukt_stal": { name: "Stål: Mjukt (< 1100 N/mm²)", Fm: 1.0, Vc_safe: 20 },
-        "hart_stal": { name: "Stål: Hårt (> 1100 N/mm²)", Fm: 0.9, Vc_safe: 15 },
-        "toolox_44": { name: "Stål: Toolox 44 (< 50 HRC)", Fm: 0.7, Vc_safe: 10 },
-        "rostfritt_austenit": { name: "Rostfritt: Austenitiskt (< 850 N/mm²)", Fm: 0.8, Vc_safe: 12 },
-        "hardat_stal_65": { name: "Stål: Härdat (<65HRC)", Fm: 0.6, Vc_safe: 5 },
-        "aluminium": { name: "Aluminium", Fm: 1.4, Vc_safe: 60 },
-        "koppar": { name: "Koppar", Fm: 1.0, Vc_safe: 30 }
+        P1: { Vc: 40, Fn_2D: 0.12, Fn_4D: 0.10, Fn_6D: 0.08, name: "Stål - Olegerat" },
+        P3: { Vc: 30, Fn_2D: 0.08, Fn_4D: 0.07, Fn_6D: 0.06, name: "Stål - Seghärdat" },
+        M1: { Vc: 15, Fn_2D: 0.06, Fn_4D: 0.05, Fn_6D: 0.04, name: "Rostfritt" },
+        K1: { Vc: 50, Fn_2D: 0.15, Fn_4D: 0.12, Fn_6D: 0.10, name: "Gjutjärn" },
+        N1: { Vc: 80, Fn_2D: 0.20, Fn_4D: 0.15, Fn_6D: 0.12, name: "Aluminium" },
+        S2: { Vc: 10, Fn_2D: 0.04, Fn_4D: 0.03, Fn_6D: 0.03, name: "Titanlegeringar" },
     };
 
-    const FdTableHM = [ 
-        { D: 0.5, '3xD': 0.05, '5xD': 0.04, '8xD': 0.035, '10xD': 0.032, '12xD': 0.030, '15xD': 0.025 },
-        { D: 1.0, '3xD': 0.07, '5xD': 0.055, '8xD': 0.045, '10xD': 0.040, '12xD': 0.035, '15xD': 0.030 },
-        { D: 2.0, '3xD': 0.09, '5xD': 0.075, '8xD': 0.065, '10xD': 0.060, '12xD': 0.055, '15xD': 0.050 },
-        { D: 2.5, '3xD': 0.11, '5xD': 0.09, '8xD': 0.075, '10xD': 0.070, '12xD': 0.065, '15xD': 0.055 },
-        { D: 3.0, '3xD': 0.12, '5xD': 0.10, '8xD': 0.08, '10xD': 0.075, '12xD': 0.07, '15xD': 0.06 },
-        { D: 4.0, '3xD': 0.14, '5xD': 0.11, '8xD': 0.10, '10xD': 0.095, '12xD': 0.09, '15xD': 0.08 },
-        { D: 5.0, '3xD': 0.17, '5xD': 0.14, '8xD': 0.12, '10xD': 0.11, '12xD': 0.10, '15xD': 0.09 },
-        { D: 6.0, '3xD': 0.20, '5xD': 0.16, '8xD': 0.14, '10xD': 0.12, '12xD': 0.11, '15xD': 0.10 },
-        { D: 8.0, '3xD': 0.26, '5xD': 0.21, '8xD': 0.18, '10xD': 0.16, '12xD': 0.14, '15xD': 0.12 },
-        { D: 10.0, '3xD': 0.34, '5xD': 0.27, '8xD': 0.24, '10xD': 0.22, '12xD': 0.20, '15xD': 0.18 },
-        { D: 12.0, '3xD': 0.38, '5xD': 0.30, '8xD': 0.27, '10xD': 0.25, '12xD': 0.23, '15xD': 0.20 },
-        { D: 14.0, '3xD': 0.41, '5xD': 0.33, '8xD': 0.29, '10xD': 0.27, '12xD': 0.25, '15xD': 0.22 },
-        { D: 16.0, '3xD': 0.44, '5xD': 0.35, '8xD': 0.31, '10xD': 0.29, '12xD': 0.27, '15xD': 0.24 },
-        { D: 18.0, '3xD': 0.46, '5xD': 0.37, '8xD': 0.32, '10xD': 0.30, '12xD': 0.28, '15xD': 0.25 },
-        { D: 20.0, '3xD': 0.50, '5xD': 0.40, '8xD': 0.35, '10xD': 0.32, '12xD': 0.30, '15xD': 0.27 },
-        { D: 22.0, '3xD': 0.53, '5xD': 0.42, '8xD': 0.37, '10xD': 0.34, '12xD': 0.32, '15xD': 0.29 },
-        { D: 25.0, '3xD': 0.58, '5xD': 0.46, '8xD': 0.40, '10xD': 0.36, '12xD': 0.33, '15xD': 0.28 }
-    ];
-
-    const FdTableHSS = [ 
-        { D: 0.5, '3xD': 0.040, '5xD': 0.028, '8xD': 0.024, '10xD': 0.022, '12xD': 0.020, '15xD': 0.016 },
-        { D: 1.0, '3xD': 0.045, '5xD': 0.031, '8xD': 0.027, '10xD': 0.025, '12xD': 0.022, '15xD': 0.018 },
-        { D: 2.0, '3xD': 0.060, '5xD': 0.042, '8xD': 0.036, '10xD': 0.033, '12xD': 0.030, '15xD': 0.024 },
-        { D: 2.5, '3xD': 0.070, '5xD': 0.049, '8xD': 0.042, '10xD': 0.038, '12xD': 0.035, '15xD': 0.028 },
-        { D: 3.0, '3xD': 0.075, '5xD': 0.052, '8xD': 0.045, '10xD': 0.041, '12xD': 0.037, '15xD': 0.030 },
-        { D: 4.0, '3xD': 0.080, '5xD': 0.056, '8xD': 0.048, '10xD': 0.044, '12xD': 0.040, '15xD': 0.032 },
-        { D: 5.0, '3xD': 0.090, '5xD': 0.063, '8xD': 0.054, '10xD': 0.049, '12xD': 0.045, '15xD': 0.036 },
-        { D: 6.0, '3xD': 0.150, '5xD': 0.105, '8xD': 0.090, '10xD': 0.082, '12xD': 0.075, '15xD': 0.060 },
-        { D: 8.0, '3xD': 0.200, '5xD': 0.140, '8xD': 0.120, '10xD': 0.110, '12xD': 0.100, '15xD': 0.080 },
-        { D: 10.0, '3xD': 0.230, '5xD': 0.161, '8xD': 0.138, '10xD': 0.126, '12xD': 0.115, '15xD': 0.092 },
-        { D: 12.0, '3xD': 0.280, '5xD': 0.196, '8xD': 0.168, '10xD': 0.154, '12xD': 0.140, '15xD': 0.112 },
-        { D: 14.0, '3xD': 0.310, '5xD': 0.217, '8xD': 0.186, '10xD': 0.170, '12xD': 0.155, '15xD': 0.124 },
-        { D: 16.0, '3xD': 0.330, '5xD': 0.231, '8xD': 0.198, '10xD': 0.181, '12xD': 0.165, '15xD': 0.132 },
-        { D: 18.0, '3xD': 0.350, '5xD': 0.245, '8xD': 0.210, '10xD': 0.192, '12xD': 0.175, '15xD': 0.140 },
-        { D: 20.0, '3xD': 0.370, '5xD': 0.259, '8xD': 0.222, '10xD': 0.203, '12xD': 0.185, '15xD': 0.148 },
-        { D: 22.0, '3xD': 0.380, '5xD': 0.266, '8xD': 0.228, '10xD': 0.209, '12xD': 0.190, '15xD': 0.152 },
-        { D: 25.0, '3xD': 0.380, '5xD': 0.266, '8xD': 0.228, '10xD': 0.209, '12xD': 0.190, '15xD': 0.152 }
-    ];
-
+    // Fd (Diameterfaktor) för att justera matningen (fz) baserat på diameter (D)
     function interpolateFd(D, lengthType, toolType) {
-        const table = toolType === 'HM' ? FdTableHM : FdTableHSS;
-        if (D < 0.5) D = 0.5;
-        if (D > 25) D = 25;
-        const lower = table.slice().reverse().find(row => row.D <= D);
-        const upper = table.find(row => row.D > D);
-        if (!upper || lower.D === D) return lower[lengthType];
-        const ratio = (D - lower.D) / (upper.D - lower.D);
-        return parseFloat((lower[lengthType] + ratio * (upper[lengthType] - lower[lengthType])).toFixed(4));
+        // Enklare interpolation för borrning: Ju mindre D, desto lägre Fn
+        if (D <= 3.0) return 0.7;
+        if (D <= 6.0) return 0.85;
+        if (D <= 10.0) return 0.95;
+        return 1.0;
     }
 
     function calculateCuttingData() {
-        // Observera: Vi söker element inom den laddade kalkylatorns DOM
-        const toolType = document.getElementById('toolType')?.value;
-        const materialKey = document.getElementById('material')?.value;
-        const lengthType = document.getElementById('length')?.value;
-        const diameterInput = document.getElementById('diameter');
-        const diameter = parseFloat(diameterInput?.value?.replace(',', '.')) || 0;
-        const maxRpmInputEl = document.getElementById('maxRpm');
-        const maxRpmInput = maxRpmInputEl?.value;
-        const resultsDiv = document.getElementById('results');
-        const badge = document.getElementById('toolBadge');
+        const toolType = document.getElementById('toolType').value;
+        const matKey = document.getElementById('material').value;
+        const lengthType = document.getElementById('length').value;
+        const D = parseFloat(document.getElementById('diameter').value);
+        const maxRpm = parseFloat(document.getElementById('maxRpm').value);
 
-        if (!toolType || !badge || !resultsDiv) return;
-
-        badge.textContent = toolType;
-        badge.className = `tool-badge tool-${toolType.toLowerCase()}`;
-
-        // Standardmeddelande
-        resultsDiv.classList.remove('ready');
-        resultsDiv.innerHTML = `<p style="color:var(--text-light);text-align:center;padding:20px 0;">
-            Fyll i fälten ovan för att få skärdata
-        </p>`;
-
-        // Validering
-        let missing = [];
-        if (!materialKey) missing.push("Material");
-        if (!lengthType) missing.push("Borrlängd");
-        if (!diameter || diameter < 0.5 || diameter > 25) missing.push("Diameter (0.5–25 mm)");
-
-        if (missing.length > 0) {
-            resultsDiv.innerHTML += `<p class="missing">Saknas: ${missing.join(', ')}</p>`;
+        if (!(D > 0 && maxRpm > 0 && D >= 0.5 && D <= 25)) {
+            document.getElementById('results').innerHTML = `<p style="color:var(--danger); text-align:center; padding:20px 0;">Kontrollera Diameter (0.5-25 mm) och Max RPM</p>`;
+            document.getElementById('toolBadge').className = `tool-badge tool-${toolType.toLowerCase()}`;
             return;
         }
 
-        const data = toolType === 'HM' ? materialDataHM : materialDataHSS;
-        const mat = data[materialKey];
-        const Fd = interpolateFd(diameter, lengthType, toolType);
-        const Fn = mat.Fm * Fd;
-        const n_calc = (mat.Vc_safe * 1000) / (Math.PI * diameter);
+        const dataSet = toolType === 'HM' ? materialDataHM : materialDataHSS;
+        const mat = dataSet[matKey];
+        const Vc = mat.Vc;
+        
+        // Hämta fz (matning per varv) baserat på borrdjup
+        const Fn_base = mat[`Fn_${lengthType}`] || mat.Fn_2D;
+        
+        // Diameterfaktor
+        const Fd = interpolateFd(D, lengthType, toolType);
+        
+        // Final Fn (matning per varv)
+        const Fn = Fn_base * Fd;
 
-        let n_final = Math.round(n_calc);
-        let Vf_final = Math.round(Fn * n_calc);
+        // 1. Varvtal (n)
+        let n = (Vc * 1000) / (Math.PI * D);
+        let n_final = n;
         let capped = false;
 
-        const maxRpm = parseFloat(maxRpmInput?.replace(',', '.')) || Infinity;
-        if (maxRpm !== Infinity && n_calc > maxRpm) {
-            n_final = Math.round(maxRpm);
-            Vf_final = Math.round(Fn * n_final);
+        if (n > maxRpm) {
+            n_final = maxRpm;
             capped = true;
         }
 
-        resultsDiv.classList.add('ready');
-        resultsDiv.innerHTML = `
-            <h2>Skärdata ${toolType === 'HM' ? 'HM' : 'HSS'}</h2>
+        // 2. Bordmatning (Vf)
+        const Vf_final = n_final * Fn;
+
+        // Uppdatera badge
+        document.getElementById('toolBadge').className = `tool-badge tool-${toolType.toLowerCase()}`;
+        
+        // Visa resultat
+        document.getElementById('results').innerHTML = `
+            <h2>${toolType} – Skärdata</h2>
             <div class="result-line"><strong>Varvtal (n)</strong> 
-                <span class="value ${capped?'capped':''}">${n_final.toLocaleString('sv')} varv/min${capped?' *':''}</span>
+                <span class="value ${capped?'capped':''}">${n_final.toLocaleString('sv', { maximumFractionDigits: 0 })} varv/min${capped?' *':''}</span>
             </div>
             <div class="result-line"><strong>Bordmatning (Vf)</strong> 
-                <span class="value">${Vf_final.toLocaleString('sv')} mm/min</span>
+                <span class="value">${Vf_final.toLocaleString('sv', { maximumFractionDigits: 0 })} mm/min</span>
             </div>
-            ${capped ? '<p class="warning-text">* Begränsat av maskinens max-RPM</p>' : ''}
+            ${capped ? '<p class="warning-text" style="color: var(--danger); margin: 8px 0;">* Begränsat av maskinens max-RPM</p>' : ''}
             <div class="details">
-                <p><strong>Material:</strong> ${mat.name} – ${lengthType}</p>
-                <p><strong>fz (matning/varv):</strong> ${Fn.toFixed(3)} mm</p>
-                <p><strong>Skärhastighet (Vc):</strong> ${mat.Vc_safe} m/min</p>
+                <p><strong>Material:</strong> ${mat.name}</p>
+                <p><strong>fz (Matning/varv):</strong> ${Fn.toFixed(3)} mm</p>
+                <p><strong>Skärhastighet (Vc):</strong> ${Vc} m/min</p>
                 <p><strong>Diameterfaktor (Fd):</strong> ${Fd.toFixed(4)}</p>
             </div>
         `;
     }
 
-    // Lyssnare på alla fält (Observera: Söker i den laddade kalkylatorns DOM)
-    document.querySelectorAll('#content-area #toolType, #content-area #material, #content-area #length, #content-area #diameter, #content-area #maxRpm').forEach(el => {
+    // Lyssnare på alla fält
+    document.querySelectorAll('#toolType, #material, #length, #diameter, #maxRpm').forEach(el => {
         el.addEventListener('input', calculateCuttingData);
         el.addEventListener('change', calculateCuttingData);
     });
 
-    // Starta
-    if (window.loadedCalculatorInit) {
-        window.loadedCalculatorInit.push(calculateCuttingData);
-    } else {
-        window.onload = calculateCuttingData;
-    }
+    // Anropa vid start för att visa defaultvärden
+    document.addEventListener('DOMContentLoaded', calculateCuttingData);
+    
+    // Den gamla TEMALOGIKEN är BORTTAGEN HÄR
 </script>
+</body>
+</html>
