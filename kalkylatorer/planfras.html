@@ -1,0 +1,245 @@
+<header class="calc-header">
+    <h1>Planfräskalkylator</h1>
+    <p class="subtitle">Planfräsning – Kappa & Runda skär</p>
+</header>
+
+<main>
+    <div class="form-group">
+        <label for="material_group">Materialgrupp</label>
+        <select id="material_group">
+            <option value="P2">P2.x (Låglegerat Stål)</option>
+            <option value="M1">M1.x (Rostfritt Stål)</option>
+            <option value="P3">P3 (Höglegerat Verktygsstål)</option>
+            <option value="T44">T44 (Högstyrka)</option>
+            <option value="K1">K1 (Gjutjärn)</option>
+            <option value="N1">N1.x (Aluminium)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="vc">Skärhastighet (Vc) (m/min)</label>
+        <input type="number" id="vc" step="10" value="176">
+    </div>
+
+    <div class="form-group">
+        <label for="hm">Önskad spåntjocklek (hm) (mm)</label>
+        <input type="number" id="hm" step="0.01" value="0.15">
+    </div>
+
+    <div class="form-group">
+        <label for="D">Verktygsdiameter (D) (mm)</label>
+        <input type="number" id="D" step="1" value="63">
+    </div>
+
+    <div class="form-group">
+        <label for="Z">Antal skär (Z)</label>
+        <input type="number" id="Z" step="1" value="6">
+    </div>
+
+    <div class="form-group">
+        <label for="ap">Axialt skärdjup (ap) (mm)</label>
+        <input type="number" id="ap" step="0.1" value="2.0">
+        <p class="warning-text" id="ap-note" style="margin-top:6px;"></p>
+    </div>
+
+    <div class="form-group">
+        <label for="ae_percent">Radiellt ingrepp (ae % av D)</label>
+        <input type="number" id="ae_percent" step="5" value="70">
+    </div>
+
+    <div class="form-group">
+        <label for="n_max">Maskinens max varvtal (RPM)</label>
+        <input type="number" id="n_max" step="100" value="10000">
+    </div>
+
+    <div class="geometry-toggle">
+        <div class="geo-btn active" data-geo="kappa">Fast ställvinkel (κ)</div>
+        <div class="geo-btn" data-geo="radius">Runda skär (R)</div>
+    </div>
+
+    <div id="kappa-input" class="form-group">
+        <label for="kappa">Ställvinkel (κ)</label>
+        <select id="kappa">
+            <option value="90">90° (Hörnfräsning)</option>
+            <option value="75">75°</option>
+            <option value="45" selected>45° (Standard)</option>
+            <option value="25">25° (Hög matning)</option>
+            <option value="10">10° (Extrem hög matning)</option>
+        </select>
+    </div>
+
+    <div id="radius-input" class="form-group" style="display:none;">
+        <label for="R">Skärradie (R) (mm)</label>
+        <input type="number" id="R" step="1" value="10">
+        <p class="warning-text" id="radius-warning" style="margin-top:6px;"></p>
+    </div>
+
+    <div class="results" id="results">
+        <p style="color:var(--text-light); text-align:center; padding:20px 0;">
+            Fyll i fälten ovan för att få skärdata
+        </p>
+    </div>
+</main>
+
+<script>
+    const materialData = {
+        'P2': { vc: 176, hm: 0.15, name: 'P2.x (Låglegerat Stål)' },
+        'M1': { vc: 120, hm: 0.12, name: 'M1.x (Rostfritt Stål)' },
+        'P3': { vc: 96,  hm: 0.12, name: 'P3 (Höglegerat Verktygsstål)' },
+        'T44':{ vc: 80,  hm: 0.10, name: 'T44 (Högstyrka)' },
+        'K1': { vc: 240, hm: 0.25, name: 'K1 (Gjutjärn)' },
+        'N1': { vc:1200, hm: 0.30, name: 'N1.x (Aluminium)' }
+    };
+
+    const inputIds = ['vc','hm','D','Z','ap','ae_percent','n_max','kappa','R'];
+
+    function loadMaterialData() {
+        const sel = document.getElementById('material_group').value;
+        document.getElementById('vc').value = materialData[sel].vc;
+        document.getElementById('hm').value = materialData[sel].hm;
+        calculate();
+    }
+
+    function toggleGeometry(event) {
+        // Observera: Vi söker element inom den laddade kalkylatorns DOM
+        const target = event ? event.target : document.querySelector('#content-area .geo-btn.active');
+        
+        const btns = document.querySelectorAll('#content-area .geo-btn');
+        btns.forEach(b => b.classList.remove('active'));
+        if (target) target.classList.add('active');
+        
+        const type = target ? target.dataset.geo : 'kappa'; 
+        const kappaInput = document.getElementById('kappa-input');
+        const radiusInput = document.getElementById('radius-input');
+
+        if (kappaInput) kappaInput.style.display = type === 'kappa' ? 'block' : 'none';
+        if (radiusInput) radiusInput.style.display = type === 'radius' ? 'block' : 'none';
+        
+        calculate();
+    }
+
+    function calculate() {
+        const results = document.getElementById('results');
+        if (!results) return;
+        
+        results.classList.remove('ready');
+
+        // 1. Hämta inputvärden
+        const vc_input = parseFloat(document.getElementById('vc')?.value) || 0;
+        const hm = parseFloat(document.getElementById('hm')?.value) || 0;
+        const D  = parseFloat(document.getElementById('D')?.value)  || 0;
+        const Z  = parseInt(document.getElementById('Z')?.value)   || 0;
+        const ap = parseFloat(document.getElementById('ap')?.value) || 0;
+        const ae_pct = parseFloat(document.getElementById('ae_percent')?.value) || 0;
+        const n_max = parseFloat(document.getElementById('n_max')?.value) || Infinity;
+        const activeGeoBtn = document.querySelector('#content-area .geo-btn.active');
+        const geoType = activeGeoBtn ? activeGeoBtn.dataset.geo : 'kappa';
+        
+        // Återställ varningsmeddelanden
+        const apNote = document.getElementById('ap-note');
+        if (apNote) apNote.textContent = '';
+        const radiusWarning = document.getElementById('radius-warning');
+        if (radiusWarning) radiusWarning.textContent = '';
+        
+        // Får ut det valda materialets namn för detaljvisningen
+        const materialName = materialData[document.getElementById('material_group')?.value]?.name || 'Okänt';
+
+        // Validering
+        if (!vc_input || !hm || !D || !Z || !ae_pct || D <= 0 || Z <= 0) {
+            results.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px 0;">Fyll i alla fält med giltiga siffror</p>';
+            return;
+        }
+
+        // 2. Beräkna Varvtal (n) - Teoretiskt & Begränsat
+        let n_theoretical = (vc_input * 1000) / (Math.PI * D);
+        let n = n_theoretical;
+        let capped = false;
+        if (n > n_max) { n = n_max; capped = true; }
+
+        // 3. Beräkna Matning per tand (fz)
+        let fz = 0;
+        
+        if (geoType === 'kappa') {
+            const kappa_el = document.getElementById('kappa');
+            const kappa_deg = kappa_el ? parseFloat(kappa_el.value) : 45; 
+            const kappa_rad = kappa_deg * Math.PI / 180;
+            fz = hm / Math.sin(kappa_rad);
+
+        } else if (geoType === 'radius') {
+            const R_el = document.getElementById('R');
+            const R = R_el ? parseFloat(R_el.value) : 0;
+            
+            if (!R || R <= 0 || !ap) {
+                fz = hm;
+                if(apNote) apNote.textContent = 'VARNING: Skärdjup (ap) och Radie (R) måste anges för korrekta fz-värden.';
+            } else {
+                
+                if (ap > R) {
+                    if(radiusWarning) radiusWarning.textContent = `Varning: ap (${ap}mm) > R (${R}mm) → spånförtunning minskar drastiskt!`;
+                }
+                
+                const sin_kappa_sq = (ap / R) * (1 - ap/(2*R));
+                const sin_kappa = sin_kappa_sq > 0 ? Math.sqrt(sin_kappa_sq) : 0;
+                
+                fz = sin_kappa > 0 ? hm / sin_kappa : hm;
+            }
+        }
+
+        // 4. Slutgiltiga resultat
+        const vf = Math.round(fz * Z * n);
+        const ae_mm = (ae_pct / 100) * D;
+        const fz_rounded = fz.toFixed(3);
+
+        // 5. Visa resultat
+        results.classList.add('ready');
+        results.innerHTML = `
+            <h2>Skärdata – Fräsning</h2>
+            
+            <div class="result-line"><strong>Varvtal (n)</strong> <span class="value ${capped?'capped':''}">${Math.round(n).toLocaleString('sv')} varv/min ${capped?'*':''}</span></div>
+            <div class="result-line"><strong>MATNING (Vf)</strong> <span class="big-vf">${vf.toLocaleString('sv')} mm/min</span></div>
+            <div class="result-line"><strong>Använd Vc</strong> <span class="big-vc">${vc_input} m/min</span></div>
+            
+            <div class="details-box">
+                <p>
+                    <span class="detail-label">Material:</span>
+                    <span class="detail-value">${materialName}</span>
+                </p>
+                <p>
+                    <span class="detail-label">Matning per tand (fz):</span>
+                    <span class="detail-value">${fz_rounded} mm/tand</span>
+                </p>
+                <p>
+                    <span class="detail-label">Radiellt ingrepp (ae):</span>
+                    <span class="detail-value">${ae_mm.toFixed(1)} mm (${ae_pct} % av D)</span>
+                </p>
+                ${capped ? '<p class="warning-text" style="color: var(--danger); margin: 8px 0;">* Varvtalet är begränsat av max-RPM</p>' : ''}
+            </div>
+        `;
+    }
+
+    // Events (Observera att vi fäster events till element som finns i DOM:en efter laddning)
+    document.getElementById('material_group')?.addEventListener('change', loadMaterialData);
+    
+    // Geometry toggles
+    document.querySelectorAll('.geo-btn').forEach(btn => btn.addEventListener('click', toggleGeometry));
+
+    // Input fields for automatic calculation
+    inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', calculate);
+    });
+    document.getElementById('kappa')?.addEventListener('change', calculate); 
+
+    // Starta kalkylatorn vid laddning
+    if (window.loadedCalculatorInit) {
+        window.loadedCalculatorInit.push(() => {
+            loadMaterialData();
+            toggleGeometry(null); 
+        });
+    } else {
+        window.onload = function() {
+            loadMaterialData();
+            toggleGeometry(null); 
+        };
+    }
+</script>

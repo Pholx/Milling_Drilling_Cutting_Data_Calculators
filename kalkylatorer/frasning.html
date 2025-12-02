@@ -1,0 +1,189 @@
+<header class="calc-header">
+    <h1>Fräsdatakalkylator</h1>
+    <p class="subtitle">Dynamisk fräsning – med +10% fz-optimering</p>
+</header>
+
+<main>
+    <div class="form-group">
+        <label for="material">1. Material</label>
+        <select id="material">
+            <option value="rostfritt">Rostfritt Stål (&lt; 750 N/mm²)</option>
+            <option value="låglegerat">Stål: Mjukt (&lt; 1100 N/mm²)</option>
+            <option value="höglegerat">Stål: Hårt (&lt; 1400 N/mm²)</option>
+            <option value="toolox44">Stål: Toolox 44 (HRC &lt; 55)</option>
+            <option value="härdat65">Stål: Härdat (HRC &lt; 65)</option>
+            <option value="aluminium">Aluminium</option>
+            <option value="koppar">Koppar</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="vc_value">2. Skärhastighet (Vc) (m/min)</label>
+        <input type="number" id="vc_value" step="1" placeholder="t.ex. 200">
+    </div>
+
+    <div class="form-group">
+        <label for="diameter">3. Fräsdiameter (D) (mm)</label>
+        <input type="number" id="diameter" step="0.1" value="10.0">
+    </div>
+
+    <div class="form-group">
+        <label for="ae_percent">4. Radiell ingreppsbredd (ae % av D)</label>
+        <input type="number" id="ae_percent" min="1" max="100" step="0.1" value="10">
+    </div>
+
+    <div class="form-group">
+        <label for="teeth">5. Antal tänder (Z)</label>
+        <input type="number" id="teeth" min="1" step="1" value="4">
+    </div>
+
+    <div class="form-group">
+        <label for="fz_auto">6. Matning/tand (fz) <small>Autovärde +10%</small></label>
+        <input type="number" id="fz_auto" step="0.001" placeholder="Automatiskt beräknat">
+    </div>
+
+    <div class="form-group">
+        <label for="max_rpm">7. Maskinens max varvtal (RPM)</label>
+        <input type="number" id="max_rpm" step="1" value="20000">
+    </div>
+
+    <div class="results" id="results">
+        <p style="color:var(--text-light); text-align:center; padding:20px 0;">
+            Fyll i fälten ovan för att få skärdata
+        </p>
+    </div>
+</main>
+
+<script>
+    const FZ_INCREASE_FACTOR = 1.10;
+
+    const materialData = {
+        'rostfritt':  { Vc: 100, Fm: 0.8 }, 
+        'låglegerat': { Vc: 200, Fm: 1.0 },
+        'höglegerat': { Vc: 120, Fm: 0.9 },
+        'toolox44':   { Vc: 30,  Fm: 0.7 },
+        'härdat65':   { Vc: 20,  Fm: 0.6 },
+        'aluminium':  { Vc: 400, Fm: 1.3 },
+        'koppar':     { Vc: 150, Fm: 1.0 }
+    };
+
+    const fdTable = [ 
+        { D: 0.5, Fd: 0.004 }, { D: 1, Fd: 0.006 }, { D: 2, Fd: 0.009 },
+        { D: 3, Fd: 0.012 }, { D: 4, Fd: 0.016 }, { D: 5, Fd: 0.022 },
+        { D: 6, Fd: 0.032 }, { D: 8, Fd: 0.045 }, { D: 10, Fd: 0.056 },
+        { D: 12, Fd: 0.074 }, { D: 14, Fd: 0.086 }, { D: 16, Fd: 0.098 },
+        { D: 20, Fd: 0.122 }, { D: 25, Fd: 0.135 }, { D: 32, Fd: 0.145 },
+        { D: 40, Fd: 0.155 }
+    ];
+
+    const feTable = [
+        { Ae_percent: 5, Fe: 1.4 }, { Ae_percent: 10, Fe: 1.2 },
+        { Ae_percent: 15, Fe: 1.1 }, { Ae_percent: 25, Fe: 1.0 },
+        { Ae_percent: 50, Fe: 0.7 }, { Ae_percent: 75, Fe: 0.6 },
+        { Ae_percent: 100, Fe: 0.5 }
+    ];
+
+    function interpolate(x, t1, v1, t2, v2) {
+        if (t2 === t1) return v1;
+        return v1 + (x - t1) * (v2 - v1) / (t2 - t1);
+    }
+
+    function getFd(D) {
+        if (D <= fdTable[0].D) return fdTable[0].Fd;
+        for (let i = 0; i < fdTable.length-1; i++) {
+            if (D >= fdTable[i].D && D <= fdTable[i+1].D)
+                return interpolate(D, fdTable[i].D, fdTable[i].Fd, fdTable[i+1].D, fdTable[i+1].Fd);
+        }
+        return fdTable[fdTable.length-1].Fd;
+    }
+
+    function getFe(ae) {
+        ae = Math.max(0, Math.min(100, ae));
+        for (let i = 0; i < feTable.length-1; i++) {
+            if (ae >= feTable[i].Ae_percent && ae < feTable[i+1].Ae_percent)
+                return interpolate(ae, feTable[i].Ae_percent, feTable[i].Fe, feTable[i+1].Ae_percent, feTable[i+1].Fe);
+        }
+        return ae <= 5 ? 1.4 : 0.5;
+    }
+
+    function updateVcAndFz() {
+        const mat = document.getElementById('material')?.value;
+        if (mat) {
+             document.getElementById('vc_value').value = materialData[mat].Vc;
+        }
+        calculate(true); // Tvinga fz uppdatering
+    }
+
+    function calculate(forceFzUpdate = false) {
+        const results = document.getElementById('results');
+        if (!results) return;
+
+        const mat = document.getElementById('material')?.value;
+        const D = parseFloat(document.getElementById('diameter')?.value.replace(',', '.')) || 0;
+        const ae = parseFloat(document.getElementById('ae_percent')?.value.replace(',', '.')) || 0;
+        const Z = parseInt(document.getElementById('teeth')?.value) || 0;
+        const Vc = parseFloat(document.getElementById('vc_value')?.value.replace(',', '.')) || 0;
+        const maxRpm = parseFloat(document.getElementById('max_rpm')?.value.replace(',', '.')) || Infinity;
+        const fzInput = document.getElementById('fz_auto');
+
+        if (!mat || isNaN(D) || isNaN(ae) || isNaN(Z) || isNaN(Vc) || D<=0 || Z<=0) {
+            results.classList.remove('ready');
+            results.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px 0;">Fyll i alla fält</p>';
+            return;
+        }
+
+        const Fm = materialData[mat].Fm;
+        const Fd = getFd(D);
+        const Fe = getFe(ae);
+        
+        // fz Beräkning med 10% ökning
+        const fzCalcBase = Fm * Fe * Fd;
+        const fzCalc = fzCalcBase * FZ_INCREASE_FACTOR;
+
+        let fz = parseFloat(fzInput?.value.replace(',', '.')) || 0;
+        // Använd fzCalc om fältet är tomt eller om vi tvingar en uppdatering (materialbyte/start)
+        if (isNaN(fz) || fzInput.value.trim() === "" || forceFzUpdate) {
+            fzInput.value = fzCalc.toFixed(4).replace('.', ',');
+            fz = fzCalc;
+        }
+
+        if (isNaN(fz) || fz <= 0) {
+             results.classList.remove('ready');
+             results.innerHTML = '<p class="warning-text" style="padding: 20px 0;">Ogiltigt fz-värde (Matning/tand)</p>';
+             return;
+        }
+
+        const nCalc = (Vc * 1000) / (Math.PI * D);
+        const n = Math.min(nCalc, maxRpm);
+        const vf = Math.round(fz * Z * n);
+        const capped = nCalc > maxRpm;
+
+        results.classList.add('ready');
+        results.innerHTML = `
+            <h2>Skärdata – Dynamisk Fräsning</h2>
+            <div class="result-line"><strong>Varvtal (n)</strong> <span class="value ${capped?'capped':''}">${n.toFixed(0).toLocaleString('sv')} varv/min ${capped?'*':''}</span></div>
+            <div class="result-line"><strong>MATNING (Vf)</strong> <span class="value big">${vf.toLocaleString('sv')} mm/min</span></div>
+            <div class="result-line"><strong>Använt Vc</strong> <span class="value">${Vc.toFixed(0)} m/min</span></div>
+            ${capped ? '<p class="warning-text">* Varvtalet är begränsat av maskinens max-RPM</p>' : ''}
+            <div class="details">
+                <p><strong>Material:</strong> ${document.querySelector('#material option:checked')?.textContent || 'Okänt'}</p>
+                <p><strong>fz auto (+10%):</strong> ${fzCalc.toFixed(4)} mm/tand</p>
+                <p><strong>Fm × Fe × Fd:</strong> ${Fm.toFixed(2)} × ${Fe.toFixed(2)} × ${Fd.toFixed(4)}</p>
+                <p><strong>Använt fz:</strong> ${fz.toFixed(4)} mm/tand</p>
+            </div>
+        `;
+    }
+
+    // Events
+    document.getElementById('material')?.addEventListener('change', updateVcAndFz);
+    ['vc_value','diameter','ae_percent','teeth','fz_auto','max_rpm'].forEach(id =>
+        document.getElementById(id)?.addEventListener('input', () => calculate(false))
+    );
+
+    // Starta beräkningen vid laddning
+    if (window.loadedCalculatorInit) {
+        window.loadedCalculatorInit.push(updateVcAndFz);
+    } else {
+        document.addEventListener('DOMContentLoaded', updateVcAndFz);
+    }
+</script>

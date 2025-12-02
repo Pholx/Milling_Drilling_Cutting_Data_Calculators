@@ -1,0 +1,215 @@
+<header class="calc-header">
+    <div class="tool-badge tool-hm" id="toolBadge">HM</div>
+    <h1>Borrkalkylator</h1>
+    <p class="subtitle">Borrning – Hårdmetall & Snabbstål</p>
+</header>
+
+<main>
+    <div class="form-group">
+        <label for="toolType">Verktygsmaterial</label>
+        <select id="toolType">
+            <option value="HM">Hårdmetall (HM)</option>
+            <option value="HSS">Snabbstål (HSS)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="material">Material</label>
+        <select id="material">
+            <option value="">-- Välj material --</option>
+            <option value="mjukt_stal">Stål: Mjukt (&lt; 1100 N/mm²)</option>
+            <option value="hart_stal">Stål: Hårt (&gt; 1100 N/mm²)</option>
+            <option value="rostfritt_austenit">Rostfritt: Austenitiskt (&lt; 850 N/mm²)</option>
+            <option value="toolox_44">Stål: Toolox 44 (&lt; 50 HRC)</option>
+            <option value="hardat_stal_65">Stål: Härdat (&lt;65 HRC)</option>
+            <option value="aluminium">Aluminium</option>
+            <option value="koppar">Koppar</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="length">Borrlängd (L/D)</label>
+        <select id="length">
+            <option value="">-- Välj längd --</option>
+            <option value="3xD">3xD</option>
+            <option value="5xD">5xD</option>
+            <option value="8xD">8xD</option>
+            <option value="10xD">10xD</option>
+            <option value="12xD">12xD</option>
+            <option value="15xD">15xD</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="diameter">Borrdiameter (mm)</label>
+        <input type="number" id="diameter" step="0.1" min="0.5" max="25" placeholder="t.ex. 8.5">
+    </div>
+
+    <div class="form-group">
+        <label for="maxRpm">Maskinens max varvtal (valfritt)</label>
+        <input type="number" id="maxRpm" step="1" placeholder="t.ex. 12000">
+    </div>
+
+    <div class="results" id="results">
+        <p style="color:var(--text-light); text-align:center; padding:20px 0;">
+            Fyll i fälten ovan för att få skärdata
+        </p>
+    </div>
+</main>
+
+<script>
+    // === ALLA DATA (Oförändrad datamängd) ===
+    const materialDataHM = { 
+        "mjukt_stal": { name: "Stål: Mjukt (< 1100 N/mm²)", Fm: 1.0, Vc_safe: 60 },
+        "hart_stal": { name: "Stål: Hårt (> 1100 N/mm²)", Fm: 0.9, Vc_safe: 40 },
+        "toolox_44": { name: "Stål: Toolox 44 (< 50 HRC)", Fm: 0.7, Vc_safe: 20 },
+        "rostfritt_austenit": { name: "Rostfritt: Austenitiskt (< 850 N/mm²)", Fm: 0.9, Vc_safe: 30 },
+        "hardat_stal_65": { name: "Stål: Härdat (<65HRC)", Fm: 0.6, Vc_safe: 15 },
+        "aluminium": { name: "Aluminium", Fm: 1.4, Vc_safe: 200 },
+        "koppar": { name: "Koppar", Fm: 1.0, Vc_safe: 80 }
+    };
+
+    const materialDataHSS = {
+        "mjukt_stal": { name: "Stål: Mjukt (< 1100 N/mm²)", Fm: 1.0, Vc_safe: 20 },
+        "hart_stal": { name: "Stål: Hårt (> 1100 N/mm²)", Fm: 0.9, Vc_safe: 15 },
+        "toolox_44": { name: "Stål: Toolox 44 (< 50 HRC)", Fm: 0.7, Vc_safe: 10 },
+        "rostfritt_austenit": { name: "Rostfritt: Austenitiskt (< 850 N/mm²)", Fm: 0.8, Vc_safe: 12 },
+        "hardat_stal_65": { name: "Stål: Härdat (<65HRC)", Fm: 0.6, Vc_safe: 5 },
+        "aluminium": { name: "Aluminium", Fm: 1.4, Vc_safe: 60 },
+        "koppar": { name: "Koppar", Fm: 1.0, Vc_safe: 30 }
+    };
+
+    const FdTableHM = [ 
+        { D: 0.5, '3xD': 0.05, '5xD': 0.04, '8xD': 0.035, '10xD': 0.032, '12xD': 0.030, '15xD': 0.025 },
+        { D: 1.0, '3xD': 0.07, '5xD': 0.055, '8xD': 0.045, '10xD': 0.040, '12xD': 0.035, '15xD': 0.030 },
+        { D: 2.0, '3xD': 0.09, '5xD': 0.075, '8xD': 0.065, '10xD': 0.060, '12xD': 0.055, '15xD': 0.050 },
+        { D: 2.5, '3xD': 0.11, '5xD': 0.09, '8xD': 0.075, '10xD': 0.070, '12xD': 0.065, '15xD': 0.055 },
+        { D: 3.0, '3xD': 0.12, '5xD': 0.10, '8xD': 0.08, '10xD': 0.075, '12xD': 0.07, '15xD': 0.06 },
+        { D: 4.0, '3xD': 0.14, '5xD': 0.11, '8xD': 0.10, '10xD': 0.095, '12xD': 0.09, '15xD': 0.08 },
+        { D: 5.0, '3xD': 0.17, '5xD': 0.14, '8xD': 0.12, '10xD': 0.11, '12xD': 0.10, '15xD': 0.09 },
+        { D: 6.0, '3xD': 0.20, '5xD': 0.16, '8xD': 0.14, '10xD': 0.12, '12xD': 0.11, '15xD': 0.10 },
+        { D: 8.0, '3xD': 0.26, '5xD': 0.21, '8xD': 0.18, '10xD': 0.16, '12xD': 0.14, '15xD': 0.12 },
+        { D: 10.0, '3xD': 0.34, '5xD': 0.27, '8xD': 0.24, '10xD': 0.22, '12xD': 0.20, '15xD': 0.18 },
+        { D: 12.0, '3xD': 0.38, '5xD': 0.30, '8xD': 0.27, '10xD': 0.25, '12xD': 0.23, '15xD': 0.20 },
+        { D: 14.0, '3xD': 0.41, '5xD': 0.33, '8xD': 0.29, '10xD': 0.27, '12xD': 0.25, '15xD': 0.22 },
+        { D: 16.0, '3xD': 0.44, '5xD': 0.35, '8xD': 0.31, '10xD': 0.29, '12xD': 0.27, '15xD': 0.24 },
+        { D: 18.0, '3xD': 0.46, '5xD': 0.37, '8xD': 0.32, '10xD': 0.30, '12xD': 0.28, '15xD': 0.25 },
+        { D: 20.0, '3xD': 0.50, '5xD': 0.40, '8xD': 0.35, '10xD': 0.32, '12xD': 0.30, '15xD': 0.27 },
+        { D: 22.0, '3xD': 0.53, '5xD': 0.42, '8xD': 0.37, '10xD': 0.34, '12xD': 0.32, '15xD': 0.29 },
+        { D: 25.0, '3xD': 0.58, '5xD': 0.46, '8xD': 0.40, '10xD': 0.36, '12xD': 0.33, '15xD': 0.28 }
+    ];
+
+    const FdTableHSS = [ 
+        { D: 0.5, '3xD': 0.040, '5xD': 0.028, '8xD': 0.024, '10xD': 0.022, '12xD': 0.020, '15xD': 0.016 },
+        { D: 1.0, '3xD': 0.045, '5xD': 0.031, '8xD': 0.027, '10xD': 0.025, '12xD': 0.022, '15xD': 0.018 },
+        { D: 2.0, '3xD': 0.060, '5xD': 0.042, '8xD': 0.036, '10xD': 0.033, '12xD': 0.030, '15xD': 0.024 },
+        { D: 2.5, '3xD': 0.070, '5xD': 0.049, '8xD': 0.042, '10xD': 0.038, '12xD': 0.035, '15xD': 0.028 },
+        { D: 3.0, '3xD': 0.075, '5xD': 0.052, '8xD': 0.045, '10xD': 0.041, '12xD': 0.037, '15xD': 0.030 },
+        { D: 4.0, '3xD': 0.080, '5xD': 0.056, '8xD': 0.048, '10xD': 0.044, '12xD': 0.040, '15xD': 0.032 },
+        { D: 5.0, '3xD': 0.090, '5xD': 0.063, '8xD': 0.054, '10xD': 0.049, '12xD': 0.045, '15xD': 0.036 },
+        { D: 6.0, '3xD': 0.150, '5xD': 0.105, '8xD': 0.090, '10xD': 0.082, '12xD': 0.075, '15xD': 0.060 },
+        { D: 8.0, '3xD': 0.200, '5xD': 0.140, '8xD': 0.120, '10xD': 0.110, '12xD': 0.100, '15xD': 0.080 },
+        { D: 10.0, '3xD': 0.230, '5xD': 0.161, '8xD': 0.138, '10xD': 0.126, '12xD': 0.115, '15xD': 0.092 },
+        { D: 12.0, '3xD': 0.280, '5xD': 0.196, '8xD': 0.168, '10xD': 0.154, '12xD': 0.140, '15xD': 0.112 },
+        { D: 14.0, '3xD': 0.310, '5xD': 0.217, '8xD': 0.186, '10xD': 0.170, '12xD': 0.155, '15xD': 0.124 },
+        { D: 16.0, '3xD': 0.330, '5xD': 0.231, '8xD': 0.198, '10xD': 0.181, '12xD': 0.165, '15xD': 0.132 },
+        { D: 18.0, '3xD': 0.350, '5xD': 0.245, '8xD': 0.210, '10xD': 0.192, '12xD': 0.175, '15xD': 0.140 },
+        { D: 20.0, '3xD': 0.370, '5xD': 0.259, '8xD': 0.222, '10xD': 0.203, '12xD': 0.185, '15xD': 0.148 },
+        { D: 22.0, '3xD': 0.380, '5xD': 0.266, '8xD': 0.228, '10xD': 0.209, '12xD': 0.190, '15xD': 0.152 },
+        { D: 25.0, '3xD': 0.380, '5xD': 0.266, '8xD': 0.228, '10xD': 0.209, '12xD': 0.190, '15xD': 0.152 }
+    ];
+
+    function interpolateFd(D, lengthType, toolType) {
+        const table = toolType === 'HM' ? FdTableHM : FdTableHSS;
+        if (D < 0.5) D = 0.5;
+        if (D > 25) D = 25;
+        const lower = table.slice().reverse().find(row => row.D <= D);
+        const upper = table.find(row => row.D > D);
+        if (!upper || lower.D === D) return lower[lengthType];
+        const ratio = (D - lower.D) / (upper.D - lower.D);
+        return parseFloat((lower[lengthType] + ratio * (upper[lengthType] - lower[lengthType])).toFixed(4));
+    }
+
+    function calculateCuttingData() {
+        // Observera: Vi söker element inom den laddade kalkylatorns DOM
+        const toolType = document.getElementById('toolType')?.value;
+        const materialKey = document.getElementById('material')?.value;
+        const lengthType = document.getElementById('length')?.value;
+        const diameterInput = document.getElementById('diameter');
+        const diameter = parseFloat(diameterInput?.value?.replace(',', '.')) || 0;
+        const maxRpmInputEl = document.getElementById('maxRpm');
+        const maxRpmInput = maxRpmInputEl?.value;
+        const resultsDiv = document.getElementById('results');
+        const badge = document.getElementById('toolBadge');
+
+        if (!toolType || !badge || !resultsDiv) return;
+
+        badge.textContent = toolType;
+        badge.className = `tool-badge tool-${toolType.toLowerCase()}`;
+
+        // Standardmeddelande
+        resultsDiv.classList.remove('ready');
+        resultsDiv.innerHTML = `<p style="color:var(--text-light);text-align:center;padding:20px 0;">
+            Fyll i fälten ovan för att få skärdata
+        </p>`;
+
+        // Validering
+        let missing = [];
+        if (!materialKey) missing.push("Material");
+        if (!lengthType) missing.push("Borrlängd");
+        if (!diameter || diameter < 0.5 || diameter > 25) missing.push("Diameter (0.5–25 mm)");
+
+        if (missing.length > 0) {
+            resultsDiv.innerHTML += `<p class="missing">Saknas: ${missing.join(', ')}</p>`;
+            return;
+        }
+
+        const data = toolType === 'HM' ? materialDataHM : materialDataHSS;
+        const mat = data[materialKey];
+        const Fd = interpolateFd(diameter, lengthType, toolType);
+        const Fn = mat.Fm * Fd;
+        const n_calc = (mat.Vc_safe * 1000) / (Math.PI * diameter);
+
+        let n_final = Math.round(n_calc);
+        let Vf_final = Math.round(Fn * n_calc);
+        let capped = false;
+
+        const maxRpm = parseFloat(maxRpmInput?.replace(',', '.')) || Infinity;
+        if (maxRpm !== Infinity && n_calc > maxRpm) {
+            n_final = Math.round(maxRpm);
+            Vf_final = Math.round(Fn * n_final);
+            capped = true;
+        }
+
+        resultsDiv.classList.add('ready');
+        resultsDiv.innerHTML = `
+            <h2>Skärdata ${toolType === 'HM' ? 'HM' : 'HSS'}</h2>
+            <div class="result-line"><strong>Varvtal (n)</strong> 
+                <span class="value ${capped?'capped':''}">${n_final.toLocaleString('sv')} varv/min${capped?' *':''}</span>
+            </div>
+            <div class="result-line"><strong>Bordmatning (Vf)</strong> 
+                <span class="value">${Vf_final.toLocaleString('sv')} mm/min</span>
+            </div>
+            ${capped ? '<p class="warning-text">* Begränsat av maskinens max-RPM</p>' : ''}
+            <div class="details">
+                <p><strong>Material:</strong> ${mat.name} – ${lengthType}</p>
+                <p><strong>fz (matning/varv):</strong> ${Fn.toFixed(3)} mm</p>
+                <p><strong>Skärhastighet (Vc):</strong> ${mat.Vc_safe} m/min</p>
+                <p><strong>Diameterfaktor (Fd):</strong> ${Fd.toFixed(4)}</p>
+            </div>
+        `;
+    }
+
+    // Lyssnare på alla fält (Observera: Söker i den laddade kalkylatorns DOM)
+    document.querySelectorAll('#content-area #toolType, #content-area #material, #content-area #length, #content-area #diameter, #content-area #maxRpm').forEach(el => {
+        el.addEventListener('input', calculateCuttingData);
+        el.addEventListener('change', calculateCuttingData);
+    });
+
+    // Starta
+    if (window.loadedCalculatorInit) {
+        window.loadedCalculatorInit.push(calculateCuttingData);
+    } else {
+        window.onload = calculateCuttingData;
+    }
+</script>
