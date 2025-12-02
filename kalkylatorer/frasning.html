@@ -1,189 +1,257 @@
-<header class="calc-header">
-    <h1>Fräsdatakalkylator</h1>
-    <p class="subtitle">Dynamisk fräsning – med +10% fz-optimering</p>
-</header>
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skärdatakalkylator - Dynamisk Fräsning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS-STYLING FÖR DENNA KALKYLATOR */
+        :root {
+            --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
+            --primary: #3b82f6; --primary-light: #dbeafe; --success: #10b981; 
+            --warning: #f59e0b; --danger: #ef4444; --border: #e2e8f0; 
+            --shadow: 0 20px 40px rgba(0,0,0,0.08); --radius: 16px;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
+                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        }
+        body.dark { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
+                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:0; transition:all .4s; }
+        .container { max-width:560px; margin:0 auto; background:var(--card); padding: 0; box-shadow:none; border-radius: 0;}
+        header { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:30px 24px; text-align:center; position:relative; }
+        h1 { font-size:1.8rem; font-weight:700; margin-bottom:8px; }
+        .subtitle { font-size:0.9rem; opacity:0.9; }
+        main { padding:32px 24px; }
+        
+        /* TOOL BADGE */
+        .tool-badge { position:absolute; top:16px; left:16px; padding:6px 14px;
+                      border-radius:50px; font-size:0.8rem; font-weight:700;
+                      text-transform:uppercase; letter-spacing:0.5px; background:#10b981; color:white; }
+        
+        /* FORM STYLING */
+        .form-group { margin-bottom: 24px; }
+        label { display:block; margin-bottom:8px; font-weight:600; font-size:0.95rem; }
+        select, input[type=number] { width:100%; padding:14px 16px; border:2px solid var(--border);
+            border-radius:12px; background:var(--card); color:var(--text); font-size:1rem;
+            transition:all .3s; }
+        select:focus, input[type=number]:focus { border-color:var(--primary); outline:none; }
+        
+        /* VC/FZ INPUT */
+        .vc-fz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-<main>
-    <div class="form-group">
-        <label for="material">1. Material</label>
-        <select id="material">
-            <option value="rostfritt">Rostfritt Stål (&lt; 750 N/mm²)</option>
-            <option value="låglegerat">Stål: Mjukt (&lt; 1100 N/mm²)</option>
-            <option value="höglegerat">Stål: Hårt (&lt; 1400 N/mm²)</option>
-            <option value="toolox44">Stål: Toolox 44 (HRC &lt; 55)</option>
-            <option value="härdat65">Stål: Härdat (HRC &lt; 65)</option>
-            <option value="aluminium">Aluminium</option>
-            <option value="koppar">Koppar</option>
-        </select>
-    </div>
+        /* RESULTS STYLING */
+        .results { 
+            background: var(--primary-light); 
+            padding: 24px; 
+            border-radius: 12px; 
+            margin-top: 32px; 
+            color: var(--text);
+            transition: background .4s;
+        }
+        body.dark .results { 
+            background: #1e3a8a; 
+            color: white;
+        }
+        .results h2 { 
+            font-size: 1.4rem; 
+            font-weight: 700; 
+            margin-bottom: 16px; 
+            color: var(--primary); 
+            transition: color .4s;
+        }
+        body.dark .results h2 { color: #93c5fd; }
+        .result-line { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        body.dark .result-line { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .result-line:last-of-type { border-bottom: none; margin-bottom: 8px; }
+        .value { color: var(--text); font-weight: 700; }
+        .value.capped { color: var(--danger); }
+        .details { 
+            margin-top: 16px; 
+            padding-top: 12px; 
+            border-top: 1px solid var(--border); 
+            font-size: 0.85rem; 
+            color: var(--text-light);
+        }
+        .details p { margin-bottom: 4px; }
+        .input-info { font-size: 0.75rem; color: var(--text-light); margin-top: 4px; }
+    </style>
+</head>
+<body>
 
-    <div class="form-group">
-        <label for="vc_value">2. Skärhastighet (Vc) (m/min)</label>
-        <input type="number" id="vc_value" step="1" placeholder="t.ex. 200">
-    </div>
+<div class="container">
+    <header>
+        <div class="tool-badge">HM</div>
+        <h1>Skärdatakalkylator</h1>
+        <p class="subtitle">Dynamisk Fräsning – Långa skär</p>
+    </header>
 
-    <div class="form-group">
-        <label for="diameter">3. Fräsdiameter (D) (mm)</label>
-        <input type="number" id="diameter" step="0.1" value="10.0">
-    </div>
+    <main>
+        <div class="form-group">
+            <label for="material">Materialgrupp</label>
+            <select id="material">
+                <option value="default" disabled selected>Välj materialgrupp...</option>
+                <option value="P">Stål (P)</option>
+                <option value="M">Rostfritt (M)</option>
+                <option value="K">Gjutjärn (K)</option>
+                <option value="S">Högtemp/Titan (S)</option>
+            </select>
+        </div>
 
-    <div class="form-group">
-        <label for="ae_percent">4. Radiell ingreppsbredd (ae % av D)</label>
-        <input type="number" id="ae_percent" min="1" max="100" step="0.1" value="10">
-    </div>
+        <div class="vc-fz-grid">
+            <div class="form-group">
+                <label for="vc_value">Skärhastighet (Vc, m/min)</label>
+                <input type="number" id="vc_value" value="150" min="10" step="10">
+            </div>
+            <div class="form-group">
+                <label for="fz_auto">Matning/tand (fz, mm)</label>
+                <input type="number" id="fz_auto" value="0.1000" min="0.01" step="0.005">
+                <div class="input-info" id="fz_info">Baserat på material (P-M-K-S)</div>
+            </div>
+        </div>
 
-    <div class="form-group">
-        <label for="teeth">5. Antal tänder (Z)</label>
-        <input type="number" id="teeth" min="1" step="1" value="4">
-    </div>
+        <div class="vc-fz-grid">
+            <div class="form-group">
+                <label for="diameter">Fräsdiameter (D, mm)</label>
+                <input type="number" id="diameter" value="12" min="1" step="1">
+            </div>
+            <div class="form-group">
+                <label for="teeth">Antal skär (z)</label>
+                <input type="number" id="teeth" value="5" min="1" step="1">
+            </div>
+        </div>
 
-    <div class="form-group">
-        <label for="fz_auto">6. Matning/tand (fz) <small>Autovärde +10%</small></label>
-        <input type="number" id="fz_auto" step="0.001" placeholder="Automatiskt beräknat">
-    </div>
+        <div class="form-group">
+            <label for="ae_percent">Radiell ingrepp (Ae, % av D)</label>
+            <input type="number" id="ae_percent" value="8" min="1" max="50" step="1">
+            <div class="input-info">Typiskt 5-10% för dynamisk fräsning</div>
+        </div>
 
-    <div class="form-group">
-        <label for="max_rpm">7. Maskinens max varvtal (RPM)</label>
-        <input type="number" id="max_rpm" step="1" value="20000">
-    </div>
+        <div class="form-group">
+            <label for="max_rpm">Maskinens max RPM</label>
+            <input type="number" id="max_rpm" value="10000" min="1000" step="1000">
+        </div>
 
-    <div class="results" id="results">
-        <p style="color:var(--text-light); text-align:center; padding:20px 0;">
-            Fyll i fälten ovan för att få skärdata
-        </p>
-    </div>
-</main>
+        <div class="results" id="results">
+            <p style="text-align:center; padding:20px 0; color:var(--text-light);">
+                Välj material och fyll i fälten ovan
+            </p>
+        </div>
+    </main>
+</div>
 
 <script>
-    const FZ_INCREASE_FACTOR = 1.10;
-
-    const materialData = {
-        'rostfritt':  { Vc: 100, Fm: 0.8 }, 
-        'låglegerat': { Vc: 200, Fm: 1.0 },
-        'höglegerat': { Vc: 120, Fm: 0.9 },
-        'toolox44':   { Vc: 30,  Fm: 0.7 },
-        'härdat65':   { Vc: 20,  Fm: 0.6 },
-        'aluminium':  { Vc: 400, Fm: 1.3 },
-        'koppar':     { Vc: 150, Fm: 1.0 }
+    // JS-LOGIK
+    const baseData = {
+        P: { Vc: 180, fz: 0.0800 },
+        M: { Vc: 120, fz: 0.0700 },
+        K: { Vc: 200, fz: 0.1200 },
+        S: { Vc: 40, fz: 0.0600 }
     };
 
-    const fdTable = [ 
-        { D: 0.5, Fd: 0.004 }, { D: 1, Fd: 0.006 }, { D: 2, Fd: 0.009 },
-        { D: 3, Fd: 0.012 }, { D: 4, Fd: 0.016 }, { D: 5, Fd: 0.022 },
-        { D: 6, Fd: 0.032 }, { D: 8, Fd: 0.045 }, { D: 10, Fd: 0.056 },
-        { D: 12, Fd: 0.074 }, { D: 14, Fd: 0.086 }, { D: 16, Fd: 0.098 },
-        { D: 20, Fd: 0.122 }, { D: 25, Fd: 0.135 }, { D: 32, Fd: 0.145 },
-        { D: 40, Fd: 0.155 }
-    ];
-
-    const feTable = [
-        { Ae_percent: 5, Fe: 1.4 }, { Ae_percent: 10, Fe: 1.2 },
-        { Ae_percent: 15, Fe: 1.1 }, { Ae_percent: 25, Fe: 1.0 },
-        { Ae_percent: 50, Fe: 0.7 }, { Ae_percent: 75, Fe: 0.6 },
-        { Ae_percent: 100, Fe: 0.5 }
-    ];
-
-    function interpolate(x, t1, v1, t2, v2) {
-        if (t2 === t1) return v1;
-        return v1 + (x - t1) * (v2 - v1) / (t2 - t1);
-    }
-
-    function getFd(D) {
-        if (D <= fdTable[0].D) return fdTable[0].Fd;
-        for (let i = 0; i < fdTable.length-1; i++) {
-            if (D >= fdTable[i].D && D <= fdTable[i+1].D)
-                return interpolate(D, fdTable[i].D, fdTable[i].Fd, fdTable[i+1].D, fdTable[i+1].Fd);
-        }
-        return fdTable[fdTable.length-1].Fd;
-    }
-
-    function getFe(ae) {
-        ae = Math.max(0, Math.min(100, ae));
-        for (let i = 0; i < feTable.length-1; i++) {
-            if (ae >= feTable[i].Ae_percent && ae < feTable[i+1].Ae_percent)
-                return interpolate(ae, feTable[i].Ae_percent, feTable[i].Fe, feTable[i+1].Ae_percent, feTable[i+1].Fe);
-        }
-        return ae <= 5 ? 1.4 : 0.5;
-    }
-
     function updateVcAndFz() {
-        const mat = document.getElementById('material')?.value;
-        if (mat) {
-             document.getElementById('vc_value').value = materialData[mat].Vc;
+        const material = document.getElementById('material').value;
+        if (baseData[material]) {
+            // Uppdaterar Vc och fz baserat på materialval, och lämnar 10% buffert på fz
+            document.getElementById('vc_value').value = baseData[material].Vc;
+            document.getElementById('fz_auto').value = (baseData[material].fz * 1.10).toFixed(4); 
+            document.getElementById('fz_info').textContent = `Baserat på material (${material}) +10% buffert`;
+        } else {
+             document.getElementById('fz_info').textContent = 'Välj materialgrupp...';
         }
-        calculate(true); // Tvinga fz uppdatering
+        calculate(true); // Tvinga omräkning
     }
 
-    function calculate(forceFzUpdate = false) {
-        const results = document.getElementById('results');
-        if (!results) return;
+    function calculate(isMaterialChange) {
+        const material = document.getElementById('material').value;
+        if (material === 'default') {
+            document.getElementById('results').innerHTML = `<p style="text-align:center; padding:20px 0; color:var(--text-light);">Välj materialgrupp ovan</p>`;
+            return;
+        }
+        
+        const Vc = parseFloat(document.getElementById('vc_value').value);
+        let fzCalc = parseFloat(document.getElementById('fz_auto').value);
+        const D = parseFloat(document.getElementById('diameter').value);
+        const z = parseFloat(document.getElementById('teeth').value);
+        const ae_pct = parseFloat(document.getElementById('ae_percent').value);
+        const maxRpm = parseFloat(document.getElementById('max_rpm').value);
 
-        const mat = document.getElementById('material')?.value;
-        const D = parseFloat(document.getElementById('diameter')?.value.replace(',', '.')) || 0;
-        const ae = parseFloat(document.getElementById('ae_percent')?.value.replace(',', '.')) || 0;
-        const Z = parseInt(document.getElementById('teeth')?.value) || 0;
-        const Vc = parseFloat(document.getElementById('vc_value')?.value.replace(',', '.')) || 0;
-        const maxRpm = parseFloat(document.getElementById('max_rpm')?.value.replace(',', '.')) || Infinity;
-        const fzInput = document.getElementById('fz_auto');
-
-        if (!mat || isNaN(D) || isNaN(ae) || isNaN(Z) || isNaN(Vc) || D<=0 || Z<=0) {
-            results.classList.remove('ready');
-            results.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px 0;">Fyll i alla fält</p>';
+        if (!(Vc > 0 && fzCalc > 0 && D > 0 && z > 0 && ae_pct >= 1 && maxRpm > 0)) {
+            document.getElementById('results').innerHTML = `<p style="color:var(--danger); text-align:center; padding:20px 0;">Kontrollera att alla fält är ifyllda (> 0)</p>`;
             return;
         }
 
-        const Fm = materialData[mat].Fm;
-        const Fd = getFd(D);
-        const Fe = getFe(ae);
+        const ae_mm = (D * ae_pct) / 100;
         
-        // fz Beräkning med 10% ökning
-        const fzCalcBase = Fm * Fe * Fd;
-        const fzCalc = fzCalcBase * FZ_INCREASE_FACTOR;
+        // 1. Spåntjockleksfaktor (he)
+        const K_he = Math.sqrt((ae_mm / D) * (1 - (ae_mm / D)));
+        
+        // 2. Faktisk matning per skär (fz)
+        const fz = fzCalc / K_he;
 
-        let fz = parseFloat(fzInput?.value.replace(',', '.')) || 0;
-        // Använd fzCalc om fältet är tomt eller om vi tvingar en uppdatering (materialbyte/start)
-        if (isNaN(fz) || fzInput.value.trim() === "" || forceFzUpdate) {
-            fzInput.value = fzCalc.toFixed(4).replace('.', ',');
-            fz = fzCalc;
+        // 3. Varvtal (n)
+        let n = (Vc * 1000) / (Math.PI * D);
+        let n_final = n;
+        let capped = false;
+
+        if (n > maxRpm) {
+            n_final = maxRpm;
+            capped = true;
         }
 
-        if (isNaN(fz) || fz <= 0) {
-             results.classList.remove('ready');
-             results.innerHTML = '<p class="warning-text" style="padding: 20px 0;">Ogiltigt fz-värde (Matning/tand)</p>';
-             return;
-        }
+        // 4. Bordmatning (Vf)
+        const Vf_final = n_final * z * fz; 
+        
+        // Förenklade faktorer (ofta 1 för dynamisk)
+        const Fm = 1; 
+        const Fe = 1;
+        const Fd = 1; 
 
-        const nCalc = (Vc * 1000) / (Math.PI * D);
-        const n = Math.min(nCalc, maxRpm);
-        const vf = Math.round(fz * Z * n);
-        const capped = nCalc > maxRpm;
-
-        results.classList.add('ready');
-        results.innerHTML = `
-            <h2>Skärdata – Dynamisk Fräsning</h2>
-            <div class="result-line"><strong>Varvtal (n)</strong> <span class="value ${capped?'capped':''}">${n.toFixed(0).toLocaleString('sv')} varv/min ${capped?'*':''}</span></div>
-            <div class="result-line"><strong>MATNING (Vf)</strong> <span class="value big">${vf.toLocaleString('sv')} mm/min</span></div>
-            <div class="result-line"><strong>Använt Vc</strong> <span class="value">${Vc.toFixed(0)} m/min</span></div>
-            ${capped ? '<p class="warning-text">* Varvtalet är begränsat av maskinens max-RPM</p>' : ''}
+        // Visa resultat
+        document.getElementById('results').innerHTML = `
+            <h2>Dynamisk Fräsning – Resultat</h2>
+            <div class="result-line">
+                <strong>Varvtal (n)</strong> 
+                <span class="value ${capped?'capped':''}">${n_final.toLocaleString('sv', { maximumFractionDigits: 0 })} varv/min${capped?' *':''}</span>
+            </div>
+            <div class="result-line">
+                <strong>Bordmatning (Vf)</strong> 
+                <span class="value">${Vf_final.toLocaleString('sv', { maximumFractionDigits: 0 })} mm/min</span>
+            </div>
+            
+            ${capped ? '<p class="warning-text" style="color: var(--danger); margin: 8px 0;">* Varvtalet är begränsat av maskinens max-RPM</p>' : ''}
             <div class="details">
-                <p><strong>Material:</strong> ${document.querySelector('#material option:checked')?.textContent || 'Okänt'}</p>
-                <p><strong>fz auto (+10%):</strong> ${fzCalc.toFixed(4)} mm/tand</p>
-                <p><strong>Fm × Fe × Fd:</strong> ${Fm.toFixed(2)} × ${Fe.toFixed(2)} × ${Fd.toFixed(4)}</p>
-                <p><strong>Använt fz:</strong> ${fz.toFixed(4)} mm/tand</p>
+                <p><strong>Material:</strong> ${document.querySelector('#material option:checked').textContent}</p>
+                <p><strong>Spåntjockleksfaktor (K_he):</strong> ${K_he.toFixed(4)}</p>
+                <p><strong>Matning per skär (fz):</strong> ${fz.toFixed(4)} mm/tand</p>
+                <p><strong>Ingreppsbredd (Ae):</strong> ${ae_mm.toFixed(2)} mm (${ae_pct} % av D)</p>
             </div>
         `;
     }
 
     // Events
-    document.getElementById('material')?.addEventListener('change', updateVcAndFz);
+    document.getElementById('material').addEventListener('change', updateVcAndFz);
+    
+    // Lyssnare på alla fält för automatisk beräkning
     ['vc_value','diameter','ae_percent','teeth','fz_auto','max_rpm'].forEach(id =>
-        document.getElementById(id)?.addEventListener('input', () => calculate(false))
+        document.getElementById(id).addEventListener('input', () => calculate(false))
     );
 
-    // Starta beräkningen vid laddning
-    if (window.loadedCalculatorInit) {
-        window.loadedCalculatorInit.push(updateVcAndFz);
-    } else {
-        document.addEventListener('DOMContentLoaded', updateVcAndFz);
-    }
+    // Initial start
+    document.addEventListener('DOMContentLoaded', updateVcAndFz);
+    
+    // Den gamla TEMALOGIKEN är BORTTAGEN HÄR
 </script>
+</body>
+</html>
