@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skärdata PRO | Kalkylator</title>
+    <title>Skärdata PRO | Kalkylatorer</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">
@@ -11,52 +11,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* === GLOBAL TEMAVARIABLER (Matchar Fragmenten) === */
+        /* === TEMAVARIABLER (Liten uppsättning, primärt för startsidan) === */
         :root {
             --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
-            --primary: #3b82f6; --primary-light: #dbeafe; --success: #10b981; 
-            --warning: #f59e0b; --danger: #ef4444; --border: #e2e8f0; 
-            --shadow: 0 20px 40px rgba(0,0,0,0.08); --radius: 16px;
+            --primary: #3b82f6; --primary-light: #dbeafe; --border: #e2e8f0; 
+            --shadow: 0 10px 20px rgba(0,0,0,0.05); --radius: 16px;
         }
-        /* Mörkt läge: systeminställningar */
         @media (prefers-color-scheme: dark) {
             :root { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
-                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); --primary-light: #1e3a8a; }
-        }
-        /* Mörkt läge: Manuell toggle */
-        body.dark {
-            --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
-            --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); --primary-light: #1e3a8a;
+                    --border: #334155; --shadow: 0 10px 20px rgba(0,0,0,0.4); }
         }
 
         /* === GLOBAL LAYOUT === */
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:0; transition:all .4s; }
-        .app-container { max-width:600px; margin:0 auto; display:flex; flex-direction:column; min-height:100vh; background:var(--card); box-shadow:var(--shadow); }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:0; transition:background .4s; }
+        .app-container { max-width:600px; margin:0 auto; display:flex; flex-direction:column; min-height:100vh; }
         
         /* === HEADER === */
-        header { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:24px 20px 16px; text-align:center; position:relative; }
-        .header-content { display:flex; justify-content:space-between; align-items:center; }
-        .logo-text { font-size:1.5rem; font-weight:700; }
+        header { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:30px 20px; text-align:center; }
+        .logo-text { font-size:1.8rem; font-weight:700; margin-bottom: 5px; }
+        .subtitle { font-size: 1rem; opacity: 0.9; }
 
-        /* === THEME TOGGLE (Mörk/Ljus) === */
-        .theme-toggle { padding:8px 12px; border:none; background:rgba(255,255,255,0.2); 
-                        color:white; border-radius:12px; cursor:pointer; font-size:1.2rem;
-                        transition:all .2s; }
-        .theme-toggle:hover { background:rgba(255,255,255,0.3); }
-
-        /* === NAVIGATION BAR === */
-        .nav-bar { display:flex; justify-content:space-between; padding:0 20px; background:var(--card); border-bottom:1px solid var(--border); }
-        .nav-tab { flex:1; text-align:center; padding:16px 0; text-decoration:none; color:var(--text-light); 
-                   font-weight:600; font-size:0.9rem; border-bottom:3px solid transparent; 
-                   transition:all .2s; }
-        .nav-tab:hover { color:var(--text); }
-        .nav-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
-
-        /* === IFRAME FÖR KALKYLATORERNA === */
-        main { flex-grow:1; background:var(--bg); }
-        #contentFrame { width:100%; height:100vh; border:none; display:block; background:var(--bg); }
+        /* === KALKYLATOR LISTA === */
+        .calculator-list { padding:20px; flex-grow:1; background:var(--bg); }
+        .calc-item { display:block; text-decoration:none; color:inherit; 
+                     background:var(--card); border:1px solid var(--border);
+                     padding:16px 20px; margin-bottom:12px; border-radius:var(--radius);
+                     transition:background .2s, border-color .2s, transform .1s;
+                     display: flex; justify-content: space-between; align-items: center;
+                     box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         
+        .calc-item:hover { background:var(--primary-light); border-color:var(--primary); transform: translateY(-1px); }
+        .calc-item:active { transform: translateY(0); }
+        .calc-item span { font-weight: 600; font-size: 1.1rem; }
+        .calc-item::after { content: '→'; font-size: 1.5rem; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -64,119 +52,30 @@
     <div class="app-container">
         
         <header>
-            <div class="header-content">
-                <div class="logo-text">Skärdata PRO</div>
-                <button id="themeToggle" class="theme-toggle">🌙</button>
-            </div>
+            <div class="logo-text">Skärdata PRO</div>
+            <div class="subtitle">Välj kalkylator nedan</div>
         </header>
 
-        <nav class="nav-bar" id="navBar">
-            <a href="#planfras" class="nav-tab active" data-path="kalkylatorer/planfras.html" data-route="planfras">
-                Planfräsning
+        <div class="calculator-list">
+            
+            <a href="kalkylatorer/Planfrasning.html" class="calc-item">
+                <span>Planfräsning</span>
             </a>
             
-            <a href="#borrning" class="nav-tab" data-path="kalkylatorer/borrning.html" data-route="borrning">
-                Borrning
+            <a href="kalkylatorer/HM&HSS-Borrning.html" class="calc-item">
+                <span>HM & HSS Borrning</span>
             </a>
             
-            <a href="#dynamisk" class="nav-tab" data-path="kalkylatorer/frasning.html" data-route="dynamisk">
-                Dynamisk Fräsning
+            <a href="kalkylatorer/Dynamisk-Fräsning.html" class="calc-item">
+                <span>Dynamisk Fräsning</span>
             </a>
-        </nav>
 
-        <main>
-            <iframe id="contentFrame" src="" title="Kalkylator"></iframe>
-        </main>
+            </div>
         
     </div>
 
 <script>
-    const contentFrame = document.getElementById('contentFrame');
-    const navBar = document.getElementById('navBar');
-    const themeToggle = document.getElementById('themeToggle');
-    
-    // === 1. TEMAHANTERING ===
-    function initTheme() {
-        // Kontrollera om användaren har en sparad preferens
-        const savedTheme = localStorage.getItem('theme');
-        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
-            document.body.classList.add('dark');
-            themeToggle.textContent = '☀️';
-        } else {
-            themeToggle.textContent = '🌙';
-        }
-
-        // Lyssna på klick på temaknappen
-        themeToggle.addEventListener('click', toggleTheme);
-    }
-
-    function toggleTheme() {
-        const isDark = document.body.classList.toggle('dark');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        themeToggle.textContent = isDark ? '☀️' : '🌙';
-        
-        // Meddela iframe om temabyte
-        // Detta är viktigt för att synkronisera med kalkylatorfragmenten
-        if (contentFrame.contentWindow) {
-            contentFrame.contentWindow.postMessage({ theme: isDark ? 'dark' : 'light' }, '*');
-        }
-    }
-    
-    // Lyssna på temaförändringar från systemet i realtid
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        // Om ingen manuell preferens sparats, följ systemet
-        if (!localStorage.getItem('theme')) {
-            if (e.matches) {
-                document.body.classList.add('dark');
-                themeToggle.textContent = '☀️';
-            } else {
-                document.body.classList.remove('dark');
-                themeToggle.textContent = '🌙';
-            }
-        }
-    });
-
-    // === 2. NAVIGATION OCH URL-HANTERING ===
-
-    // Lyssna på klick på nav-flikarna
-    navBar.addEventListener('click', (e) => {
-        const target = e.target.closest('.nav-tab');
-        if (target) {
-            e.preventDefault();
-            const route = target.dataset.route;
-            // Uppdatera URL:en (hash) och ladda innehållet
-            history.pushState(null, '', `#${route}`);
-            handleRoute();
-        }
-    });
-
-    // Lyssna på framåt/bakåt i webbläsaren
-    window.addEventListener('popstate', handleRoute);
-
-    // Huvudfunktion för att hantera URL-hash och ladda rätt fil
-    function handleRoute() {
-        // Ta bort # och eventuella parametrar från hash
-        const hash = window.location.hash.substring(1).split('?')[0]; 
-        const route = hash || 'planfras'; // Standardvy om ingen hash finns
-
-        const targetTab = document.querySelector(`.nav-tab[data-route="${route}"]`);
-
-        if (targetTab) {
-            // 'Klick'-simulering för att ladda filen och uppdatera utseendet
-            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-            targetTab.classList.add('active');
-            contentFrame.src = targetTab.dataset.path;
-        } else {
-            // Om route är okänd, ladda standard (Planfräsning)
-            contentFrame.src = document.querySelector('.nav-tab[data-route="planfras"]').dataset.path;
-            document.querySelector('.nav-tab[data-route="planfras"]').classList.add('active');
-            history.replaceState(null, '', '#planfras');
-        }
-    }
-    
-    // === 3. SERVICE WORKER REGISTRERING (PWA) ===
+    // === SERVICE WORKER REGISTRERING (PWA) ===
     function registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -191,12 +90,7 @@
         }
     }
 
-    // === START ===
-    document.addEventListener('DOMContentLoaded', () => {
-        initTheme();
-        handleRoute(); // Se till att rätt kalkylator laddas vid start/refresh
-        registerServiceWorker(); // Starta PWA-väktaren
-    });
+    document.addEventListener('DOMContentLoaded', registerServiceWorker);
 </script>
 </body>
 </html>
