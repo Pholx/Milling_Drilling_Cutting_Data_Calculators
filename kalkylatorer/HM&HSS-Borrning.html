@@ -4,152 +4,235 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skärdatakalkylator - Borrning (HM & HSS)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Modern CSS för Mobilanpassning - Corporate Blue Theme */
         :root {
-            --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
-            --primary: #3b82f6; --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
-            --border: #e2e8f0; --shadow: 0 20px 40px rgba(0,0,0,0.08); --radius: 16px;
+            --primary-color: #004085; /* Deep Corporate Blue */
+            --secondary-color: #17a2b8; /* Sharp Teal/Cyan for Results Highlight */
+            --accent-color: #ffc107;
+            --background-color: #f8f9fa; /* Light, neutral body background */
+            --card-background: #ffffff;
+            --text-color: #343a40;
+            --border-color: #ced4da; /* Sharper, slightly darker border */
+            --warning-color: #dc3545;
+            --hm-color: #004085; /* Use primary blue for HM indicator */
+            --hss-color: #e99400; /* Distinct HSS Orange */
         }
-        @media (prefers-color-scheme: dark) {
-            :root { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
-                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            padding: 20px 10px;
         }
-        body.dark { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
-                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
-               min-height:100vh; padding:20px; transition:all .4s; }
-        .container { max-width:560px; margin:40px auto; background:var(--card);
-                     border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
-                     position:relative; }
-        .theme-toggle { position:absolute; top:16px; right:16px; background:none; border:none;
-                        font-size:1.5rem; cursor:pointer; padding:8px; border-radius:50%; }
-        header { background:linear-gradient(135deg,#667eea,#764ba2); color:white;
-                 padding:30px 24px; text-align:center; position:relative; }
-        h1 { font-size:1.8rem; font-weight:700; margin-bottom:8px; }
-        .subtitle { font-size:0.9rem; opacity:0.9; }
-        .tool-badge { position:absolute; top:16px; left:16px; padding:6px 14px;
-                      border-radius:50px; font-size:0.8rem; font-weight:700;
-                      text-transform:uppercase; letter-spacing:0.5px; }
-        .tool-hm { background:#1d4ed8; } .tool-hss { background:#ea580c; }
-        main { padding:32px 24px; }
-        .form-group { margin-bottom:20px; }
-        label { display:block; margin-bottom:8px; font-weight:600; font-size:0.95rem; }
-        select, input[type=number] { width:100%; padding:14px 16px; border:2px solid var(--border);
-            border-radius:12px; background:var(--card); color:var(--text); font-size:1rem;
-            transition:all .3s; }
-        select:focus, input[type=number]:focus { outline:none; border-color:var(--primary);
-            box-shadow:0 0 0 4px rgba(59,130,246,.15); transform:translateY(-2px); }
-        .results { margin-top:32px; padding:24px; background:linear-gradient(to bottom,#f8fafc,#e2e8f0);
-            border-radius:14px; border:2px solid #cbd5e1; min-height:120px; transition:all .4s; }
-        body.dark .results { background:linear-gradient(to bottom,#1e293b,#334155);
-            border-color:#475569; }
-        .results.ready { background:linear-gradient(to bottom,#ecfdf5,#d1fae5);
-            border-color:#34d399; }
-        body.dark .results.ready { background:linear-gradient(to bottom,#064e3b,#065f46); }
-        .results h2 { font-size:1.4rem; color:var(--success); margin-bottom:16px;
-                      display:flex; align-items:center; gap:12px; }
-        .result-line { display:flex; justify-content:space-between; padding:10px 0;
-                       font-size:1.1rem; border-bottom:1px dashed var(--border); }
-        .result-line:last-child { border-bottom:none; }
-        .result-line strong { color:var(--text-light); font-weight:500; }
-        .value { font-weight:700; color:var(--text); }
-        .capped { color:var(--danger); }
-        .warning-text { font-size:0.85rem; color:var(--warning); margin-top:12px; }
-        .details { margin-top:20px; padding-top:16px; border-top:1px dashed var(--border);
-                   font-size:0.88rem; color:var(--text-light); }
-        .missing { color:#dc2626; font-weight:600; text-align:center; margin-top:10px; }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--card-background);
+            padding: 25px;
+            border-radius: 6px; /* Skarpare hörn */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Tydligare skugga */
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            text-align: center;
+            margin-bottom: 5px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-color); /* Tydlig separation */
+            padding-bottom: 15px;
+        }
+
+        .info-text {
+            font-size: 0.85em;
+            text-align: center;
+            color: #6c757d;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary-color); /* Blå labels */
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px; /* Skarpa hörn på inputs */
+            box-sizing: border-box;
+            font-size: 1em;
+            appearance: none; 
+            background-color: #ffffff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        select:focus, input[type="number"]:focus {
+            border-color: var(--secondary-color); /* Teal-fokus */
+            box-shadow: 0 0 0 4px rgba(23, 162, 184, 0.25); /* Tydlig fokus-skugga */
+            background-color: var(--card-background);
+            outline: none;
+        }
+
+        /* Resultatsektionens design */
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid var(--secondary-color);
+            background-color: #f0f8ff; /* Mycket ljusblå bakgrund för resultat */
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .results h2 {
+            font-size: 1.4em;
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .results p {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            line-height: 1.5;
+        }
+
+        .results strong {
+            font-weight: 700;
+        }
+
+        .results span {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .sub-value {
+            font-size: 0.85em;
+            margin-left: 15px;
+            color: #6c757d;
+        }
+        .warning {
+            color: var(--warning-color);
+            font-weight: 600;
+            padding: 10px;
+            border: 1px solid var(--warning-color);
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .capped-rpm {
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+        .tool-indicator {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: auto;
+        }
+        .tool-indicator-hm {
+            background-color: var(--hm-color);
+            color: white;
+        }
+        .tool-indicator-hss {
+            background-color: var(--hss-color);
+            color: white;
+        }
+        
     </style>
 </head>
 <body>
 
 <div class="container">
-    <button class="theme-toggle" id="themeToggle">Moon</button>
+    <h1>Metrisk Skärdatakalkylator</h1>
+    <p class="info-text">*Använder säkra startvärden för HM/HSS borr (0.5 - 25.0 mm).</p>
     
-    <header>
-        <div class="tool-badge tool-hm" id="toolBadge">HM</div>
-        <h1>Skärdatakalkylator</h1>
-        <p class="subtitle">Borrning – Hårdmetall & Snabbstål (0.5–25 mm)</p>
-    </header>
+    <div class="input-group">
+        <label for="toolType">Välj Verktygsmaterial:</label>
+        <select id="toolType">
+            <option value="HM">Hårdmetall (HM)</option>
+            <option value="HSS">Snabbstål (HSS) - Balanserade Värden</option>
+        </select>
+    </div>
 
-    <main>
-        <div class="form-group">
-            <label for="toolType">Verktygsmaterial</label>
-            <select id="toolType">
-                <option value="HM">Hårdmetall (HM)</option>
-                <option value="HSS">Snabbstål (HSS)</option>
-            </select>
-        </div>
+    <div class="input-group">
+        <label for="material">Välj Material:</label>
+        <select id="material">
+            <option value="">-- Välj material... --</option>
+            <option value="mjukt_stal">Stål: Mjukt (< 1100 N/mm²)</option>
+            <option value="hart_stal">Stål: Hårt (> 1100 N/mm²)</option>
+            <option value="rostfritt_austenit">Rostfritt: Austenitiskt (< 850 N/mm²)</option>
+            <option value="toolox_44">Stål: Toolox 44 (< 50 HRC)</option>
+            <option value="hardat_stal_65">Stål: Härdat (<65HRC)</option>
+            <option value="aluminium">Aluminium</option>
+            <option value="koppar">Koppar</option>
+        </select>
+    </div>
 
-        <div class="form-group">
-            <label for="material">Material</label>
-            <select id="material">
-                <option value="">-- Välj material --</option>
-                <option value="mjukt_stal">Stål: Mjukt (&lt; 1100 N/mm²)</option>
-                <option value="hart_stal">Stål: Hårt (&gt; 1100 N/mm²)</option>
-                <option value="rostfritt_austenit">Rostfritt: Austenitiskt (&lt; 850 N/mm²)</option>
-                <option value="toolox_44">Stål: Toolox 44 (&lt; 50 HRC)</option>
-                <option value="hardat_stal_65">Stål: Härdat (&lt;65 HRC)</option>
-                <option value="aluminium">Aluminium</option>
-                <option value="koppar">Koppar</option>
-            </select>
-        </div>
+    <div class="input-group">
+        <label for="length">Välj Borrlängd (L/D):</label>
+        <select id="length">
+            <option value="">-- Välj längd... --</option>
+            <option value="3xD">3xD</option>
+            <option value="5xD">5xD</option>
+            <option value="8xD">8xD</option>
+            <option value="10xD">10xD</option>
+            <option value="12xD">12xD</option>
+            <option value="15xD">15xD</option>
+        </select>
+    </div>
 
-        <div class="form-group">
-            <label for="length">Borrlängd (L/D)</label>
-            <select id="length">
-                <option value="">-- Välj längd --</option>
-                <option value="3xD">3xD</option>
-                <option value="5xD">5xD</option>
-                <option value="8xD">8xD</option>
-                <option value="10xD">10xD</option>
-                <option value="12xD">12xD</option>
-                <option value="15xD">15xD</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="diameter">Borrdiameter (mm)</label>
-            <input type="number" id="diameter" step="0.1" min="0.5" max="25" placeholder="t.ex. 8.5">
-        </div>
-
-        <div class="form-group">
-            <label for="maxRpm">Maskinens max varvtal (valfritt)</label>
-            <input type="number" id="maxRpm" step="1" placeholder="t.ex. 12000">
-        </div>
-
-        <div class="results" id="results">
-            <p style="color:var(--text-light); text-align:center; padding:20px 0;">
-                Fyll i fälten ovan för att få skärdata
-            </p>
-        </div>
-    </main>
+    <div class="input-group">
+        <label for="diameter">Borrdiameter D (mm, 0.5 - 25.0):</label>
+        <input type="number" id="diameter" step="0.1" min="0.5" max="25.0" placeholder="Ange diameter (ex. 4.3)">
+    </div>
+    
+    <div class="input-group">
+        <label for="maxRpm">Maskinens Max RPM (Valfritt):</label>
+        <input type="number" id="maxRpm" step="1" min="1" placeholder="Max varvtal (t.ex. 12000)">
+    </div>
+    
+    <div class="results" id="results">
+        <p class="warning">Fyll i Verktyg, Material, Längd och Diameter för att beräkna skärdata.</p>
+    </div>
 </div>
 
 <script>
-    // === ALLA DATA ===
-    const materialDataHM = { /* oförändrad – samma som tidigare */ 
+    // --- Materialdata för HM och HSS (Vc och Fm) ---
+    const materialDataHM = {
         "mjukt_stal": { name: "Stål: Mjukt (< 1100 N/mm²)", Fm: 1.0, Vc_safe: 60 },
         "hart_stal": { name: "Stål: Hårt (> 1100 N/mm²)", Fm: 0.9, Vc_safe: 40 },
         "toolox_44": { name: "Stål: Toolox 44 (< 50 HRC)", Fm: 0.7, Vc_safe: 20 },
-        "rostfritt_austenit": { name: "Rostfritt: Austenitiskt (< 850 N/mm²)", Fm: 0.9, Vc_safe: 30 },
+        "rostfritt_austenit": { name: "Rostfritt: Austenitiskt (< 850 N/mm²)", Fm: 0.9, Vc_safe: 30 }, 
         "hardat_stal_65": { name: "Stål: Härdat (<65HRC)", Fm: 0.6, Vc_safe: 15 },
         "aluminium": { name: "Aluminium", Fm: 1.4, Vc_safe: 200 },
         "koppar": { name: "Koppar", Fm: 1.0, Vc_safe: 80 }
     };
-
+    
     const materialDataHSS = {
         "mjukt_stal": { name: "Stål: Mjukt (< 1100 N/mm²)", Fm: 1.0, Vc_safe: 20 },
         "hart_stal": { name: "Stål: Hårt (> 1100 N/mm²)", Fm: 0.9, Vc_safe: 15 },
         "toolox_44": { name: "Stål: Toolox 44 (< 50 HRC)", Fm: 0.7, Vc_safe: 10 },
-        "rostfritt_austenit": { name: "Rostfritt: Austenitiskt (< 850 N/mm²)", Fm: 0.8, Vc_safe: 12 },
+        "rostfritt_austenit": { name: "Rostfritt: Austenitiskt (< 850 N/mm²)", Fm: 0.8, Vc_safe: 12 }, 
         "hardat_stal_65": { name: "Stål: Härdat (<65HRC)", Fm: 0.6, Vc_safe: 5 },
         "aluminium": { name: "Aluminium", Fm: 1.4, Vc_safe: 60 },
         "koppar": { name: "Koppar", Fm: 1.0, Vc_safe: 30 }
     };
 
-    const FdTableHM = [ /* hela tabellen – exakt som du hade */ 
+    // --- Diameterfaktor (Fd) för Hårdmetall (HM) (Från PDF & Extrapolerad) ---
+    const FdTableHM = [
         { D: 0.5, '3xD': 0.05, '5xD': 0.04, '8xD': 0.035, '10xD': 0.032, '12xD': 0.030, '15xD': 0.025 },
         { D: 1.0, '3xD': 0.07, '5xD': 0.055, '8xD': 0.045, '10xD': 0.040, '12xD': 0.035, '15xD': 0.030 },
         { D: 2.0, '3xD': 0.09, '5xD': 0.075, '8xD': 0.065, '10xD': 0.060, '12xD': 0.055, '15xD': 0.050 },
@@ -169,15 +252,17 @@
         { D: 25.0, '3xD': 0.58, '5xD': 0.46, '8xD': 0.40, '10xD': 0.36, '12xD': 0.33, '15xD': 0.28 }
     ];
 
-    const FdTableHSS = [ /* hela tabellen – exakt som du hade */ 
+    // --- Diameterfaktor (Fd) för Snabbstål (HSS) (Nya, Balanserade Värden) ---
+    const FdTableHSS = [
+        // D-värden | 3xD (Bas) | 5xD (-30%) | 8xD (-40%) | 10xD (-45%) | 12xD (-50%) | 15xD (-60%)
         { D: 0.5, '3xD': 0.040, '5xD': 0.028, '8xD': 0.024, '10xD': 0.022, '12xD': 0.020, '15xD': 0.016 },
         { D: 1.0, '3xD': 0.045, '5xD': 0.031, '8xD': 0.027, '10xD': 0.025, '12xD': 0.022, '15xD': 0.018 },
         { D: 2.0, '3xD': 0.060, '5xD': 0.042, '8xD': 0.036, '10xD': 0.033, '12xD': 0.030, '15xD': 0.024 },
         { D: 2.5, '3xD': 0.070, '5xD': 0.049, '8xD': 0.042, '10xD': 0.038, '12xD': 0.035, '15xD': 0.028 },
         { D: 3.0, '3xD': 0.075, '5xD': 0.052, '8xD': 0.045, '10xD': 0.041, '12xD': 0.037, '15xD': 0.030 },
-        { D: 4.0, '3xD': 0.080, '5xD': 0.056, '8xD': 0.048, '10xD': 0.044, '12xD': 0.040, '15xD': 0.032 },
-        { D: 5.0, '3xD': 0.090, '5xD': 0.063, '8xD': 0.054, '10xD': 0.049, '12xD': 0.045, '15xD': 0.036 },
-        { D: 6.0, '3xD': 0.150, '5xD': 0.105, '8xD': 0.090, '10xD': 0.082, '12xD': 0.075, '15xD': 0.060 },
+        { D: 4.0, '3xD': 0.11, '5xD': 0.08, '8xD': 0.07, '10xD': 0.06, '12xD': 0.05, '15xD': 0.04 },
+        { D: 5.0, '3xD': 0.13, '5xD': 0.10, '8xD': 0.08, '10xD': 0.07, '12xD': 0.06, '15xD': 0.05 },
+        { D: 6.0, '3xD': 0.16, '5xD': 0.12, '8xD': 0.10, '10xD': 0.08, '12xD': 0.07, '15xD': 0.06 },
         { D: 8.0, '3xD': 0.200, '5xD': 0.140, '8xD': 0.120, '10xD': 0.110, '12xD': 0.100, '15xD': 0.080 },
         { D: 10.0, '3xD': 0.230, '5xD': 0.161, '8xD': 0.138, '10xD': 0.126, '12xD': 0.115, '15xD': 0.092 },
         { D: 12.0, '3xD': 0.280, '5xD': 0.196, '8xD': 0.168, '10xD': 0.154, '12xD': 0.140, '15xD': 0.112 },
@@ -189,96 +274,125 @@
         { D: 25.0, '3xD': 0.380, '5xD': 0.266, '8xD': 0.228, '10xD': 0.209, '12xD': 0.190, '15xD': 0.152 }
     ];
 
+    /**
+     * Linjär interpolering för Fd.
+     */
     function interpolateFd(D, lengthType, toolType) {
-        const table = toolType === 'HM' ? FdTableHM : FdTableHSS;
+        const FdTable = (toolType === 'HM') ? FdTableHM : FdTableHSS;
+        
         if (D < 0.5) D = 0.5;
-        if (D > 25) D = 25;
-        const lower = table.slice().reverse().find(row => row.D <= D);
-        const upper = table.find(row => row.D > D);
+        if (D > 25.0) D = 25.0;
+
+        let lower = FdTable.slice().reverse().find(item => item.D <= D);
+        let upper = FdTable.find(item => item.D > D);
+
         if (!upper || lower.D === D) return lower[lengthType];
-        const ratio = (D - lower.D) / (upper.D - lower.D);
-        return parseFloat((lower[lengthType] + ratio * (upper[lengthType] - lower[lengthType])).toFixed(4));
+        if (!lower) return upper[lengthType];
+
+        let D1 = lower.D;
+        let Fd1 = lower[lengthType];
+        let D2 = upper.D;
+        let Fd2 = upper[lengthType];
+
+        let interpolatedFd = Fd1 + (Fd2 - Fd1) * ((D - D1) / (D2 - D1));
+        return parseFloat(interpolatedFd.toFixed(4));
     }
 
+    /**
+     * Beräknar och visar skärdata automatiskt.
+     */
     function calculateCuttingData() {
+        // Hämta element och värden
         const toolType = document.getElementById('toolType').value;
         const materialKey = document.getElementById('material').value;
         const lengthType = document.getElementById('length').value;
-        const diameter = parseFloat(document.getElementById('diameter').value.replace(',', '.'));
+        const diameterInput = document.getElementById('diameter').value;
         const maxRpmInput = document.getElementById('maxRpm').value;
         const resultsDiv = document.getElementById('results');
-        const badge = document.getElementById('toolBadge');
+        
+        resultsDiv.innerHTML = ''; 
 
-        badge.textContent = toolType;
-        badge.className = `tool-badge tool-${toolType.toLowerCase()}`;
-
-        // Standardmeddelande
-        resultsDiv.classList.remove('ready');
-        resultsDiv.innerHTML = `<p style="color:var(--text-light);text-align:center;padding:20px 0;">
-            Fyll i fälten ovan för att få skärdata
-        </p>`;
-
-        // Validering
-        let missing = [];
-        if (!materialKey) missing.push("Material");
-        if (!lengthType) missing.push("Borrlängd");
-        if (!diameter || diameter < 0.5 || diameter > 25) missing.push("Diameter (0.5–25 mm)");
-
-        if (missing.length > 0) {
-            resultsDiv.innerHTML += `<p class="missing">Saknas: ${missing.join(', ')}</p>`;
+        // FIX FÖR MOBIL/PWA: Ersätter kommatecken med punkt för korrekt tolkning
+        const D = parseFloat(diameterInput.replace(',', '.'));
+        const maxRpm = parseFloat(maxRpmInput.replace(',', '.'));
+        
+        // Välj rätt datakälla (HM eller HSS)
+        const currentMaterialData = (toolType === 'HM') ? materialDataHM : materialDataHSS;
+        
+        // 1. Validering: Kontrollera att Material, Längd och Diameter är ifyllda och giltiga
+        if (!materialKey || !lengthType || isNaN(D) || D < 0.5 || D > 25.0) {
+            resultsDiv.innerHTML = '<p class="warning">Fyll i Verktyg, Material, Längd och Diameter för att beräkna skärdata.</p>';
             return;
         }
 
-        const data = toolType === 'HM' ? materialDataHM : materialDataHSS;
-        const mat = data[materialKey];
-        const Fd = interpolateFd(diameter, lengthType, toolType);
-        const Fn = mat.Fm * Fd;
-        const n_calc = (mat.Vc_safe * 1000) / (Math.PI * diameter);
-
-        let n_final = Math.round(n_calc);
-        let Vf_final = Math.round(Fn * n_calc);
-        let capped = false;
-
-        const maxRpm = parseFloat(maxRpmInput.replace(',', '.'));
-        if (maxRpm && n_calc > maxRpm) {
-            n_final = Math.round(maxRpm);
-            Vf_final = Math.round(Fn * n_final);
-            capped = true;
+        const material = currentMaterialData[materialKey];
+        
+        // 2. Beräkningar (Baserat på Vc)
+        const Fm = material.Fm; 
+        const Vc_safe = material.Vc_safe; 
+        
+        // Hämta Fd baserat på VALT VERKTYG
+        const Fd = interpolateFd(D, lengthType, toolType);
+        
+        // Fn (fz) = Fm * Fd
+        const Fn = Fm * Fd;
+        
+        // Beräknat varvtal baserat på Vc
+        const n_calculated = (Vc_safe * 1000) / (Math.PI * D);
+        
+        let n_final = Math.round(n_calculated);
+        let Vf_final;
+        let rpmCapped = false;
+        
+        // 3. Max RPM-logik
+        if (!isNaN(maxRpm) && maxRpm > 0 && n_calculated > maxRpm) {
+            n_final = Math.round(maxRpm); // Begränsa varvtalet
+            Vf_final = Fn * n_final; // Justera matningen för att behålla Fn
+            rpmCapped = true;
+        } else {
+            // Använd det beräknade Vf om det inte begränsas av Max RPM
+            Vf_final = Fn * n_calculated;
         }
 
-        resultsDiv.classList.add('ready');
+        Vf_final = Math.round(Vf_final);
+        
+        // 4. Visa resultat
+        let rpmDisplay = `<span>${n_final} varv/min</span>`;
+        let vfDisplay = `<span>${Vf_final} mm/min</span>`;
+        let rpmWarning = '';
+        let toolIndicator = `<div class="tool-indicator tool-indicator-${toolType.toLowerCase()}">${toolType} Verktyg</div>`;
+
+        if (rpmCapped) {
+            rpmDisplay = `<span class="capped-rpm">${n_final} varv/min *</span>`;
+            rpmWarning = `<p class="sub-value warning">*) Varvtal begränsat av din Max RPM. Bordmatning (Vf) har justerats nedåt för att bibehålla skärdata.</p>`;
+        }
+
         resultsDiv.innerHTML = `
-            <h2>Skärdata ${toolType === 'HM' ? 'HM' : 'HSS'} ${toolType}</h2>
-            <div class="result-line"><strong>Varvtal (n)</strong> 
-                <span class="value ${capped?'capped':''}">${n_final.toLocaleString('sv')} varv/min${capped?' *':''}</span>
-            </div>
-            <div class="result-line"><strong>Bordmatning (Vf)</strong> 
-                <span class="value">${Vf_final.toLocaleString('sv')} mm/min</span>
-            </div>
-            ${capped ? '<p class="warning-text">* Begränsat av maskinens max-RPM</p>' : ''}
-            <div class="details">
-                <p><strong>Material:</strong> ${mat.name} – ${lengthType}</p>
-                <p><strong>fz (matning/varv):</strong> ${Fn.toFixed(3)} mm</p>
-                <p><strong>Skärhastighet (Vc):</strong> ${mat.Vc_safe} m/min</p>
-                <p><strong>Diameterfaktor (Fd):</strong> ${Fd.toFixed(4)}</p>
-            </div>
+            <h2>SKÄRDATA ${toolIndicator}</h2>
+            
+            <p><strong>Varvtal (n)</strong> ${rpmDisplay}</p>
+            <p><strong>Bordmatning (Vf)</strong> ${vfDisplay}</p>
+            ${rpmWarning}
+            <hr style="border-color: var(--border-color);">
+            
+            <p class="sub-value"><strong>Material:</strong> ${material.name} (${lengthType})</p>
+            <p class="sub-value"><strong>Matning / varv (fz/Fn):</strong> ${Fn.toFixed(3)} mm/varv</p>
+            <p class="sub-value"><strong>Skärhastighet (Vc):</strong> ${Vc_safe} m/min (Säkerhetsvärde)</p>
+            <p class="sub-value"><strong>Diameterfaktor (Fd):</strong> ${Fd.toFixed(4)}</p>
         `;
     }
 
-    // Lyssnare på alla fält
-    document.querySelectorAll('#toolType, #material, #length, #diameter, #maxRpm').forEach(el => {
-        el.addEventListener('input', calculateCuttingData);
-        el.addEventListener('change', calculateCuttingData);
-    });
+    // Lägg till händelselyssnare för automatisk uppdatering
+    document.getElementById('toolType').addEventListener('change', calculateCuttingData);
+    document.getElementById('material').addEventListener('change', calculateCuttingData);
+    document.getElementById('length').addEventListener('change', calculateCuttingData);
+    // Modifierade lyssnare för att hantera mobil input
+    document.getElementById('diameter').addEventListener('input', calculateCuttingData);
+    document.getElementById('maxRpm').addEventListener('input', calculateCuttingData); 
 
-    // Tema
-    document.getElementById('themeToggle').addEventListener('click', () => {
-        document.body.classList.toggle('dark');
-        document.getElementById('themeToggle').textContent = document.body.classList.contains('dark') ? 'Sun' : 'Moon';
-    });
-
-    // Starta
-    calculateCuttingData();
+    // Kör en initial beräkning vid laddning
+    document.addEventListener('DOMContentLoaded', calculateCuttingData);
 </script>
+
 </body>
 </html>
