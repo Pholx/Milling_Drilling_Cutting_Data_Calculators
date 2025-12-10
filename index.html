@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skärdata PRO | Kalkylatorer</title>
+    <title>Cutting Data PRO | Calculators</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">
@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* === TEMAVARIABLER (Liten uppsättning, primärt för startsidan) === */
+        /* === THEME VARIABLES (Primary for landing page) === */
         :root {
             --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
             --primary: #3b82f6; --primary-light: #dbeafe; --border: #e2e8f0; 
@@ -32,7 +32,7 @@
         .logo-text { font-size:1.8rem; font-weight:700; margin-bottom: 5px; }
         .subtitle { font-size: 1rem; opacity: 0.9; }
 
-        /* === KALKYLATOR LISTA === */
+        /* === CALCULATOR LIST === */
         .calculator-list { padding:20px; flex-grow:1; background:var(--bg); }
         .calc-item { display:block; text-decoration:none; color:inherit; 
                      background:var(--card); border:1px solid var(--border);
@@ -45,6 +45,17 @@
         .calc-item:active { transform: translateY(0); }
         .calc-item span { font-weight: 600; font-size: 1.1rem; }
         .calc-item::after { content: '→'; font-size: 1.5rem; color: var(--primary); }
+        
+        /* === NEW FOOTER STYLE === */
+        .footer-text {
+            text-align: center;
+            padding: 20px 20px 30px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            /* Bytte border-top mot en enklare stil, men behåller den för att separera */
+            border-top: 1px solid var(--border); 
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -52,18 +63,18 @@
     <div class="app-container">
         
         <header>
-            <div class="logo-text">Skärdata PRO</div>
-            <div class="subtitle">Välj kalkylator nedan</div>
+            <div class="logo-text">Cutting Data PRO</div>
+            <div class="subtitle">Select a calculator below</div>
         </header>
 
         <div class="calculator-list">
             
             <a href="kalkylatorer/Planfrasning.html" class="calc-item">
-                <span>Planfräsning</span>
+                <span>Face Milling</span>
             </a>
             
             <a href="kalkylatorer/HM&HSS-Borrning.html" class="calc-item">
-                <span>HM & HSS Borrning</span>
+                <span>Solid Drilling (HM & HSS)</span>
             </a>
             
             <a href="kalkylatorer/Milling_Data_Calculator-Pro.html" class="calc-item">
@@ -71,11 +82,15 @@
             </a>
 
             </div>
+
+        <div class="footer-text">
+            Milling machining Calculators Pro – created by Jimmy Rauhala
+        </div>
         
     </div>
 
 <script>
-    // === SERVICE WORKER REGISTRERING (PWA) ===
+    // === SERVICE WORKER REGISTRATION (PWA) ===
     function registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
