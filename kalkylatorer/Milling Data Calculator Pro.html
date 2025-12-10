@@ -156,7 +156,7 @@
         <div class="results ready">
             <h2>Results</h2>
             <div class="result-line"><strong>Spindle Speed [rpm]:</strong> <span class="value" id="nResult">-</span></div>
-            <div class="result-line"><strong>Roughing Feed [mm/min]:</strong> <span class="value" id="vfResult">-</span></div>
+            <div class="result-line"><strong>Roughing Feed (Straight) [mm/min]:</strong> <span class="value" id="vfResult">-</span></div>
             <div class="result-line" style="display: none;"><strong>Roughing Feed (Corner) [mm/min]:</strong> <span class="value corner-value" id="vfCornerResult">-</span></div>
             <div class="result-line"><strong>Finishing Feed [mm/min]:</strong> <span class="value" id="vfFinishResult">-</span></div>
             <div class="result-line"><strong>Ramping <span id="alphaDisplay">2.0°</span> Helical [mm/min]:</strong> <span class="value ramp-value" id="vfRampResult">-</span></div>
@@ -174,8 +174,7 @@
 <script>
     const K_1000 = 1000;
     const PI = Math.PI;
-    const FINISH_FACTOR = 1.5; 
-    const RAMP_ANGLE_SENSITIVITY = 5; // %-justering per 1° skillnad från basvinkeln
+    // FINISH_FACTOR (1.5) är borttagen.
 
     const parseValue = (id, defaultValue = 0) => {
         const value = parseFloat(document.getElementById(id).value);
@@ -248,21 +247,15 @@
     }
 
     function calculateRampFactor(material, selectedAngle) {
-        const rampData = rampDefaults[material];
-        const baseFactor = rampData.baseFactor;
-        const defaultAngle = rampData.defaultAngle;
+        const r = rampDefaults[material];
+        const baseFactor = r.baseFactor;
+        const diff = selectedAngle - r.defaultAngle;
         
-        let P_base = 100 / baseFactor;
-        const angleDiff = selectedAngle - defaultAngle;
-        const P_adjustment = angleDiff * RAMP_ANGLE_SENSITIVITY;
+        // Linjär ökning av faktorn (långsammare matning) vid brantare vinkel
+        let factor = baseFactor + diff * 0.15; 
 
-        let P_final = P_base - P_adjustment; 
-        
-        P_final = Math.max(P_final, 30); 
-        P_final = Math.min(P_final, 70); 
-
-        const rampFactor = 100 / P_final;
-        return rampFactor;
+        // Klämmer faktorn mellan 1.3 och 3.5
+        return Math.max(1.3, Math.min(3.5, factor));
     }
 
 
@@ -284,7 +277,7 @@
         if (D <= 0 || Vc <= 0 || z <= 0 || fz <= 0) {
             document.getElementById('nResult').textContent = 'N/A';
             document.getElementById('vfResult').textContent = 'N/A';
-            document.getElementById('vfCornerResult').textContent = 'N/A'; // Behåll tilldelning för säkerhets skull
+            document.getElementById('vfCornerResult').textContent = 'N/A';
             document.getElementById('vfFinishResult').textContent = 'N/A'; 
             document.getElementById('vfRampResult').textContent = 'N/A';
             document.getElementById('fzCorrectedResult').textContent = '-';
@@ -302,8 +295,8 @@
         const ae_raw = D * aePercent / 100;
         const ae = Math.max(ae_raw, 0.000001); 
 
+        // ROUGHING FZ KORRIGERING (Baserat på chip thinning)
         let fz_korr = fz;
-        
         if (aePercent > 50) {
             fz_korr = fz;
             aeWarningElement.textContent = 'WARNING: Stepover ae > 50%. Chip thinning correction is disabled.';
@@ -315,12 +308,23 @@
             aeWarningElement.style.display = 'none';
         }
         
-        const fz_finish_korr = fz * FINISH_FACTOR;
+        // NY LOGIK FÖR FINISHING FZ
+        let fz_finish_base = 0.005 * D; // Bas-fz = 0.005 * D
+        let finish_factor = 1.0; 
+
+        if (material === 'steel50hrc') {
+            finish_factor = 0.90; // 10% sänkning
+        } else if (material === 'steel60hrc') {
+            finish_factor = 0.80; // 20% sänkning
+        }
+
+        const fz_finish_korr = fz_finish_base * finish_factor;
+        // SLUT NY LOGIK FÖR FINISHING FZ
+
 
         const Vf_normal = Math.round(n * fz_korr * z);
-        let Vf_corner = Vf_normal; // Värdet behålls
-        
-        const Vf_finish = Math.round(n * fz_finish_korr * z); 
+        let Vf_corner = Vf_normal; 
+        const Vf_finish = Math.round(n * fz_finish_korr * z); // Använder ny fz_finish_korr
 
         const rampFactor = calculateRampFactor(material, selectedRampAngle);
         const Vf_ramp = Math.round(Vf_normal / rampFactor);
@@ -330,10 +334,10 @@
         document.getElementById('nResult').textContent = Math.round(n);
         
         document.getElementById('fzCorrectedResult').innerHTML = formatDecimal(fz_korr, 3) + ' <sub>mm/z</sub>';
-        document.getElementById('fzFinishCorrectedResult').innerHTML = formatDecimal(fz_finish_korr, 3) + ' <sub>mm/z</sub>';
-
+        document.getElementById('fzFinishCorrectedResult').innerHTML = formatDecimal(fz_finish_korr, 3) + ' <sub>mm/z</sub>'; // Visar den nya fz
+        
         document.getElementById('vfResult').textContent = Vf_normal;
-        document.getElementById('vfCornerResult').textContent = Vf_corner; // Fortsätt att tilldela till dolt element
+        document.getElementById('vfCornerResult').textContent = Vf_corner;
         document.getElementById('vfFinishResult').textContent = Vf_finish; 
         document.getElementById('vfRampResult').textContent = Vf_ramp;
         
