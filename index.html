@@ -6,12 +6,13 @@
     <title>Cutting Data PRO | Calculators</title>
     
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">
+    <link rel="icon" href="/Milling_Drilling_Cutting_Data_Calculators/icon-192.png" sizes="192x192" type="image/png">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* === THEME VARIABLES (Primary for landing page) === */
+        /* [Stilarna är oförändrade, men ligger kvar för fullständighet] */
+        /* === TEMAVARIABLER (Primary for landing page) === */
         :root {
             --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
             --primary: #3b82f6; --primary-light: #dbeafe; --border: #e2e8f0; 
@@ -46,13 +47,12 @@
         .calc-item span { font-weight: 600; font-size: 1.1rem; }
         .calc-item::after { content: '→'; font-size: 1.5rem; color: var(--primary); }
         
-        /* === NEW FOOTER STYLE === */
+        /* === FOOTER STYLE === */
         .footer-text {
             text-align: center;
             padding: 20px 20px 30px;
             font-size: 0.8rem;
             color: var(--text-light);
-            /* Bytte border-top mot en enklare stil, men behåller den för att separera */
             border-top: 1px solid var(--border); 
             margin-top: 20px;
         }
@@ -70,15 +70,15 @@
         <div class="calculator-list">
             
             <a href="kalkylatorer/Face_Milling_Data_Calculator-Pro.html" class="calc-item">
-                <span>Face Milling</span>
+                <span>Face Milling Data Calculator</span>
             </a>
             
             <a href="kalkylatorer/Drilling_Data_Calculator-Pro.html" class="calc-item">
-                <span>Drilling</span>
+                <span>Drilling Data Calculator</span>
             </a>
             
             <a href="kalkylatorer/Milling_Data_Calculator-Pro.html" class="calc-item">
-                <span>Milling</span>
+                <span>Dynamic Milling Data Calculator</span>
             </a>
 
             </div>
@@ -94,7 +94,8 @@
     function registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
+                // Notera: Service Worker-stigen måste fortfarande peka på roten (/)
+                navigator.serviceWorker.register('/Milling_Drilling_Cutting_Data_Calculators/service-worker.js')
                 .then(registration => {
                     console.log('ServiceWorker registration successful:', registration.scope);
                 })
