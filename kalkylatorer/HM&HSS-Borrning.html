@@ -15,57 +15,121 @@
             :root { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
                     --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
         }
+        /* Denna regel är viktig för att dark mode ska fungera oavsett @media-query */
         body.dark { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
                     --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
                min-height:100vh; padding:20px; transition:all .4s; }
-        .container { max-width:560px; margin:40px auto; background:var(--card);
+               
+        /* SYNKAD DESIGN */
+        .container { max-width:650px; margin:20px auto; background:var(--card);
                      border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
                      position:relative; }
         .theme-toggle { position:absolute; top:16px; right:16px; background:none; border:none;
-                        font-size:1.5rem; cursor:pointer; padding:8px; border-radius:50%; }
+                        font-size:1.5rem; cursor:pointer; padding:8px; border-radius:50%;
+                        color: white; /* Fix: säkerställ att ikonen syns mot den mörka headern */
+                        line-height: 1; /* Fix: säkerställ att ikonen är centrerad */
+                        z-index: 10;
+                    }
+        .theme-toggle:hover { background:rgba(255,255,255,.1); } /* Hover i header */
+
         header { background:linear-gradient(135deg,#667eea,#764ba2); color:white;
                  padding:30px 24px; text-align:center; position:relative; }
         h1 { font-size:1.8rem; font-weight:700; margin-bottom:8px; }
-        .subtitle { font-size:0.9rem; opacity:0.9; }
+        /* JUSTERING FÖR MINDRE TEXTSTORLEK */
+        .subtitle { font-size:0.85rem; opacity:0.9; }
         .tool-badge { position:absolute; top:16px; left:16px; padding:6px 14px;
                       border-radius:50px; font-size:0.8rem; font-weight:700;
                       text-transform:uppercase; letter-spacing:0.5px; }
         .tool-hm { background:#1d4ed8; } .tool-hss { background:#ea580c; }
         main { padding:32px 24px; }
+
+        .section-title { font-size:1.25rem; font-weight:600; color:var(--primary); margin:24px 0 16px; }
+        hr { border:none; height:2px; background:linear-gradient(to right,transparent,var(--border),transparent); margin:20px 0; }
+
         .form-group { margin-bottom:20px; }
         label { display:block; margin-bottom:8px; font-weight:600; font-size:0.95rem; }
-        select, input[type=number] { width:100%; padding:14px 16px; border:2px solid var(--border);
-            border-radius:12px; background:var(--card); color:var(--text); font-size:1rem;
-            transition:all .3s; }
+        select, input[type=number] { 
+            width:100%; padding:14px 16px; border:2px solid var(--border);
+            border-radius:12px; background:var(--card); color:var(--text); 
+            font-size:16px;
+            transition:all .3s; 
+        }
         select:focus, input[type=number]:focus { outline:none; border-color:var(--primary);
             box-shadow:0 0 0 4px rgba(59,130,246,.15); transform:translateY(-2px); }
+
         .results { margin-top:32px; padding:24px; background:linear-gradient(to bottom,#f8fafc,#e2e8f0);
             border-radius:14px; border:2px solid #cbd5e1; min-height:120px; transition:all .4s; }
-        body.dark .results { background:linear-gradient(to bottom,#1e293b,#334155);
-            border-color:#475569; }
-        .results.ready { background:linear-gradient(to bottom,#ecfdf5,#d1fae5);
-            border-color:#34d399; }
+        body.dark .results { background:linear-gradient(to bottom,#1e293b,#334155); border-color:#475569; }
+        .results.ready { background:linear-gradient(to bottom,#ecfdf5,#d1fae5); border-color:#34d399; }
         body.dark .results.ready { background:linear-gradient(to bottom,#064e3b,#065f46); }
-        .results h2 { font-size:1.4rem; color:var(--success); margin-bottom:16px;
-                      display:flex; align-items:center; gap:12px; }
+
+        .results h2 { font-size:1.4rem; color:var(--success); margin-bottom:16px; 
+                      text-align:center;
+                      display:block;
+                    }
         .result-line { display:flex; justify-content:space-between; padding:10px 0;
                        font-size:1.1rem; border-bottom:1px dashed var(--border); }
         .result-line:last-child { border-bottom:none; }
-        .result-line strong { color:var(--text-light); font-weight:500; }
+        
+        .result-line strong { color:var(--text-light);
+                               font-weight:500; }
+        
         .value { font-weight:700; color:var(--text); }
         .capped { color:var(--danger); }
         .warning-text { font-size:0.85rem; color:var(--warning); margin-top:12px; }
-        .details { margin-top:20px; padding-top:16px; border-top:1px dashed var(--border);
-                   font-size:0.88rem; color:var(--text-light); }
+
+        /* DETALJRUTA */
+        .details-box {
+            margin-top: 18px;
+            padding: 14px 18px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.35;
+        }
+        body.dark .details-box { background:#334155; }
+        .details-box p {
+            margin: 4px 0 !important;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: nowrap;
+        }
+        .details-box strong {
+            color: var(--text-light);
+            font-weight: 600;
+            flex-shrink: 1;
+            flex-basis: 50%;
+            white-space: normal;
+        }
+        .details-box span {
+            color: var(--text);
+            font-weight: 700;
+            white-space: nowrap;
+            text-align: right;
+            flex-shrink: 0;
+            flex-basis: auto;
+        }
+        .details-box span sub {
+            font-weight: normal;
+            vertical-align: middle;
+            font-size: 85%;
+            padding-left: 2px;
+        }
+        
         .missing { color:#dc2626; font-weight:600; text-align:center; margin-top:10px; }
+
+        /* FOOTER */
+        footer {text-align:center; margin-top:30px; color:var(--text-light); font-size:0.95em; padding-bottom: 20px;}
     </style>
 </head>
 <body>
 
 <div class="container">
-    <button class="theme-toggle" id="themeToggle">Moon</button>
+    <button class="theme-toggle" id="themeToggle">☀️</button> 
     
     <header>
         <div class="tool-badge tool-hm" id="toolBadge">HM</div>
@@ -74,6 +138,8 @@
     </header>
 
     <main>
+        <div class="section-title">Input</div>
+
         <div class="form-group">
             <label for="toolType">Verktygsmaterial</label>
             <select id="toolType">
@@ -127,9 +193,12 @@
     </main>
 </div>
 
+<footer>Skärdatakalkylator - Borrning (HM & HSS) – created by Jimmy Rauhala</footer>
+
+
 <script>
-    // === ALLA DATA ===
-    const materialDataHM = { /* oförändrad – samma som tidigare */ 
+    // === ALLA DATA (Oförändrad) ===
+    const materialDataHM = {
         "mjukt_stal": { name: "Stål: Mjukt (< 1100 N/mm²)", Fm: 1.0, Vc_safe: 60 },
         "hart_stal": { name: "Stål: Hårt (> 1100 N/mm²)", Fm: 0.9, Vc_safe: 40 },
         "toolox_44": { name: "Stål: Toolox 44 (< 50 HRC)", Fm: 0.7, Vc_safe: 20 },
@@ -149,7 +218,7 @@
         "koppar": { name: "Koppar", Fm: 1.0, Vc_safe: 30 }
     };
 
-    const FdTableHM = [ /* hela tabellen – oförändrad */ 
+    const FdTableHM = [
         { D: 0.5, '3xD': 0.05, '5xD': 0.04, '8xD': 0.035, '10xD': 0.032, '12xD': 0.030, '15xD': 0.025 },
         { D: 1.0, '3xD': 0.07, '5xD': 0.055, '8xD': 0.045, '10xD': 0.040, '12xD': 0.035, '15xD': 0.030 },
         { D: 2.0, '3xD': 0.09, '5xD': 0.075, '8xD': 0.065, '10xD': 0.060, '12xD': 0.055, '15xD': 0.050 },
@@ -169,7 +238,7 @@
         { D: 25.0, '3xD': 0.58, '5xD': 0.46, '8xD': 0.40, '10xD': 0.36, '12xD': 0.33, '15xD': 0.28 }
     ];
 
-    const FdTableHSS = [ /* hela tabellen – oförändrad */ 
+    const FdTableHSS = [
         { D: 0.5, '3xD': 0.040, '5xD': 0.028, '8xD': 0.024, '10xD': 0.022, '12xD': 0.020, '15xD': 0.016 },
         { D: 1.0, '3xD': 0.045, '5xD': 0.031, '8xD': 0.027, '10xD': 0.025, '12xD': 0.022, '15xD': 0.018 },
         { D: 2.0, '3xD': 0.060, '5xD': 0.042, '8xD': 0.036, '10xD': 0.033, '12xD': 0.030, '15xD': 0.024 },
@@ -250,37 +319,68 @@
 
         resultsDiv.classList.add('ready');
         resultsDiv.innerHTML = `
-            <h2>Skärdata ${toolType === 'HM' ? 'HM' : 'HSS'} ${toolType}</h2>
+            <h2>Resultat</h2>
             <div class="result-line"><strong>Varvtal (n)</strong> 
-                <span class="value ${capped?'capped':''}">${n_final.toLocaleString('sv')} varv/min${capped?' *':''}</span>
+                <span class="value ${capped?'capped':''}">${n_final.toLocaleString('sv')}${capped?' *':''}</span>
             </div>
             <div class="result-line"><strong>Bordmatning (Vf)</strong> 
-                <span class="value">${Vf_final.toLocaleString('sv')} mm/min</span>
+                <span class="value">${Vf_final.toLocaleString('sv')}</span>
             </div>
             ${capped ? '<p class="warning-text">* Begränsat av maskinens max-RPM</p>' : ''}
-            <div class="details">
-                <p><strong>Material:</strong> ${mat.name} – ${lengthType}</p>
-                <p><strong>fz (matning/varv):</strong> ${Fn.toFixed(3)} mm</p>
-                <p><strong>Skärhastighet (Vc):</strong> ${mat.Vc_safe} m/min</p>
-                <p><strong>Diameterfaktor (Fd):</strong> ${Fd.toFixed(4)}</p>
+            
+            <div class="details-box">
+                <p><strong>Borrlängd:</strong><span>${lengthType}</span></p>
+                <p><strong>fz (matning/varv):</strong><span>${Fn.toFixed(3)} <sub>mm</sub></span></p>
+                <p><strong>Skärhastighet (Vc):</strong><span>${mat.Vc_safe} <sub>m/min</sub></span></p>
+                <p><strong>Diameterfaktor (Fd):</strong><span>${Fd.toFixed(4)}</span></p>
             </div>
         `;
     }
 
-    // Lyssnare på alla fält
-    document.querySelectorAll('#toolType, #material, #length, #diameter, #maxRpm').forEach(el => {
-        el.addEventListener('input', calculateCuttingData);
-        el.addEventListener('change', calculateCuttingData);
-    });
+    // === TEMA LOGIK MED SOL/MÅNE IKONER OCH LAGRING ===
+    const themeToggle = document.getElementById('themeToggle');
+    
+    const updateThemeIcon = () => {
+        if (document.body.classList.contains('dark')) {
+            themeToggle.textContent = '☀️';
+        } else {
+            themeToggle.textContent = '🌙';
+        }
+    };
 
-    // Tema
-    document.getElementById('themeToggle').addEventListener('click', () => {
+    const loadTheme = () => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark');
+        } else if (savedTheme === 'light') {
+            document.body.classList.remove('dark');
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // Följer systemets preferens om inget sparat tema finns
+            document.body.classList.add('dark');
+        }
+        updateThemeIcon(); // Uppdatera ikonen efter att temat är laddat
+    };
+
+    themeToggle.addEventListener('click', () => {
         document.body.classList.toggle('dark');
-        document.getElementById('themeToggle').textContent = document.body.classList.contains('dark') ? 'Sun' : 'Moon';
+        const newTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon();
     });
 
-    // Starta
-    calculateCuttingData();
+    document.addEventListener('DOMContentLoaded', () => {
+        // Ladda tema först
+        loadTheme(); 
+        
+        // Lyssnare på alla kalkylatorfält
+        document.querySelectorAll('#toolType, #material, #length, #diameter, #maxRpm').forEach(el => {
+            el.addEventListener('input', calculateCuttingData);
+            el.addEventListener('change', calculateCuttingData);
+        });
+
+        // Starta kalkylatorn
+        calculateCuttingData();
+    });
 </script>
 </body>
 </html>
