@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* [Stilarna är oförändrade, men ligger kvar för fullständighet] */
         /* === TEMAVARIABLER (Primary for landing page) === */
         :root {
             --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
@@ -44,6 +43,12 @@
         
         .calc-item:hover { background:var(--primary-light); border-color:var(--primary); transform: translateY(-1px); }
         .calc-item:active { transform: translateY(0); }
+        
+        /* ÅTGÄRD FÖR ATT TA BORT KVARSTÅENDE MARKERING VID BACK */
+        .calc-item:visited { color: inherit; } 
+        .calc-item:visited span { color: var(--text); } 
+        .calc-item:focus { outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); } 
+        
         .calc-item span { font-weight: 600; font-size: 1.1rem; }
         .calc-item::after { content: '→'; font-size: 1.5rem; color: var(--primary); }
         
@@ -81,7 +86,7 @@
                 <span>Dynamic Milling Data Calculator</span>
             </a>
 
-            </div>
+        </div>
 
         <div class="footer-text">
             Milling machining Calculators Pro – created by Jimmy Rauhala
