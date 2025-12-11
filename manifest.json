@@ -1,9 +1,9 @@
 {
-  "name": "Skärdata PRO",
-  "short_name": "Skärdata",
-  "description": "Beräkna skärdata för fräsning, borrning och dynamisk fräsning snabbt och enkelt.",
-  "start_url": "/index.html",
-  "scope": "/",
+  "name": "Cutting Data PRO",
+  "short_name": "CuttingData",
+  "description": "Calculate cutting data for face milling, drilling, and dynamic milling quickly and easily.",
+  "start_url": "/Milling_Drilling_Cutting_Data_Calculators/index.html",
+  "scope": "/Milling_Drilling_Cutting_Data_Calculators/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f8fafc",
@@ -39,7 +39,7 @@
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ]
 }
