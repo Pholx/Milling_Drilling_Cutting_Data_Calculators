@@ -18,7 +18,7 @@ const urlsToCache = [
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
     
     // Kalkylatorfragment
-    BASE_PATH + '/kalkylatorer/Face Milling_Data_Calculator-Pro.html',
+    BASE_PATH + '/kalkylatorer/Face_Milling_Data_Calculator-Pro.html',
     BASE_PATH + '/kalkylatorer/Drilling_Data_Calculator-Pro.html',
     BASE_PATH + '/kalkylatorer/Milling_Data_Calculator-Pro.html'
 ];
@@ -75,3 +75,4 @@ self.addEventListener('activate', event => {
     })
   );
 });
+
