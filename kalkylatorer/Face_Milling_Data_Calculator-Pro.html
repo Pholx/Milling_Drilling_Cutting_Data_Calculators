@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skärdatakalkylator - Planfräsning</title>
+    <title>Cutting Data Calculator - Face Milling</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -44,11 +44,11 @@
                    transition:all .3s; }
         .geo-btn.active { background:var(--primary); color:white; }
         
-        /* --- Ny Resultat Styling --- */
+        /* --- Result Styling --- */
         .results { 
             margin-top: 32px; 
             padding: 24px; 
-            background: #e9f7ff; /* Ljusblå bakgrund */
+            background: #e9f7ff; 
             border-radius: 14px; 
             border: 2px solid #b3e0ff;
             min-height: 120px; 
@@ -63,7 +63,7 @@
         
         .results h2 { 
             font-size: 1.4rem; 
-            color: #10b981; /* Success färg */
+            color: #10b981; 
             margin-bottom: 20px; 
             text-align: center; 
             font-weight: 700;
@@ -74,13 +74,13 @@
             justify-content: space-between; 
             padding: 8px 0; 
             font-size: 1.1rem; 
-            border-bottom: 1px dashed #c0c0c0; /* Lättare streck */
+            border-bottom: 1px dashed #c0c0c0;
         }
         body.dark .result-line { border-bottom: 1px dashed #475569; }
 
         .result-line:last-child { border-bottom: none; }
         .result-line strong { 
-            color: #1e293b; /* Mörkare text för label */
+            color: #1e293b; 
             font-weight: 600;
         }
         body.dark .result-line strong { color: #f1f5f9; }
@@ -88,13 +88,13 @@
         .value { font-weight: 700; color: #1e293b; }
         body.dark .value { color: #f1f5f9; }
 
-        .big-vf { font-size: 1.4rem; color: #ef4444; font-weight: 800; } /* Röd för Vf */
-        .big-vc { font-size: 1.2rem; color: #1e293b; font-weight: 700; } /* Normal färg för Vc */
+        .big-vf { font-size: 1.4rem; color: #ef4444; font-weight: 800; } 
+        .big-vc { font-size: 1.2rem; color: #1e293b; font-weight: 700; } 
         .capped { color: var(--danger); }
         
-        /* Detaljavsnittet (nedre boxen i exemplet) */
+        /* Detail Box */
         .details-box {
-            background: var(--card); /* Vit/Mörk bakgrund */
+            background: var(--card); 
             border-radius: 10px;
             padding: 15px;
             margin-top: 20px;
@@ -126,84 +126,84 @@
     <button class="theme-toggle" id="themeToggle">🌙</button>
     
     <header>
-        <h1>Planfräskalkylator</h1>
-        <p class="subtitle">Planfräsning – Kappa & Runda skär</p>
+        <h1>Face Milling Calculator</h1>
+        <p class="subtitle">Face Milling – Kappa & Round Inserts</p>
     </header>
 
     <main>
         <div class="form-group">
-            <label for="material_group">Materialgrupp</label>
+            <label for="material_group">Material Group</label>
             <select id="material_group">
-                <option value="P2">P2.x (Låglegerat Stål)</option>
-                <option value="M1">M1.x (Rostfritt Stål)</option>
-                <option value="P3">P3 (Höglegerat Verktygsstål)</option>
-                <option value="T44">T44 (Högstyrka)</option>
-                <option value="K1">K1 (Gjutjärn)</option>
-                <option value="N1">N1.x (Aluminium)</option>
+                <option value="P2">P2.x (Low Alloy Steel)</option>
+                <option value="M1">M1.x (Stainless Steel)</option>
+                <option value="P3">P3 (High Alloy Tool Steel)</option>
+                <option value="T44">T44 (High Strength)</option>
+                <option value="K1">K1 (Cast Iron)</option>
+                <option value="N1">N1.x (Aluminum)</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="vc">Skärhastighet (Vc) (m/min)</label>
+            <label for="vc">Cutting Speed (Vc) (m/min)</label>
             <input type="number" id="vc" step="10" value="176">
         </div>
 
         <div class="form-group">
-            <label for="hm">Önskad spåntjocklek (hm) (mm)</label>
+            <label for="hm">Desired Chip Thickness (hm) (mm)</label>
             <input type="number" id="hm" step="0.01" value="0.15">
         </div>
 
         <div class="form-group">
-            <label for="D">Verktygsdiameter (D) (mm)</label>
+            <label for="D">Tool Diameter (D) (mm)</label>
             <input type="number" id="D" step="1" value="63">
         </div>
 
         <div class="form-group">
-            <label for="Z">Antal skär (Z)</label>
+            <label for="Z">Number of Teeth (Z)</label>
             <input type="number" id="Z" step="1" value="6">
         </div>
 
         <div class="form-group">
-            <label for="ap">Axialt skärdjup (ap) (mm)</label>
+            <label for="ap">Axial Depth of Cut (ap) (mm)</label>
             <input type="number" id="ap" step="0.1" value="2.0">
             <p class="warning-text" id="ap-note" style="margin-top:6px;"></p>
         </div>
 
         <div class="form-group">
-            <label for="ae_percent">Radiellt ingrepp (ae % av D)</label>
+            <label for="ae_percent">Radial Engagement (ae % of D)</label>
             <input type="number" id="ae_percent" step="5" value="70">
         </div>
 
         <div class="form-group">
-            <label for="n_max">Maskinens max varvtal (RPM)</label>
+            <label for="n_max">Machine Max RPM</label>
             <input type="number" id="n_max" step="100" value="10000">
         </div>
 
         <div class="geometry-toggle">
-            <div class="geo-btn active" data-geo="kappa">Fast ställvinkel (κ)</div>
-            <div class="geo-btn" data-geo="radius">Runda skär (R)</div>
+            <div class="geo-btn active" data-geo="kappa">Fixed Rake Angle (κ)</div>
+            <div class="geo-btn" data-geo="radius">Round Inserts (R)</div>
         </div>
 
         <div id="kappa-input" class="form-group">
-            <label for="kappa">Ställvinkel (κ)</label>
+            <label for="kappa">Rake Angle (κ)</label>
             <select id="kappa">
-                <option value="90">90° (Hörnfräsning)</option>
+                <option value="90">90° (Shoulder Milling)</option>
                 <option value="75">75°</option>
-                <option value="45" selected>45° (Standard)</option>
-                <option value="25">25° (Hög matning)</option>
-                <option value="10">10° (Extrem hög matning)</option>
+                <option value="45" selected>45° (Standard Face Milling)</option>
+                <option value="25">25° (High Feed)</option>
+                <option value="10">10° (Extreme High Feed)</option>
             </select>
         </div>
 
         <div id="radius-input" class="form-group" style="display:none;">
-            <label for="R">Skärradie (R) (mm)</label>
+            <label for="R">Insert Radius (R) (mm)</label>
             <input type="number" id="R" step="1" value="10">
             <p class="warning-text" id="radius-warning" style="margin-top:6px;"></p>
         </div>
 
         <div class="results" id="results">
             <p style="color:var(--text-light); text-align:center; padding:20px 0;">
-                Fyll i fälten ovan för att få skärdata
+                Fill in the fields above to get cutting data
             </p>
         </div>
     </main>
@@ -211,12 +211,12 @@
 
 <script>
     const materialData = {
-        'P2': { vc: 176, hm: 0.15, name: 'P2.x (Låglegerat Stål)' },
-        'M1': { vc: 120, hm: 0.12, name: 'M1.x (Rostfritt Stål)' },
-        'P3': { vc: 96,  hm: 0.12, name: 'P3 (Höglegerat Verktygsstål)' },
-        'T44':{ vc: 80,  hm: 0.10, name: 'T44 (Högstyrka)' },
-        'K1': { vc: 240, hm: 0.25, name: 'K1 (Gjutjärn)' },
-        'N1': { vc:1200, hm: 0.30, name: 'N1.x (Aluminium)' }
+        'P2': { vc: 176, hm: 0.15, name: 'P2.x (Low Alloy Steel)' },
+        'M1': { vc: 120, hm: 0.12, name: 'M1.x (Stainless Steel)' },
+        'P3': { vc: 96,  hm: 0.12, name: 'P3 (High Alloy Tool Steel)' },
+        'T44':{ vc: 80,  hm: 0.10, name: 'T44 (High Strength)' },
+        'K1': { vc: 240, hm: 0.25, name: 'K1 (Cast Iron)' },
+        'N1': { vc:1200, hm: 0.30, name: 'N1.x (Aluminum)' }
     };
 
     const inputIds = ['vc','hm','D','Z','ap','ae_percent','n_max','kappa','R'];
@@ -246,7 +246,7 @@
         const results = document.getElementById('results');
         results.classList.remove('ready');
 
-        // 1. Hämta inputvärden
+        // 1. Get input values
         const vc_input = parseFloat(document.getElementById('vc').value) || 0;
         const hm = parseFloat(document.getElementById('hm').value) || 0;
         const D  = parseFloat(document.getElementById('D').value)  || 0;
@@ -256,26 +256,25 @@
         const n_max = parseFloat(document.getElementById('n_max').value) || Infinity;
         const geoType = document.querySelector('.geo-btn.active').dataset.geo;
 
-        // Återställ varningsmeddelanden
+        // Reset warnings
         document.getElementById('ap-note').textContent = '';
         document.getElementById('radius-warning').textContent = '';
         
-        // Får ut det valda materialets namn för detaljvisningen
         const materialName = materialData[document.getElementById('material_group').value].name;
 
-        // Validering
+        // Validation
         if (!vc_input || !hm || !D || !Z || !ae_pct || D <= 0 || Z <= 0) {
-            results.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px 0;">Fyll i alla fält med giltiga siffror</p>';
+            results.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px 0;">Fill in all fields with valid numbers</p>';
             return;
         }
 
-        // 2. Beräkna Varvtal (n) - Teoretiskt & Begränsat
+        // 2. Calculate RPM (n) - Theoretical & Capped
         let n_theoretical = (vc_input * 1000) / (Math.PI * D);
         let n = n_theoretical;
         let capped = false;
         if (n > n_max) { n = n_max; capped = true; }
 
-        // 3. Beräkna Matning per tand (fz)
+        // 3. Calculate Feed per Tooth (fz)
         let fz = 0;
         
         if (geoType === 'kappa') {
@@ -288,11 +287,11 @@
             
             if (!R || R <= 0 || !ap) {
                 fz = hm;
-                document.getElementById('ap-note').textContent = 'VARNING: Skärdjup (ap) och Radie (R) måste anges för korrekta fz-värden.';
+                document.getElementById('ap-note').textContent = 'WARNING: Depth of Cut (ap) and Radius (R) are required for correct fz values.';
             } else {
                 
                 if (ap > R) {
-                    document.getElementById('radius-warning').textContent = `Varning: ap (${ap}mm) > R (${R}mm) → spånförtunning minskar drastiskt!`;
+                    document.getElementById('radius-warning').textContent = `Warning: ap (${ap}mm) > R (${R}mm) → chip thinning is drastically reduced!`;
                 }
                 
                 const sin_kappa_sq = (ap / R) * (1 - ap/(2*R));
@@ -302,19 +301,20 @@
             }
         }
 
-        // 4. Slutgiltiga resultat
-        const vf = Math.round(fz * Z * n);
+        // 4. Final Results
+        // Round Vf to the nearest integer for machine input simplicity
+        const vf = Math.round(fz * Z * n); 
         const ae_mm = (ae_pct / 100) * D;
         const fz_rounded = fz.toFixed(3);
 
-        // 5. Visa resultat
+        // 5. Display results
         results.classList.add('ready');
         results.innerHTML = `
-            <h2>Skärdata – Fräsning</h2>
+            <h2>Cutting Data – Milling</h2>
             
-            <div class="result-line"><strong>Varvtal (n)</strong> <span class="value ${capped?'capped':''}">${Math.round(n).toLocaleString('sv')} varv/min ${capped?'*':''}</span></div>
-            <div class="result-line"><strong>MATNING (Vf)</strong> <span class="big-vf">${vf.toLocaleString('sv')} mm/min</span></div>
-            <div class="result-line"><strong>Använd Vc</strong> <span class="big-vc">${vc_input} m/min</span></div>
+            <div class="result-line"><strong>Spindle Speed (n)</strong> <span class="value ${capped?'capped':''}">${Math.round(n).toLocaleString('en')} RPM ${capped?'*':''}</span></div>
+            <div class="result-line"><strong>FEED RATE (Vf)</strong> <span class="big-vf">${vf.toLocaleString('en')} mm/min</span></div>
+            <div class="result-line"><strong>Used Vc</strong> <span class="big-vc">${vc_input} m/min</span></div>
             
             <div class="details-box">
                 <p>
@@ -322,14 +322,14 @@
                     <span class="detail-value">${materialName}</span>
                 </p>
                 <p>
-                    <span class="detail-label">Matning per tand (fz):</span>
-                    <span class="detail-value">${fz_rounded} mm/tand</span>
+                    <span class="detail-label">Feed per Tooth (fz):</span>
+                    <span class="detail-value">${fz_rounded} mm/tooth</span>
                 </p>
                 <p>
-                    <span class="detail-label">Radiellt ingrepp (ae):</span>
-                    <span class="detail-value">${ae_mm.toFixed(1)} mm (${ae_pct} % av D)</span>
+                    <span class="detail-label">Radial Engagement (ae):</span>
+                    <span class="detail-value">${ae_mm.toFixed(1)} mm (${ae_pct} % of D)</span>
                 </p>
-                ${capped ? '<p class="warning-text" style="color: var(--danger); margin: 8px 0;">* Varvtalet är begränsat av max-RPM</p>' : ''}
+                ${capped ? '<p class="warning-text" style="color: var(--danger); margin: 8px 0;">* RPM is limited by machine max-RPM</p>' : ''}
             </div>
         `;
     }
@@ -347,13 +347,13 @@
     });
     document.getElementById('kappa').addEventListener('change', calculate); 
 
-    // Tema
+    // Theme
     const toggle = document.getElementById('themeToggle');
     toggle.addEventListener('click', () => {
         document.body.classList.toggle('dark');
         toggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
     });
-    // Kontrollera systemtema vid start
+    // Check system preference on load
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.body.classList.add('dark');
         toggle.textContent = '☀️';
@@ -362,7 +362,7 @@
     }
 
 
-    // Starta kalkylatorn vid laddning
+    // Start the calculator on load
     window.onload = function() {
         loadMaterialData();
         toggleGeometry(null); 
@@ -370,4 +370,3 @@
 </script>
 </body>
 </html>
-
