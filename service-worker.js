@@ -1,12 +1,13 @@
 // Fil: service-worker.js
 
 // 1. DEFINIERA CACHENAMN OCH FILER
-const CACHE_NAME = 'skardata-pwa-v7-english-update'; // Ny version v7!
+const CACHE_NAME = 'skardata-pwa-v8-final-paths'; // VIKTIGT: Ökad version till V8
 const BASE_PATH = '/Milling_Drilling_Cutting_Data_Calculators'; // Ny basväg
 
 // Alla filer som appen behöver för att fungera offline
 const urlsToCache = [
-    BASE_PATH + '/', // Den nya roten
+    // Huvudsidor
+    BASE_PATH + '/', 
     BASE_PATH + '/index.html',
     BASE_PATH + '/manifest.json',
     
@@ -17,7 +18,7 @@ const urlsToCache = [
     // Fonts (extern)
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
     
-    // Kalkylatorfragment
+    // Kalkylatorfragment (De nya engelska filnamnen)
     BASE_PATH + '/kalkylatorer/Face_Milling_Data_Calculator-Pro.html',
     BASE_PATH + '/kalkylatorer/Drilling_Data_Calculator-Pro.html',
     BASE_PATH + '/kalkylatorer/Milling_Data_Calculator-Pro.html'
@@ -28,7 +29,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache, adding essential files (v7).');
+        console.log('Opened cache, adding essential files (v8).');
         return cache.addAll(urlsToCache);
       })
       .then(() => {
@@ -75,4 +76,3 @@ self.addEventListener('activate', event => {
     })
   );
 });
-
