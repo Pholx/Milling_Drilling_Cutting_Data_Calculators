@@ -307,33 +307,43 @@
         } else if (geoType === 'radius') {
             const R = parseFloat(document.getElementById('R').value) || 0;
             
+            // NY LOGIK OCH FORMEL FÖR RUNDA SKÄR (ENLIGT SANDVIK M.FL.)
             if (!R || R <= 0 || !ap) {
-                fz = hm; 
-                document.getElementById('ap-note').textContent = 'WARNING: Depth of Cut (ap) and Radius (R) must be specified for correct fz values.';
+                fz = hm;
+                document.getElementById('radius-warning').textContent = 'Enter R and ap.';
+            } else if (ap > R) {
+                 fz = hm; // Fz defaults to hm when chip thinning is lost
+                 document.getElementById('radius-warning').textContent = 'Warning: ap > R → No chip thinning. Consider a lower ap.';
             } else {
+                const ratio = ap / R;
                 
-                if (ap > R) {
-                    document.getElementById('radius-warning').textContent = `Warning: ap (${ap}mm) > R (${R}mm) → chip thinning significantly reduced!`;
+                // Ny varningslogik: ap > 50% av R
+                if (ratio > 0.5) {
+                    document.getElementById('radius-warning').textContent = 
+                        'Note: ap > 50% av R → Reduced chip thinning efficiency (max ap recommended: 0.4–0.5 * R)';
                 }
                 
-                // Formula for effective kappa angle (sin(kappa_eff) = sqrt((ap/R) * (1 - ap/(2R))))
-                const sin_kappa_sq = (ap / R) * (1 - ap/(2*R));
-                const sin_kappa = sin_kappa_sq > 0 ? Math.sqrt(sin_kappa_sq) : 0;
-                
-                fz = sin_kappa > 0 ? hm / sin_kappa : hm;
+                // Korrekt formel: sin(κ_eff) = sqrt( ap / R * (2 - ap/R) )
+                const sin_kappa_eff = Math.sqrt(ratio * (2 - ratio));
+                fz = hm / sin_kappa_eff;
             }
+            
         }
 
         // 4. Final Results
         const vf = Math.round(fz * Z * n);
+        
+        // >>> UPPDATERAD: Avrundar n till närmaste heltal för Spindle Speed [rpm]
+        const n_display_formatted = Math.round(n).toLocaleString('sv');
+
 
         // 5. Display Results
         results.classList.add('ready');
         results.innerHTML = `
             <h2>Cutting Data – Milling</h2>
             
-            <div class="result-line"><strong>Spindle Speed [rpm]:</strong> <span class="value ${capped?'capped':''}">${Math.round(n).toLocaleString('en')} ${capped?'*':''}</span></div>
-            <div class="result-line"><strong>Feed [mm/min]:</strong> <span class="value">${vf.toLocaleString('en')}</span></div>
+            <div class="result-line"><strong>Spindle Speed [rpm]:</strong> <span class="value ${capped?'capped':''}">${n_display_formatted} ${capped?'*':''}</span></div>
+            <div class="result-line"><strong>Feed [mm/min]:</strong> <span class="value">${vf.toLocaleString('sv')}</span></div>
             
             <div class="details-box">
                 <p>
