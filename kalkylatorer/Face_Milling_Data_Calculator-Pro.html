@@ -298,15 +298,39 @@
 
         // 3. Calculate Feed per tooth (fz)
         let fz = 0;
+        let ae_reco_string;
         
         if (geoType === 'kappa') {
             const kappa_deg = parseFloat(document.getElementById('kappa').value);
             const kappa_rad = kappa_deg * Math.PI / 180;
             fz = hm / Math.sin(kappa_rad);
+            
+            // NY LOGIK: Dynamisk ae-rekommendation baserat på Kappa
+            switch (kappa_deg) {
+                case 90:
+                    ae_reco_string = '90–100 %'; // Shoulder milling
+                    break;
+                case 75:
+                    ae_reco_string = '80–90 %';
+                    break;
+                case 45:
+                    ae_reco_string = '70–80 %'; // General recommendation for 45 deg
+                    break;
+                case 25:
+                    ae_reco_string = '30–40 %'; // High feed
+                    break;
+                case 10:
+                    ae_reco_string = '10–20 %'; // Extreme High feed
+                    break;
+                default:
+                    ae_reco_string = '60–70 %'; // Fallback
+            }
 
         } else if (geoType === 'radius') {
             const R = parseFloat(document.getElementById('R').value) || 0;
             
+            ae_reco_string = '60–70 %'; // Standard recommendation for round inserts
+
             // NY LOGIK OCH FORMEL FÖR RUNDA SKÄR (ENLIGT SANDVIK M.FL.)
             if (!R || R <= 0 || !ap) {
                 fz = hm;
@@ -333,7 +357,7 @@
         // 4. Final Results
         const vf = Math.round(fz * Z * n);
         
-        // >>> UPPDATERAD: Avrundar n till närmaste heltal för Spindle Speed [rpm]
+        // Avrundar n till närmaste heltal för Spindle Speed [rpm]
         const n_display_formatted = Math.round(n).toLocaleString('sv');
 
 
@@ -358,7 +382,7 @@
                 
                 <p>
                     <span class="detail-label">ae:</span>
-                    <span class="detail-value">60–70 %</span>
+                    <span class="detail-value">${ae_reco_string}</span>
                 </p>
 
                 ${capped ? '<p class="warning-text" style="color: var(--danger); margin: 8px 0;">* Spindle speed is capped by Max-RPM</p>' : ''}
