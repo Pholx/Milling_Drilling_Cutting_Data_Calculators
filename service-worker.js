@@ -1,7 +1,7 @@
 // Fil: service-worker.js
 
 // 1. DEFINIERA CACHENAMN OCH FILER
-const CACHE_NAME = 'skardata-pwa-v9-add-chamfer'; // VIKTIGT: Ny version v9!
+const CACHE_NAME = 'skardata-pwa-v10-add-tslot'; // VIKTIGT: Ny version v10!
 const BASE_PATH = '/Milling_Drilling_Cutting_Data_Calculators'; 
 
 // Alla filer som appen behöver för att fungera offline
@@ -18,11 +18,12 @@ const urlsToCache = [
     // Fonts (extern)
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
     
-    // Kalkylatorfragment (Uppdaterad lista v9)
+    // Kalkylatorfragment (Uppdaterad lista v10)
     BASE_PATH + '/kalkylatorer/Face_Milling_Data_Calculator-Pro.html',
     BASE_PATH + '/kalkylatorer/Drilling_Data_Calculator-Pro.html',
     BASE_PATH + '/kalkylatorer/Milling_Data_Calculator-Pro.html',
-    BASE_PATH + '/kalkylatorer/Chamfer_Data_Calculator-Pro.html' // <--- DEN NYA FILEN
+    BASE_PATH + '/kalkylatorer/Chamfer_Data_Calculator-Pro.html',
+    BASE_PATH + '/kalkylatorer/T-slot_Milling_Data_Calculator-Pro.html' // <--- DEN NYA FILEN
 ];
 
 // 2. INSTALLERA SERVICE WORKER OCH CACHA STATISKA TILLGÅNGAR
@@ -30,7 +31,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache, adding essential files (v9).');
+        console.log('Opened cache, adding essential files (v10).');
         return cache.addAll(urlsToCache);
       })
       .then(() => {
