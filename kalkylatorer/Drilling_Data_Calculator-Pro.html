@@ -4,127 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drilling Data Calculator Pro</title>
+    
+    <link rel="stylesheet" href="style.css"> 
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
-            --primary: #3b82f6; --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
-            --border: #e2e8f0; --shadow: 0 20px 40px rgba(0,0,0,0.08); --radius: 16px;
-        }
-        @media (prefers-color-scheme: dark) {
-            :root { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
-                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        }
-        /* Denna regel är viktig för att dark mode ska fungera oavsett @media-query */
-        body.dark { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
-                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
-               min-height:100vh; padding:20px; transition:all .4s; }
-               
-        /* SYNCED DESIGN */
-        .container { max-width:650px; margin:20px auto; background:var(--card);
-                     border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
-                     position:relative; }
-        .theme-toggle { position:absolute; top:16px; right:16px; background:none; border:none;
-                        font-size:1.5rem; cursor:pointer; padding:8px; border-radius:50%;
-                        color: white; 
-                        line-height: 1; 
-                        z-index: 10;
-                    }
-        .theme-toggle:hover { background:rgba(255,255,255,.1); } 
-
-        header { background:linear-gradient(135deg,#667eea,#764ba2); color:white;
-                 padding:30px 24px; text-align:center; position:relative; }
-        h1 { font-size:1.8rem; font-weight:700; margin-bottom:8px; }
-        /* ADJUSTMENT FOR SMALLER TEXT SIZE */
-        .subtitle { font-size:0.85rem; opacity:0.9; }
-        .tool-badge { position:absolute; top:16px; left:16px; padding:6px 14px;
-                      border-radius:50px; font-size:0.8rem; font-weight:700;
-                      text-transform:uppercase; letter-spacing:0.5px; }
-        .tool-hm { background:#1d4ed8; } .tool-hss { background:#ea580c; }
-        main { padding:32px 24px; }
-
-        .section-title { font-size:1.25rem; font-weight:600; color:var(--primary); margin:24px 0 16px; }
-        hr { border:none; height:2px; background:linear-gradient(to right,transparent,var(--border),transparent); margin:20px 0; }
-
-        .form-group { margin-bottom:20px; }
-        label { display:block; margin-bottom:8px; font-weight:600; font-size:0.95rem; }
-        select, input[type=number] { 
-            width:100%; padding:14px 16px; border:2px solid var(--border);
-            border-radius:12px; background:var(--card); color:var(--text); 
-            font-size:16px;
-            transition:all .3s; 
-        }
-        select:focus, input[type=number]:focus { outline:none; border-color:var(--primary);
-            box-shadow:0 0 0 4px rgba(59,130,246,.15); transform:translateY(-2px); }
-
-        .results { margin-top:32px; padding:24px; background:linear-gradient(to bottom,#f8fafc,#e2e8f0);
-            border-radius:14px; border:2px solid #cbd5e1; min-height:120px; transition:all .4s; }
-        body.dark .results { background:linear-gradient(to bottom,#1e293b,#334155); border-color:#475569; }
-        .results.ready { background:linear-gradient(to bottom,#ecfdf5,#d1fae5); border-color:#34d399; }
-        body.dark .results.ready { background:linear-gradient(to bottom,#064e3b,#065f46); }
-
-        .results h2 { font-size:1.4rem; color:var(--success); margin-bottom:16px; 
-                      text-align:center;
-                      display:block;
-                    }
-        .result-line { display:flex; justify-content:space-between; padding:10px 0;
-                       font-size:1.1rem; border-bottom:1px dashed var(--border); }
-        .result-line:last-child { border-bottom:none; }
-        
-        .result-line strong { color:var(--text-light);
-                               font-weight:500; }
-        
-        .value { font-weight:700; color:var(--text); }
-        .capped { color:var(--danger); }
-        .warning-text { font-size:0.85rem; color:var(--warning); margin-top:12px; }
-
-        /* DETAILS BOX */
-        .details-box {
-            margin-top: 18px;
-            padding: 14px 18px;
-            background: var(--card);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 0.9rem;
-            line-height: 1.35;
-        }
-        body.dark .details-box { background:#334155; }
-        .details-box p {
-            margin: 4px 0 !important;
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: nowrap;
-        }
-        .details-box strong {
-            color: var(--text-light);
-            font-weight: 600;
-            flex-shrink: 1;
-            flex-basis: 50%;
-            white-space: normal;
-        }
-        .details-box span {
-            color: var(--text);
-            font-weight: 700;
-            white-space: nowrap;
-            text-align: right;
-            flex-shrink: 0;
-            flex-basis: auto;
-        }
-        .details-box span sub {
-            font-weight: normal;
-            vertical-align: middle;
-            font-size: 85%;
-            padding-left: 2px;
-        }
-        
-        .missing { color:#dc2626; font-weight:600; text-align:center; margin-top:10px; }
-
-        /* FOOTER */
-        footer {text-align:center; margin-top:30px; color:var(--text-light); font-size:0.95em; padding-bottom: 20px;}
-    </style>
 </head>
 <body>
 
@@ -193,54 +76,33 @@
 <footer>Drilling Data Calculator Pro – created by Jimmy Rauhala</footer>
 
 
+<script src="drilling_tool_data.js"></script>
+
+
 <script>
-    // === 1. ORIGINAL HM BASE DATA (3xD och 10xD borttagna) ===
-    const FdTableHM_Original = [
-        { D: 0.5, '5xD': 0.040, '8xD': 0.035, '12xD': 0.030, '15xD': 0.025 },
-        { D: 1.0, '5xD': 0.055, '8xD': 0.045, '12xD': 0.035, '15xD': 0.030 },
-        { D: 2.0, '5xD': 0.075, '8xD': 0.065, '12xD': 0.055, '15xD': 0.050 },
-        { D: 2.5, '5xD': 0.090, '8xD': 0.075, '12xD': 0.065, '15xD': 0.055 },
-        { D: 3.0, '5xD': 0.100, '8xD': 0.080, '12xD': 0.070, '15xD': 0.060 },
-        { D: 4.0, '5xD': 0.110, '8xD': 0.100, '12xD': 0.090, '15xD': 0.080 },
-        { D: 5.0, '5xD': 0.140, '8xD': 0.120, '12xD': 0.100, '15xD': 0.090 },
-        { D: 6.0, '5xD': 0.160, '8xD': 0.140, '12xD': 0.110, '15xD': 0.100 },
-        { D: 8.0, '5xD': 0.210, '8xD': 0.180, '12xD': 0.140, '15xD': 0.120 },
-        { D: 10.0, '5xD': 0.270, '8xD': 0.240, '12xD': 0.200, '15xD': 0.180 },
-        { D: 12.0, '5xD': 0.300, '8xD': 0.270, '12xD': 0.230, '15xD': 0.200 },
-        { D: 14.0, '5xD': 0.330, '8xD': 0.290, '12xD': 0.250, '15xD': 0.220 },
-        { D: 16.0, '5xD': 0.350, '8xD': 0.310, '12xD': 0.270, '15xD': 0.240 },
-        { D: 18.0, '5xD': 0.370, '8xD': 0.320, '12xD': 0.280, '15xD': 0.250 },
-        { D: 20.0, '5xD': 0.400, '8xD': 0.350, '12xD': 0.300, '15xD': 0.270 },
-        { D: 22.0, '5xD': 0.420, '8xD': 0.370, '12xD': 0.320, '15xD': 0.290 },
-        { D: 25.0, '5xD': 0.460, '8xD': 0.400, '12xD': 0.330, '15xD': 0.280 }
-    ];
-
-    // === 2. KURVJUSTERINGSLOGIK (Inga ändringar) ===
-    const curveAdjustmentPoints = [
-        { D: 2.0, factor: 0.90 }, 
-        { D: 3.0, factor: 0.85 }, 
-        { D: 6.0, factor: 0.70 }, 
-        { D: 8.0, factor: 0.65 }, 
-        { D: 11.0, factor: 0.55 }, 
-        { D: 13.0, factor: 0.50 }, 
-        { D: 18.0, factor: 0.45 } 
-    ];
-
+    // === 1. KURVJUSTERINGSLOGIK (För HM-borrar) ===
+    // Denna funktion beräknar den diameterberoende reduktionsfaktorn 
+    // genom att interpolera mellan punkterna i 'curveAdjustmentPoints' (från datafilen).
     function getCurveAdjustmentFactor(D) {
+        // Om diametern är mindre än eller lika med den minsta definierade punkten, använd den lägsta faktorn.
         if (D <= curveAdjustmentPoints[0].D) {
             return curveAdjustmentPoints[0].factor; 
         }
         
+        // Om diametern är större än den största definierade punkten, använd den högsta faktorn.
         if (D >= curveAdjustmentPoints[curveAdjustmentPoints.length - 1].D) {
             return curveAdjustmentPoints[curveAdjustmentPoints.length - 1].factor; 
         }
         
+        // Linjär interpolation mellan de definierade punkterna
         for (let i = 1; i < curveAdjustmentPoints.length; i++) {
             const lower = curveAdjustmentPoints[i - 1];
             const upper = curveAdjustmentPoints[i];
             
             if (D <= upper.D) {
+                // Beräkna hur långt D är mellan lower.D och upper.D (som en ratio 0 till 1)
                 const ratio = (D - lower.D) / (upper.D - lower.D);
+                // Interpolera faktorn
                 return lower.factor + ratio * (upper.factor - lower.factor);
             }
         }
@@ -248,13 +110,15 @@
         return curveAdjustmentPoints[curveAdjustmentPoints.length - 1].factor;
     }
     
-    // === 3. FUNKTION FÖR ATT SKAPA DEN AKTIVA HM-TABELLEN (Använder nu endast befintliga nycklar) ===
+    // === 2. FUNKTION FÖR ATT SKAPA DEN AKTIVA HM-TABELLEN ===
+    // Går igenom den ursprungliga HM-tabellen och applicerar Kurvjusteringsfaktorn.
+    // Detta skapar en ny, justerad tabell som sedan används för interpolering.
     function getAdjustedHMTable() {
         return FdTableHM_Original.map(row => {
             const factor = getCurveAdjustmentFactor(row.D);
             return {
                 D: row.D,
-                // Nycklarna 3xD och 10xD finns inte längre i FdTableHM_Original
+                // Beräkna och avrunda de justerade matningsvärdena
                 '5xD': parseFloat((row['5xD'] * factor).toFixed(4)),
                 '8xD': parseFloat((row['8xD'] * factor).toFixed(4)),
                 '12xD': parseFloat((row['12xD'] * factor).toFixed(4)),
@@ -263,99 +127,71 @@
         });
     }
 
-    // === 4. MATERIALDATA (HM Vc-värden uppdaterade, Fm aluminium uppdaterad) ===
-    const materialDataHM = {
-        "soft_steel": { name: "Steel: Soft (< 1100 N/mm²)", Fm: 1.0, Vc_safe: 90 }, // Vc: 90
-        "hard_steel": { name: "Steel: Hard (> 1100 N/mm²)", Fm: 0.9, Vc_safe: 60 }, // Vc: 60
-        "toolox_44": { name: "Steel: Toolox 44 (< 50 HRC)", Fm: 0.77, Vc_safe: 25 }, // Vc: 25
-        "stainless_austenitic": { name: "Stainless: Austenitic (< 850 N/mm²)", Fm: 0.9, Vc_safe: 20 }, // Vc: 20
-        "hardened_steel_65": { name: "Steel: Hardened (<65 HRC)", Fm: 0.6, Vc_safe: 10 }, // Vc: 10
-        "aluminium": { name: "Aluminum", Fm: 1.913, Vc_safe: 300 } // Vc: 300, Fm: 1.913
-    };
-
-    // === 5. HSS DATA (3xD och 10xD borttagna) ===
-    const materialDataHSS = {
-        "soft_steel": { name: "Steel: Soft (< 1100 N/mm²)", Fm: 1.0, Vc_safe: 20 },
-        "hard_steel": { name: "Steel: Hard (> 1100 N/mm²)", Fm: 0.9, Vc_safe: 15 },
-        "toolox_44": { name: "Steel: Toolox 44 (< 50 HRC)", Fm: 0.7, Vc_safe: 10 },
-        "stainless_austenitic": { name: "Stainless: Austenitic (< 850 N/mm²)", Fm: 0.8, Vc_safe: 12 },
-        "hardened_steel_65": { name: "Steel: Hardened (<65 HRC)", Fm: 0.6, Vc_safe: 5 },
-        "aluminium": { name: "Aluminum", Fm: 1.4, Vc_safe: 60 }
-    };
-
-    const FdTableHSS = [
-        { D: 0.5, '5xD': 0.028, '8xD': 0.024, '12xD': 0.020, '15xD': 0.016 },
-        { D: 1.0, '5xD': 0.031, '8xD': 0.027, '12xD': 0.022, '15xD': 0.018 },
-        { D: 2.0, '5xD': 0.042, '8xD': 0.036, '12xD': 0.030, '15xD': 0.024 },
-        { D: 2.5, '5xD': 0.049, '8xD': 0.042, '12xD': 0.035, '15xD': 0.028 },
-        { D: 3.0, '5xD': 0.052, '8xD': 0.045, '12xD': 0.037, '15xD': 0.030 },
-        { D: 4.0, '5xD': 0.056, '8xD': 0.048, '12xD': 0.040, '15xD': 0.032 },
-        { D: 5.0, '5xD': 0.063, '8xD': 0.054, '12xD': 0.045, '15xD': 0.036 },
-        { D: 6.0, '5xD': 0.105, '8xD': 0.090, '12xD': 0.075, '15xD': 0.060 },
-        { D: 8.0, '5xD': 0.140, '8xD': 0.120, '12xD': 0.100, '15xD': 0.080 },
-        { D: 10.0, '5xD': 0.161, '8xD': 0.138, '12xD': 0.115, '15xD': 0.092 },
-        { D: 12.0, '5xD': 0.196, '8xD': 0.168, '12xD': 0.140, '15xD': 0.112 },
-        { D: 14.0, '5xD': 0.217, '8xD': 0.186, '12xD': 0.155, '15xD': 0.124 },
-        { D: 16.0, '5xD': 0.231, '8xD': 0.198, '12xD': 0.165, '15xD': 0.132 },
-        { D: 18.0, '5xD': 0.245, '8xD': 0.210, '12xD': 0.175, '15xD': 0.140 },
-        { D: 20.0, '5xD': 0.259, '8xD': 0.222, '12xD': 0.185, '15xD': 0.148 },
-        { D: 22.0, '5xD': 0.266, '8xD': 0.228, '12xD': 0.190, '15xD': 0.152 },
-        { D: 25.0, '5xD': 0.266, '8xD': 0.228, '12xD': 0.190, '15xD': 0.152 }
-    ];
-    // === CALCULATOR LOGIC (Inga ändringar) ===
+    // === 3. FUNKTION FÖR ATT INTERPOLERA Fd-VÄRDET ===
+    // Hittar det exakta Fd-värdet för den angivna diametern och längden genom linjär interpolering.
     function interpolateFd(D, lengthType, toolType) {
         let table;
+        // Välj rätt matningstabell baserat på verktygstyp
         if (toolType === 'HM') {
-            table = getAdjustedHMTable(); // Använder den kurvjusterade tabellen
+            table = getAdjustedHMTable(); // Använder den justerade HM-tabellen
         } else {
-            table = FdTableHSS; // HSS använder den ojusterade
+            table = FdTableHSS; // HSS-tabellen används direkt
         }
 
+        // Kapa diametern till tabellens gränser (0.5 mm till 25 mm)
         if (D < 0.5) D = 0.5;
         if (D > 25) D = 25;
+        
+        // Hitta de närmaste raderna (en under, en över)
         const lower = table.slice().reverse().find(row => row.D <= D);
         const upper = table.find(row => row.D > D);
         
+        // Om vi har en exakt matchning eller om D är större än det sista elementet
         if (!upper || lower.D === D) return lower[lengthType];
         
+        // Linjär interpolationsformel: 
+        // Värde = Nedre Värde + (Övre Värde - Nedre Värde) * Ratio
         const ratio = (D - lower.D) / (upper.D - lower.D);
         return parseFloat((lower[lengthType] + ratio * (upper[lengthType] - lower[lengthType])).toFixed(4));
     }
 
+    // Ger en läsbar text för den kurvjusteringsfaktor som applicerats
     function getAdjustmentFactorDisplay(D, toolType) {
         if (toolType === 'HSS') {
             return '1.00 (No reduction)';
         }
         
-        // Curve adjustment
         const factor = getCurveAdjustmentFactor(D);
         const reduction = ((1 - factor) * 100).toFixed(0);
         return `${factor.toFixed(2)} (${reduction}% reduction)`;
     }
 
 
+    // === 4. HUVUDFUNKTION FÖR BERÄKNING OCH UPPDATERING AV RESULTAT ===
     function calculateCuttingData() {
+        // Hämta värden från inputfälten
         const toolType = document.getElementById('toolType').value;
         const materialKey = document.getElementById('material').value;
         const lengthType = document.getElementById('length').value;
         
-        // FIX for Mobile/PWA: Replaces comma with period for correct parsing.
+        // Hämta diameter och hantera komma/punkt för användarvänlighet
         const diameter = parseFloat(document.getElementById('diameter').value.replace(',', '.'));
         const maxRpm = parseFloat(document.getElementById('maxRpm').value.replace(',', '.'));
         
         const resultsDiv = document.getElementById('results');
         const badge = document.getElementById('toolBadge');
 
+        // Uppdatera verktygsbrickan (HM/HSS)
         badge.textContent = toolType;
         badge.className = `tool-badge tool-${toolType.toLowerCase()}`;
 
-        // Default message
+        // Återställ resultatfönstret vid varje nytt anrop
         resultsDiv.classList.remove('ready');
         resultsDiv.innerHTML = `<p style="color:var(--text-light); text-align:center; padding:20px 0;">
             Fill in the fields above to get cutting data
         </p>`;
 
-        // Validation
+        // Input Validering
         let missing = [];
         if (!materialKey) missing.push("Material");
         if (!lengthType) missing.push("Drill Length");
@@ -366,40 +202,45 @@
             return;
         }
 
-        const data = toolType === 'HM' ? materialDataHM : materialDataHSS;
-        // Kontrollera om materialnyckeln finns
+        // Hämta materialdata från den externa datafilen (drilling_tool_data.js)
+        const data = toolType === 'HM' ? materialDataHM : materialDataHSS; 
+        
         if (!data[materialKey]) {
              resultsDiv.innerHTML = `<p class="missing">Selected material is not supported for this tool type.</p>`;
              return;
         }
 
         const mat = data[materialKey];
-        // HM använder den kurvjusterade Fd
+        
+        // HUVUDBERÄKNINGAR
+        
+        // 1. Interpolerat matningsvärde (Fd)
         const Fd = interpolateFd(diameter, lengthType, toolType);
         
-        // Final Matning fz = F_material * F_diameter
+        // 2. Slutligt fz (Fn = Fd * Fm)
         const Fn = mat.Fm * Fd;
         
-        // Varvtal n = (Vc * 1000) / (PI * D)
+        // 3. Beräkna varvtal (n_calc = (Vc * 1000) / (PI * D))
         const n_calc = (mat.Vc_safe * 1000) / (Math.PI * diameter);
 
         let n_final = Math.round(n_calc);
-        // Bordmatning Vf = fz * n
+        
+        // 4. Beräkna bordmatning (Vf_final = Fn * n_calc)
         let Vf_final = Math.round(Fn * n_calc);
         let capped = false;
 
+        // Kontrollera mot Max RPM (om angivet)
         if (maxRpm && n_calc > maxRpm) {
-            n_final = Math.round(maxRpm);
-            Vf_final = Math.round(Fn * n_final);
+            n_final = Math.round(maxRpm); // Sätt n till maskinens max
+            Vf_final = Math.round(Fn * n_final); // Beräkna ny Vf baserat på det sänkta n
             capped = true;
         }
         
         const adjFactorDisplay = getAdjustmentFactorDisplay(diameter, toolType);
-        const materialFactorDisplay = mat.Fm.toFixed(3); // Display the material factor
-        // Denna variabel används inte i visningen, men kan användas för felsökning/detaljer
-        // const totalFeedReduction = (1 - (mat.Fm * getCurveAdjustmentFactor(diameter))).toFixed(3);
+        const materialFactorDisplay = mat.Fm.toFixed(3); 
 
 
+        // SKRIV UT RESULTAT
         resultsDiv.classList.add('ready');
         resultsDiv.innerHTML = `
             <h2>Results</h2>
@@ -422,9 +263,10 @@
         `;
     }
 
-    // === THEME LOGIC WITH SUN/MOON ICONS AND STORAGE ===
+    // === 5. TEMA OCH INITIERINGSLOGIK ===
     const themeToggle = document.getElementById('themeToggle');
     
+    // Uppdaterar ikonen baserat på aktuellt tema
     const updateThemeIcon = () => {
         if (document.body.classList.contains('dark')) {
             themeToggle.textContent = '☀️';
@@ -433,6 +275,7 @@
         }
     };
 
+    // Laddar sparat tema från webbläsarens lagring (localStorage)
     const loadTheme = () => {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
@@ -440,12 +283,13 @@
         } else if (savedTheme === 'light') {
             document.body.classList.remove('dark');
         } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            // Follows system preference if no saved theme exists
+            // Fallback: Använd systemets preferens om inget tema är sparat
             document.body.classList.add('dark');
         }
-        updateThemeIcon(); // Update the icon after the theme is loaded
+        updateThemeIcon(); 
     };
 
+    // Hanterar klick på temaknappen
     themeToggle.addEventListener('click', () => {
         document.body.classList.toggle('dark');
         const newTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
@@ -453,17 +297,17 @@
         updateThemeIcon();
     });
 
+    // Körs när sidan har laddats klart
     document.addEventListener('DOMContentLoaded', () => {
-        // Load theme first
         loadTheme(); 
         
-        // Listeners for all calculator fields
+        // Kopplar beräkningsfunktionen till alla input- och select-fält
         document.querySelectorAll('#toolType, #material, #length, #diameter, #maxRpm').forEach(el => {
-            el.addEventListener('input', calculateCuttingData);
-            el.addEventListener('change', calculateCuttingData);
+            el.addEventListener('input', calculateCuttingData); // För textinput (skrivande)
+            el.addEventListener('change', calculateCuttingData); // För select-fält (ändring av val)
         });
 
-        // Start the calculator
+        // Kör beräkningen en gång initialt för att visa default-värden/tomt resultat
         calculateCuttingData();
     });
 </script>

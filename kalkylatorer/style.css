@@ -1,0 +1,467 @@
+/* =================================================================
+   1. GLOBAL VARIABLER (THEME SETTINGS)
+   Dessa variabler kontrollerar alla färger i kalkylatorn.
+   Ändra dessa för att snabbt byta tema.
+   ================================================================= */
+:root {
+    /* Ljust tema (Standard) */
+    --bg: #f8fafc;        /* Bakgrundsfärg */
+    --card: #ffffff;      /* Kortbakgrund (input/details) */
+    --text: #1e293b;      /* Huvudtextfärg */
+    --text-light: #64748b; /* Lättare text (etiketter, footers) */
+    --primary: #3b82f6;   /* Huvudfärg (sektionstitel, fokusramar) */
+    --success: #10b981;   /* Färg för positiva resultat/huvudresultat */
+    --warning: #f59e0b;   /* Varningsfärg */
+    --danger: #ef4444;    /* Fel/Maxat värde-färg */
+    --border: #e2e8f0;    /* Linjer och kantlinjer */
+    --shadow: 0 20px 40px rgba(0,0,0,0.08); /* Skugga under kortet */
+    --radius: 16px;       /* Standard hörnradie */
+}
+
+/* Mörkt tema: Aktiveras automatiskt om användarens system stöder det */
+@media (prefers-color-scheme: dark) {
+    :root { 
+        --bg: #0f172a;    /* Mörk bakgrund */
+        --card: #1e293b;  /* Mörka kort */
+        --text: #f1f5f9;  /* Ljus text */
+        --text-light: #94a3b8; /* Lättare ljus text */
+        --border: #334155; /* Mörka linjer */
+        --shadow: 0 20px 40px rgba(0,0,0,0.4); 
+    }
+}
+
+/* Tvingar fram mörkt tema om 'dark' klassen sätts via JavaScript (theme toggle) */
+body.dark { 
+    --bg: #0f172a; 
+    --card: #1e293b; 
+    --text: #f1f5f9; 
+    --text-light: #94a3b8;
+    --border: #334155; 
+    --shadow: 0 20px 40px rgba(0,0,0,0.4); 
+}
+
+/* =================================================================
+   2. BASSTYLING
+   Grundläggande reset och kroppsinställningar.
+   ================================================================= */
+* { 
+    margin:0; 
+    padding:0; 
+    box-sizing:border-box; /* Räknar padding/border i bredden */
+}
+body { 
+    font-family:'Inter',sans-serif; /* Länkas via HTML:s <head> */
+    background:var(--bg); 
+    color:var(--text);
+    min-height:100vh; 
+    padding:20px; 
+    transition:all .4s; /* Mjuk övergång vid tema-/färgbyte */
+}
+       
+/* =================================================================
+   3. LAYOUT OCH HUVUDKOMPONENTER (CONTAINER, HEADER, TOGGLE)
+   ================================================================= */
+.container { 
+    max-width:650px; 
+    margin:20px auto; /* Centrerar kortet på skärmen */
+    background:var(--card);
+    border-radius:var(--radius); 
+    overflow:hidden; 
+    box-shadow:var(--shadow);
+    position:relative; 
+}
+.theme-toggle { 
+    position:absolute; 
+    top:16px; 
+    right:16px; 
+    background:none; 
+    border:none;
+    font-size:1.5rem; 
+    cursor:pointer; 
+    padding:8px; 
+    border-radius:50%;
+    color: white; 
+    line-height: 1; 
+    z-index: 10;
+}
+.theme-toggle:hover { 
+    background:rgba(255,255,255,.1); 
+} 
+
+header { 
+    background:linear-gradient(135deg,#667eea,#764ba2); /* Lila/blå gradient */
+    color:white;
+    padding:30px 24px; 
+    text-align:center; 
+    position:relative; 
+}
+h1 { 
+    font-size:1.8rem; 
+    font-weight:700; 
+    margin-bottom:8px; 
+}
+.subtitle { 
+    font-size:0.85rem; 
+    opacity:0.9; 
+}
+
+/* Verktygsmaterial-brickan (HM / HSS) */
+.tool-badge { 
+    position:absolute; 
+    top:16px; 
+    left:16px; 
+    padding:6px 14px;
+    border-radius:50px; 
+    font-size:0.8rem; 
+    font-weight:700;
+    text-transform:uppercase; 
+    letter-spacing:0.5px; 
+}
+.tool-hm { background:#1d4ed8; }   /* Blå för HM */
+.tool-hss { background:#ea580c; }  /* Orange för HSS */
+
+main { 
+    padding:32px 24px; 
+}
+
+/* =================================================================
+   4. FORMULÄR OCH INPUTS
+   Styling för inmatningsfält och etiketter.
+   ================================================================= */
+.section-title { 
+    font-size:1.25rem; 
+    font-weight:600; 
+    color:var(--primary); 
+    margin:24px 0 16px; 
+}
+hr { 
+    border:none; 
+    height:2px; 
+    background:linear-gradient(to right,transparent,var(--border),transparent); 
+    margin:20px 0; 
+}
+
+.form-group { 
+    margin-bottom:20px; 
+}
+label { 
+    display:block; 
+    margin-bottom:8px; 
+    font-weight:600; 
+    font-size:0.95rem; 
+}
+select, input[type=number] { 
+    width:100%; 
+    padding:14px 16px; 
+    border:2px solid var(--border);
+    border-radius:12px; 
+    background:var(--card); 
+    color:var(--text); 
+    font-size:16px;
+    transition:all .3s; 
+}
+select:focus, input[type=number]:focus { 
+    outline:none; 
+    border-color:var(--primary); /* Lyser upp vid fokus */
+    box-shadow:0 0 0 4px rgba(59,130,246,.15); 
+    transform:translateY(-2px); /* Liten upplyftande effekt vid fokus */
+}
+
+/* =================================================================
+   5. RESULTAT SEKTION
+   Styling för resultatboxen.
+   ================================================================= */
+.results { 
+    margin-top:32px; 
+    padding:24px; 
+    background:linear-gradient(to bottom,#f8fafc,#e2e8f0); /* Lätt gradient */
+    border-radius:14px; 
+    border:2px solid #cbd5e1; 
+    min-height:120px; 
+    transition:all .4s; 
+}
+body.dark .results { 
+    background:linear-gradient(to bottom,#1e293b,#334155); 
+    border-color:#475569; 
+}
+
+/* Färg när resultaten är beräknade (grön ton) */
+.results.ready { 
+    background:linear-gradient(to bottom,#ecfdf5,#d1fae5); 
+    border-color:#34d399; 
+}
+body.dark .results.ready { 
+    background:linear-gradient(to bottom,#064e3b,#065f46); 
+}
+
+.results h2 { 
+    font-size:1.4rem; 
+    color:var(--success); 
+    margin-bottom:16px; 
+    text-align:center;
+    display:block;
+}
+.result-line { 
+    display:flex; 
+    justify-content:space-between; /* Sprider ut text och värde */
+    padding:10px 0;
+    font-size:1.1rem; 
+    border-bottom:1px dashed var(--border); /* Delar upp resultatraderna */
+}
+.result-line:last-child { 
+    border-bottom:none; 
+}
+        
+.result-line strong { 
+    color:var(--text-light);
+    font-weight:500; 
+}
+        
+.value { 
+    font-weight:700; 
+    color:var(--text); 
+}
+.capped { 
+    color:var(--danger); /* Markerar varvtal om det begränsats av Max RPM */
+}
+.warning-text { 
+    font-size:0.85rem; 
+    color:var(--warning); 
+    margin-top:12px; 
+}
+
+/* =================================================================
+   6. DETALJBOXEN
+   Styling för de mindre beräkningsdetaljerna.
+   ================================================================= */
+.details-box {
+    margin-top: 18px;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.9rem;
+    line-height: 1.35;
+}
+body.dark .details-box { 
+    background:#334155; 
+}
+.details-box p {
+    margin: 4px 0 !important;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: nowrap;
+}
+.details-box strong {
+    color: var(--text-light);
+    font-weight: 600;
+    flex-shrink: 1;
+    flex-basis: 50%;
+    white-space: normal;
+}
+.details-box span {
+    color: var(--text);
+    font-weight: 700;
+    white-space: nowrap; /* Förhindrar att resultatet bryts */
+    text-align: right;
+    flex-shrink: 0;
+    flex-basis: auto;
+}
+.details-box span sub {
+    font-weight: normal;
+    vertical-align: middle;
+    font-size: 85%;
+    padding-left: 2px;
+}
+
+/* Meddelande om att inmatning saknas */
+.missing { 
+    color:#dc2626; 
+    font-weight:600; 
+    text-align:center; 
+    margin-top:10px; 
+}
+
+/* =================================================================
+   7. FOOTER
+   ================================================================= */
+footer {
+    text-align:center; 
+    margin-top:30px; 
+    color:var(--text-light); 
+    font-size:0.95em; 
+    padding-bottom: 20px;
+}
+
+/* =================================================================
+   8. FACE MILLING SPECIFIKT (GEOMETRY TOGGLE)
+   Styling för att växla mellan Kappa-vinkel och Rund skär.
+   ================================================================= */
+.geometry-toggle { 
+    display:flex; 
+    gap:12px; 
+    margin:20px 0; 
+}
+.geo-btn { 
+    flex:1; 
+    padding:14px; 
+    background:var(--border); 
+    color:var(--text-light);
+    text-align:center; 
+    border-radius:12px; 
+    cursor:pointer; 
+    font-weight:600;
+    transition:all .3s; 
+    user-select: none; /* Förhindrar att text markeras vid klick */
+}
+.geo-btn:hover {
+    opacity: 0.9;
+}
+.geo-btn.active { 
+    background:var(--primary); 
+    color:white; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* =================================================================
+   9. T-SLOT & SIDE MILLING SPECIFIKT
+   Tillägg för lägesväljare, underrubrik och varningar.
+   ================================================================= */
+
+/* Underrubrik i header (Header Subtext) */
+.header-subtext {
+    font-size: 0.85rem;
+    font-weight: 400;
+    opacity: 0.9;
+    margin-top: 0;
+    color: white;
+}
+
+/* Lägesväljare (Mode Selector) */
+.mode-selector { 
+    display: flex; 
+    gap: 10px; 
+    margin-bottom: 20px; 
+}
+.mode-selector label {
+    flex-grow: 1; 
+    text-align: center; 
+    padding: 10px 15px; 
+    border-radius: 12px;
+    cursor: pointer; 
+    transition: all 0.3s; 
+    font-weight: 600;
+    border: 2px solid var(--border); 
+    background-color: var(--bg);
+    color: var(--text-light);
+}
+.mode-selector input[type="radio"] { 
+    display: none; 
+}
+.mode-selector input[type="radio"]:checked + label {
+    background-color: var(--primary); 
+    color: white; 
+    border-color: var(--primary);
+}
+.mode-selector input[type="radio"]:hover + label {
+    background-color: rgba(59, 130, 246, 0.1); /* Light theme hover */
+}
+body.dark .mode-selector input[type="radio"]:hover + label {
+    background-color: rgba(59, 130, 246, 0.3); /* Dark theme hover */
+}
+
+/* Varningsruta */
+.warning { 
+    color: var(--danger); 
+    font-weight: 600; 
+    margin-bottom: 15px; 
+    text-align: center; 
+    background: rgba(239, 68, 68, 0.1); 
+    border: 1px solid var(--danger);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+/* =================================================================
+   10. INDEX.HTML SPECIFIKT (Layout och Navigering)
+   ================================================================= */
+
+/* Body padding: Vi använder den globala padding:20px (se Sektion 2) för att få utrymme runt kortet. */
+
+/* Global layout för startsidan: Gör den till ett kort */
+.app-container { 
+    max-width:650px; 
+    margin: 20px auto 30px; /* Centrerar horisontellt, 30px marginal under kortet */
+    display:flex; 
+    flex-direction:column; 
+    
+    /* GÖR DEN TILL ETT KORT (som .container) */
+    background:var(--card);
+    border-radius:var(--radius); 
+    overflow:hidden; 
+    box-shadow:var(--shadow);
+    position:relative; 
+}
+
+/* === HEADER === */
+.app-container header { 
+    background:linear-gradient(135deg,#667eea,#764ba2); 
+    color:white; 
+    padding:30px 24px; /* Ökat padding för att matcha kalkylatorerna */
+    text-align:center; 
+    margin-bottom: 20px;
+}
+.logo-text { 
+    font-size:1.8rem; 
+    font-weight:700; 
+    margin-bottom: 5px; 
+}
+.subtitle { 
+    font-size: 1rem; 
+    opacity: 0.9; 
+}
+
+/* === CALCULATOR LIST === */
+.calculator-list { 
+    padding: 0 24px; /* Använder samma horisontella padding som main */
+    flex-grow:1; 
+    background:var(--card); 
+}
+.calc-item { 
+    display:block; 
+    text-decoration:none; 
+    color:inherit; 
+    background:var(--card); 
+    /* NYTT: Lägger till en tunn ram med din standardkantfärg */
+    border: 1px solid var(--border); 
+    padding:16px 20px; 
+    margin-bottom:12px; 
+    border-radius:var(--radius);
+    transition:background .2s, transform .1s, border-color .2s;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+}
+.calc-item:last-child {
+    margin-bottom: 30px; /* Extra marginal under sista elementet, före footern */
+}
+.calc-item:hover { 
+    background:var(--primary-light); 
+    border-color: var(--primary); /* Lyser upp kanten vid hover */
+    transform: translateY(-1px); 
+}
+.calc-item:active { transform: translateY(0); }
+/* Fixar färg vid besökta länkar */
+.calc-item:visited { color: inherit; } 
+.calc-item:visited span { color: var(--text); } 
+.calc-item:focus { 
+    outline: none; 
+    box-shadow: 0 0 0 4px rgba(59,130,246,.15); /* Matchar fokusringen på inputfälten */
+    background: var(--card) !important; 
+    border-color: var(--primary) !important;
+} 
+.calc-item span { font-weight: 600; font-size: 1.1rem; color: var(--text); }
+.calc-item::after { content: '→'; font-size: 1.5rem; color: var(--primary); }

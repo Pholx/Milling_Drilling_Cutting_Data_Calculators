@@ -5,77 +5,13 @@
     <title>Chamfer Milling Calculator Pro</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
-            --primary: #3b82f6; --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
-            --border: #e2e8f0; --shadow: 0 20px 40px rgba(0,0,0,0.08); --radius: 16px;
-        }
-        @media (prefers-color-scheme: dark) {
-            :root { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
-                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        }
-        body.dark { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
-                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
-               min-height:100vh; padding:20px; transition:all .4s; }
-        .container { max-width:650px; margin:20px auto; background:var(--card);
-                     border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
-                     position:relative; }
-        .theme-toggle { position:absolute; top:16px; right:16px; background:none; border:none;
-                        font-size:1.5rem; cursor:pointer; padding:8px; border-radius:50%; }
-        .theme-toggle:hover { background:rgba(0,0,0,.1); }
-        header { background:linear-gradient(135deg,#764ba2,#667eea); color:white;
-                 padding:30px 24px; text-align:center; }
-        h1 { font-size:1.8rem; font-weight:700; margin-bottom:4px; } 
-        .header-subtext { font-size: 0.85rem; font-weight: 400; opacity: 0.9; margin-top: 0; color: white; }
-        main { padding:32px 24px; }
-        .section-title { font-size:1.25rem; font-weight:600; color:#764ba2; margin:24px 0 16px; }
-        hr { border:none; height:2px; background:linear-gradient(to right,transparent,var(--border),transparent); margin:20px 0; }
-        .form-group { margin-bottom:20px; }
-        label { display:block; margin-bottom:8px; font-weight:600; font-size:0.95rem; }
-        select, input[type=number] { 
-            width:100%; padding:14px 16px; border:2px solid var(--border);
-            border-radius:12px; background:var(--card); color:var(--text); 
-            font-size:16px;
-            transition:all .3s; 
-        }
-        select:focus, input[type=number]:focus { outline:none; border-color:var(--primary);
-            box-shadow:0 0 0 4px rgba(59,130,246,.15); transform:translateY(-2px); }
-        .results { margin-top:32px; padding:24px; background:linear-gradient(to bottom,#f8fafc,#e2e8f0);
-            border-radius:14px; border:2px solid #cbd5e1; transition:all .4s; }
-        body.dark .results { background:linear-gradient(to bottom,#1e293b,#334155); border-color:#475569; }
-        .results.ready { background:linear-gradient(to bottom,#ecfdf5,#d1fae5); border-color:#34d399; }
-        body.dark .results.ready { background:linear-gradient(to bottom,#064e3b,#065f46); }
-        .results h2 { font-size:1.4rem; color:var(--success); margin-bottom:16px; text-align:center; }
-        .result-line { display:flex; justify-content:space-between; padding:10px 0;
-                       font-size:1.1rem; border-bottom:1px dashed var(--border); }
-        .result-line:last-of-type { border-bottom:none; }
-        .result-line strong { color:var(--text-light); font-weight:500; }
-        .value { font-weight:700; color:var(--text); }
-        .production-value { color:var(--danger); } 
-        body.dark .production-value { color:#f97316; }
-        .details-box {
-            margin-top: 18px;
-            padding: 14px 18px;
-            background: var(--card);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 0.9rem;
-            line-height: 1.35;
-        }
-        body.dark .details-box { background:#334155; }
-        .details-box p { margin: 4px 0 !important; display: flex; justify-content: space-between; gap: 12px; flex-wrap: nowrap; }
-        .details-box strong { color: var(--text-light); font-weight: 600; flex-shrink: 1; flex-basis: 50%; white-space: normal; }
-        .details-box span { color: var(--text); font-weight: 700; white-space: nowrap; text-align: right; flex-shrink: 0; flex-basis: auto; }
-        .details-box span sub { font-weight: normal; vertical-align: middle; font-size: 85%; padding-left: 2px; }
-        footer { text-align: center; margin-top: 30px; color: var(--text-light); font-size: 0.95em; padding-bottom: 20px; }
-    </style>
+    
+    <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
 <div class="container">
     <button class="theme-toggle" id="themeToggle">🌙</button>
+    <div class="tool-badge tool-hm">HM</div>
    
     <header>
         <h1>Chamfer Milling Calculator Pro</h1>
@@ -129,30 +65,31 @@
         <div class="form-group"><label>Number of Flutes z:</label><input type="number" id="z" value="4" step="1"></div>
         <div class="form-group"><label>Max RPM:</label><input type="number" id="maxRpm" value="8000" step="any"></div>
         
-        <p id="apWarning" style="color:var(--warning); font-weight:600; margin-bottom:15px; display:none;"></p>
-
+        
         <div class="results ready">
             <h2>Results</h2>
             <div class="result-line"><strong>Spindle Speed N [rpm]:</strong> <span class="value" id="nResult">-</span></div>
             <div class="result-line"><strong>V<sub>f</sub> (Internal/Std) [mm/min]:</strong> <span class="value" id="vfResultStandard">-</span></div>
-            <div class="result-line"><strong>V<sub>f</sub> (External/Prod) [mm/min]:</strong> <span class="value production-value" id="vfResultProd">-</span></div>
+            <div class="result-line"><strong>V<sub>f</sub> (External/Prod) [mm/min]:</strong> <span class="value capped" id="vfResultProd">-</span></div>
             
             <div class="details-box">
                 <p><strong>D<sub>eff</sub>:</strong><span id="dEffResult">-</span></p> 
                 <p><strong>Std. f<sub>z</sub>:</strong><span id="fzCorrectedStandard">-</span></p>
-                <p><strong>f<sub>z</sub>*1.5:</strong><span id="fzCorrectedProd">-</span></p>
-                <p><strong>Base f<sub>z</sub>:</strong><span id="fzBaseValue">-</span></p>
+                <p><strong>Prod. f<sub>z</sub> (Std. f<sub>z</sub> * 1.5):</strong><span id="fzCorrectedProd">-</span></p>
                 <p><strong>Feed Reduction R<sub>f</sub>:</strong><span id="rfFactorResult">-</span></p>
-                <p><strong>Vc:</strong><span id="vcValue">-</span></p>
+                <p><strong>Vc:</strong><span id="actualVcResult">-</span></p> 
             </div>
         </div>
     </main>
 </div>
 <footer>Chamfer Milling Calculator Pro – created by Jimmy Rauhala</footer>
+
+<script src="Chamfer_tool_data.js"></script>
+
 <script>
-    const K_1000 = 1000;
-    const PI = Math.PI;
-    const PRODUCTION_FACTOR = 1.5; 
+    // =====================================================================
+    // Kritiska Hjälpfunktioner
+    // =====================================================================
 
     const parseValue = (id, defaultValue = 0) => {
         const value = parseFloat(document.getElementById(id).value);
@@ -160,79 +97,36 @@
     };
     
     const formatDecimal = (num, fixed) => {
+        if (isNaN(num)) return "N/A";
         return num.toFixed(fixed).replace(/\.?0+$/, "");
     };
 
-    const toolData = {
-        steel1080: {z_base:4, name:"Steel (~1080 N/mm²)", vc:150, fz_table:{0:0.000,1:0.010,2:0.018,3:0.025,4:0.032,5:0.038,6:0.045,8:0.055,10:0.065,12:0.075,16:0.095,20:0.115}},
-        toolox44: {z_base:4, name:"Toolox 44 (~45 HRC)", vc:80, fz_table:{0:0.000,1:0.008,2:0.015,3:0.021,4:0.027,5:0.032,6:0.038,8:0.048,10:0.057,12:0.065,16:0.082,20:0.098}},
-        steel50hrc:{z_base:4, name:"Hardened Steel 50 HRC", vc:60, fz_table:{0:0.000,1:0.006,2:0.011,3:0.015,4:0.019,5:0.023,6:0.027,8:0.033,10:0.038,12:0.045,16:0.055,20:0.065}},
-        steel60hrc:{z_base:4, name:"Hardened Steel 60 HRC", vc:30, fz_table:{0:0.000,1:0.003,2:0.005,3:0.008,4:0.010,5:0.012,6:0.014,8:0.018,10:0.021,12:0.025,16:0.030,20:0.036}},
-        vanadis: {z_base:4, name:"Vanadis / Powder Steel", vc:100, fz_table:{0:0.000,1:0.008,2:0.015,3:0.021,4:0.027,5:0.032,6:0.038,8:0.048,10:0.057,12:0.065,16:0.082,20:0.098}},
-        nonferrous:{z_base:3, name:"Aluminum / Copper", vc:350, fz_table:{0:0.000,1:0.020,2:0.040,3:0.060,4:0.080,5:0.100,6:0.120,8:0.150,10:0.180,12:0.200,16:0.250,20:0.300}}
-    };
 
-    let userEdited = {vc:false, fz:false, z:false};
+    // Flaggar för att kontrollera om användaren har redigerat Vc, fz, eller z manuellt
+    const userEdited = {vc: false, fz: false, z: false};
 
-    function getFzFromTable(material, D_eff) {
-        const table = toolData[material].fz_table;
-        const keys = Object.keys(table).map(Number).sort((a, b) => a - b);
+    // Funktion för att uppdatera alla resultat i HTML-gränssnittet
+    function updateResults(n, Vf_standard, Vf_prod, D_eff, fz_korr_standard, fz_korr_prod, Rf_standard, Vc, maxRpm, isCapped, actualVc) {
+        document.getElementById('nResult').textContent = Math.round(n);
+        document.getElementById('vfResultStandard').textContent = Vf_standard;
+        document.getElementById('vfResultProd').textContent = Vf_prod; 
         
-        if (D_eff <= keys[1]) return table[keys[1]]; 
-
-        for (let i = 1; i < keys.length; i++) {
-            const D1 = keys[i];
-            const D2 = keys[i + 1];
-            
-            if (D_eff === D1) return table[D1];
-            
-            if (D_eff > D1 && D_eff < D2) {
-                const fz1 = table[D1];
-                const fz2 = table[D2];
-                return fz1 + (D_eff - D1) * (fz2 - fz1) / (D2 - D1);
-            }
-        }
-        return table[keys[keys.length - 1]];
+        // Sätter färg på varvtalet om det begränsats av Max RPM
+        document.getElementById('nResult').classList.toggle('capped', isCapped);
+        
+        // Uppdaterar detaljboxen
+        document.getElementById('dEffResult').innerHTML = formatDecimal(D_eff, 3) + ' <sub>mm</sub>';
+        document.getElementById('fzCorrectedStandard').innerHTML = formatDecimal(fz_korr_standard, 4) + ' <sub>mm/z</sub>';
+        document.getElementById('fzCorrectedProd').innerHTML = formatDecimal(fz_korr_prod, 4) + ' <sub>mm/z</sub>';
+        document.getElementById('rfFactorResult').innerHTML = formatDecimal(Rf_standard, 2) + ' <sub>(x)</sub>';
+        
+        // VISAR DET FAKTISKA Vc-VÄRDET
+        document.getElementById('actualVcResult').innerHTML = formatDecimal(actualVc, 1) + ' <sub>m/min</sub>';
     }
 
-    function updateStandardValues() {
-        const mat = document.getElementById('material').value;
-        const matData = toolData[mat];
-        
-        if (!matData) return;
-
-        const D_eff_placeholder = 4;
-        const default_fz = getFzFromTable(mat, D_eff_placeholder);
-        
-        if (!userEdited.vc) document.getElementById('vc').value = matData.vc;
-        if (!userEdited.fz) document.getElementById('fzBase').value = formatDecimal(default_fz, 4);
-        if (!userEdited.z) document.getElementById('z').value = matData.z_base;
-        
-        calculate();
-    }
-
-    function calculateDeff(D_tip, fasVinkel, ap) {
-        if (fasVinkel === 90) return D_tip + 2 * ap; 
-        const radianer = fasVinkel * (PI / 180);
-        return D_tip + (ap * Math.tan(radianer)); 
-    }
-
-    function calculateRf(ap) {
-        const ap_threshold = 1.0; 
-        const reduction_rate = 0.05; 
-        const max_reduction = 0.20; 
-        
-        if (ap <= ap_threshold) return 1.0;
-        
-        let reduction = reduction_rate * (ap - ap_threshold);
-        reduction = Math.min(reduction, max_reduction);
-        
-        return 1.0 - reduction;
-    }
-
-
+    // Huvudberäkningsfunktion som anropar logiken i Chamfer_tool_data.js
     function calculate() {
-        // 1. INPUT
+        // Hämta inmatningsvärden från HTML via parseValue()
         const D_tip = parseValue('Dtip');
         const fasVinkel = parseValue('fasVinkel');
         const ap = parseValue('fasDjup');
@@ -240,73 +134,90 @@
         const fz_bas = parseValue('fzBase'); 
         const z = Math.round(parseValue('z', 1));
         const maxRpm = parseValue('maxRpm');
-        const apWarningElement = document.getElementById('apWarning');
+        const mat = document.getElementById('material').value;
 
-        if (D_tip < 0 || ap <= 0 || Vc <= 0 || z <= 0 || fz_bas <= 0) {
-            const results = ['nResult', 'vfResultStandard', 'vfResultProd', 'dEffResult', 'fzCorrectedStandard', 'fzCorrectedProd', 'fzBaseValue', 'rfFactorResult', 'vcValue'];
+        // Kontrollerar om nödvändiga värden finns. 
+        if (D_tip < 0 || ap <= 0 || Vc <= 0 || z <= 0 || fz_bas <= 0 || typeof runCalculations === 'undefined') {
+            // Rensa resultat om inmatning saknas eller om JS-filen inte laddades
+            const results = ['nResult', 'vfResultStandard', 'vfResultProd', 'dEffResult', 'fzCorrectedStandard', 'fzCorrectedProd', 'rfFactorResult', 'actualVcResult'];
             results.forEach(id => document.getElementById(id).textContent = 'N/A');
-            apWarningElement.style.display = 'none';
+            document.getElementById('nResult').classList.remove('capped');
             return;
         }
 
-        // 2. BERÄKNA EFFEKTIV DIAMETER & VARVTAL
-        const D_eff = calculateDeff(D_tip, fasVinkel, ap);
-        
-        let n = (Vc * K_1000) / (PI * D_eff); 
-        if (maxRpm > 0 && n > maxRpm) {
-            n = maxRpm;
-            apWarningElement.textContent = `WARNING: RPM limited by Max RPM (${maxRpm}). Actual Vc: ${formatDecimal((n * PI * D_eff) / K_1000, 1)} m/min.`;
-            apWarningElement.style.display = 'block';
-        } else {
-             apWarningElement.style.display = 'none';
+        // Anropar beräkningslogiken (funktionalitet från Chamfer_tool_data.js)
+        const results = runCalculations(D_tip, fasVinkel, ap, Vc, fz_bas, z, maxRpm, mat);
+
+        // Uppdaterar gränssnittet
+        updateResults(
+            results.n, 
+            results.Vf_standard, 
+            results.Vf_prod, 
+            results.D_eff, 
+            results.fz_korr_standard, 
+            results.fz_korr_prod, 
+            results.Rf_standard, 
+            Vc, 
+            maxRpm, 
+            results.isCapped,
+            results.actualVc
+        );
+    }
+    
+    // Funktion för att uppdatera Vc och fz baserat på materialval. Anropar calculate.
+    function updateStandardValuesAndCalculate() {
+        // Kontrollerar att beroenden från Chamfer_tool_data.js är definierade
+        if (typeof toolData === 'undefined' || typeof getFzFromTable === 'undefined' || typeof calculateDeff === 'undefined') {
+             console.error("Chamfer_tool_data.js verkar inte ha laddats korrekt.");
+             calculate(); 
+             return;
         }
 
-
-        // 3. KORREKTION AV MATNING PER TAND (FZ)
+        const mat = document.getElementById('material').value;
+        const matData = toolData[mat];
         
-        // A. Standard/Internal Feed (With conservative ap reduction)
-        const Rf_standard = calculateRf(ap);
-        const fz_korr_standard = fz_bas * Rf_standard; 
-        const Vf_standard = Math.round(n * fz_korr_standard * z);
+        if (!matData) return;
         
-        // B. Production/External Feed (Standard fz, corrected, multiplied by 1.5)
-        const fz_korr_prod = fz_korr_standard * PRODUCTION_FACTOR;
-        const Vf_prod = Math.round(n * fz_korr_prod * z); 
+        // Hämta aktuella geometrivärden
+        const current_Dtip = parseValue('Dtip');
+        const current_fasVinkel = parseValue('fasVinkel');
+        const current_ap = parseValue('fasDjup');
         
+        // Beräkna den aktuella D_eff och använd den för att slå upp fz.
+        const actual_D_eff = calculateDeff(current_Dtip, current_fasVinkel, current_ap); 
+        const default_fz = getFzFromTable(mat, actual_D_eff);
         
-        // 4. UPPDATERA RESULTATEN
-        document.getElementById('nResult').textContent = Math.round(n);
+        // Uppdatera Vc, fzBase och z endast om användaren INTE redigerat dem
+        if (!userEdited.vc) document.getElementById('vc').value = matData.vc;
+        if (!userEdited.fz) document.getElementById('fzBase').value = formatDecimal(default_fz, 4);
+        if (!userEdited.z) document.getElementById('z').value = matData.z_base;
         
-        document.getElementById('vfResultStandard').textContent = Vf_standard;
-        document.getElementById('vfResultProd').textContent = Vf_prod; 
-        
-        document.getElementById('dEffResult').innerHTML = formatDecimal(D_eff, 3) + ' <sub>mm</sub>';
-        document.getElementById('fzCorrectedStandard').innerHTML = formatDecimal(fz_korr_standard, 4) + ' <sub>mm/z</sub>';
-        document.getElementById('fzCorrectedProd').innerHTML = formatDecimal(fz_korr_prod, 4) + ' <sub>mm/z</sub>';
-        document.getElementById('fzBaseValue').innerHTML = formatDecimal(fz_bas, 4) + ' <sub>mm/z</sub>';
-        document.getElementById('rfFactorResult').innerHTML = formatDecimal(Rf_standard, 2) + ' <sub>(x)</sub>';
-        document.getElementById('vcValue').innerHTML = Vc + ' <sub>m/min</sub>';
+        calculate();
     }
 
+
+    // Huvudfunktion som körs när sidan laddas
     document.addEventListener('DOMContentLoaded', () => {
+        // Event listeners för att markera om användaren redigerat ett värde
         document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', () => {
             if (el.id === 'vc') userEdited.vc = true;
             if (el.id === 'fzBase') userEdited.fz = true;
             if (el.id === 'z') userEdited.z = true;
-            calculate();
+            calculate(); // Kör beräkningen vid varje inmatningsändring
         }));
         
-        document.getElementById('material').addEventListener('change', updateStandardValues);
-        document.getElementById('Dtip').addEventListener('change', updateStandardValues);
-        
-        document.getElementById('fasVinkel').addEventListener('change', calculate);
-        document.getElementById('fasDjup').addEventListener('input', calculate);
+        // Event listeners för ändringar i input
+        document.getElementById('material').addEventListener('change', updateStandardValuesAndCalculate);
+        document.getElementById('Dtip').addEventListener('change', updateStandardValuesAndCalculate);
+        document.getElementById('fasVinkel').addEventListener('change', updateStandardValuesAndCalculate);
+        document.getElementById('fasDjup').addEventListener('input', updateStandardValuesAndCalculate); 
         document.getElementById('maxRpm').addEventListener('input', calculate);
 
-        updateStandardValues();
+        // Initial beräkning när sidan laddats
+        updateStandardValuesAndCalculate();
     });
 
-    // Dark Mode Toggle 
+    // Dark Mode Toggle Logic
     const toggle = document.getElementById('themeToggle');
     const updateThemeIcon = () => {
         if (document.body.classList.contains('dark')) {
@@ -325,5 +236,4 @@
     updateThemeIcon();
 </script>
 </body>
-
 </html>

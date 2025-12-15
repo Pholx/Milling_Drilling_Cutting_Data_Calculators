@@ -1,403 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
     <title>Milling Data Calculator Pro</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css"> 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
-            --primary: #3b82f6; --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
-            --border: #e2e8f0; --shadow: 0 20px 40px rgba(0,0,0,0.08); --radius: 16px;
-        }
-        @media (prefers-color-scheme: dark) {
-            :root { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
-                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        }
-        body.dark { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
-                    --border: #334155; --shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
-               min-height:100vh; padding:20px; transition:all .4s; }
-        .container { max-width:650px; margin:20px auto; background:var(--card);
-                     border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
-                     position:relative; }
-        .theme-toggle { position:absolute; top:16px; right:16px; background:none; border:none;
-                        font-size:1.5rem; cursor:pointer; padding:8px; border-radius:50%; }
-        .theme-toggle:hover { background:rgba(0,0,0,.1); }
-        header { background:linear-gradient(135deg,#667eea,#764ba2); color:white;
-                 padding:30px 24px; text-align:center; }
-        h1 { font-size:1.8rem; font-weight:700; margin-bottom:4px; } 
-        .header-subtext { /* Stil för subrubriken */
-            font-size: 0.85rem;
-            font-weight: 400; /* Lättare vikt */
-            opacity: 0.9;     /* Gör den något svagare */
-            margin-top: 0;
-            color: white; /* Samma färg som <h1> */
-        }
-        main { padding:32px 24px; }
-        .section-title { font-size:1.25rem; font-weight:600; color:var(--primary); margin:24px 0 16px; }
-        hr { border:none; height:2px; background:linear-gradient(to right,transparent,var(--border),transparent); margin:20px 0; }
-        .form-group { margin-bottom:20px; }
-        label { display:block; margin-bottom:8px; font-weight:600; font-size:0.95rem; }
-        select, input[type=number] { 
-            width:100%; padding:14px 16px; border:2px solid var(--border);
-            border-radius:12px; background:var(--card); color:var(--text); 
-            font-size:16px;
-            transition:all .3s; 
-        }
-        select:focus, input[type=number]:focus { outline:none; border-color:var(--primary);
-            box-shadow:0 0 0 4px rgba(59,130,246,.15); transform:translateY(-2px); }
-        .results { margin-top:32px; padding:24px; background:linear-gradient(to bottom,#f8fafc,#e2e8f0);
-            border-radius:14px; border:2px solid #cbd5e1; transition:all .4s; }
-        body.dark .results { background:linear-gradient(to bottom,#1e293b,#334155); border-color:#475569; }
-        .results.ready { background:linear-gradient(to bottom,#ecfdf5,#d1fae5); border-color:#34d399; }
-        body.dark .results.ready { background:linear-gradient(to bottom,#064e3b,#065f46); }
-        .results h2 { font-size:1.4rem; color:var(--success); margin-bottom:16px; text-align:center; }
-        .result-line { display:flex; justify-content:space-between; padding:10px 0;
-                       font-size:1.1rem; border-bottom:1px dashed var(--border); }
-        .result-line:last-of-type { border-bottom:none; }
-        .result-line strong { color:var(--text-light); font-weight:500; }
-        .value { font-weight:700; color:var(--text); }
-        .corner-value { color:#1b5e20; }
-        body.dark .corner-value { color:#86efac !important; }
-        .ramp-value { color:#856404; }
-        body.dark .ramp-value { color:#fbbf24 !important; }
-        .details-box {
-            margin-top: 18px;
-            padding: 14px 18px;
-            background: var(--card);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 0.9rem;
-            line-height: 1.35;
-        }
-        body.dark .details-box { background:#334155; }
-        .details-box p {
-            margin: 4px 0 !important;
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: nowrap;
-        }
-        .details-box strong {
-            color: var(--text-light);
-            font-weight: 600;
-            flex-shrink: 1;
-            flex-basis: 50%;
-            white-space: normal;
-        }
-        .details-box span {
-            color: var(--text);
-            font-weight: 700;
-            white-space: nowrap;
-            text-align: right;
-            flex-shrink: 0;
-            flex-basis: auto;
-        }
-        .details-box span sub {
-            font-weight: normal;
-            vertical-align: middle;
-            font-size: 85%;
-            padding-left: 2px;
-        }
-        /* KORRIGERAD FOOTER-STIL */
-        footer {
-            text-align: center;
-            margin-top: 30px; /* Ändrat från 50px */
-            color: var(--text-light); /* Ändrat från #555 */
-            font-size: 0.95em;
-            padding-bottom: 20px; /* Lagt till */
-        }
-    </style>
 </head>
 <body>
-<div class="container">
-    <button class="theme-toggle" id="themeToggle">🌙</button>
-   
-    <header>
-        <h1>Milling Data Calculator Pro</h1>
-        <h2 class="header-subtext">Milling – Solid Carbide End Mill (1–20 mm)</h2> 
-    </header>
-    <main>
-        <div class="section-title">Input</div>
-        <div class="form-group">
-            <label for="diameter">1. Cutter Diameter D [mm]:</label>
-            <select id="diameter">
-                <option value="1">1 mm</option><option value="2">2 mm</option><option value="3">3 mm</option>
-                <option value="4">4 mm</option><option value="5">5 mm</option><option value="6">6 mm</option>
-                <option value="8">8 mm</option><option value="10">10 mm</option>
-                <option value="12" selected>12 mm</option><option value="16">16 mm</option>
-                <option value="20">20 mm</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="material">2. Material:</label>
-            <select id="material">
-                <option value="steel1080" selected>Steel (~1080 N/mm²)</option>
-                <option value="toolox44">Toolox 44 (~45 HRC)</option>
-                <option value="steel50hrc">Hardened Steel 50 HRC</option>
-                <option value="steel60hrc">Hardened Steel 60 HRC</option>
-                <option value="vanadis">Vanadis / Powder Steel</option>
-                <option value="nonferrous">Aluminum / Copper</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="rampAngle">3. Ramping Angle (alpha) [°]:</label>
-            <select id="rampAngle">
-                <option value="0.5">0.5°</option>
-                <option value="1.0">1.0°</option>
-                <option value="1.5">1.5°</option>
-                <option value="2.0" selected>2.0°</option>
-                <option value="2.5">2.5°</option>
-                <option value="3.0">3.0°</option>
-                <option value="4.0">4.0°</option>
-                <option value="5.0">5.0°</option>
-                <option value="7.0">7.0°</option>
-                <option value="10.0">10.0°</option>
-            </select>
-        </div>
-
-        <hr>
-        <div class="section-title">Cutting Data (Editable)</div>
-        <div class="form-group"><label>Cutting Speed Vc [m/min]:</label><input type="number" id="vc" value="200" step="any"></div>
-        <div class="form-group"><label>Feed per Tooth fz [mm/z]:</label><input type="number" id="fzInitial" value="0.032" step="any"></div>
-        <div class="form-group"><label>Number of Flutes z:</label><input type="number" id="z" value="4" step="any"></div>
-        <div class="form-group"><label>Radial Engagement ae [%]:</label><input type="number" id="aePercent" value="10" step="any"></div>
-        <div class="form-group"><label>Max RPM:</label><input type="number" id="maxRpm" value="12000" step="any"></div>
+    <div class="container">
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+       
+        <header>
+            <div class="tool-badge tool-hm">HM</div> 
+            <h1>Milling Data Calculator Pro</h1>
+            <p class="subtitle">Milling – Solid Carbide End Mill (1–20 mm)</p> 
+        </header>
         
-        <p id="aeWarning" style="color:var(--warning); font-weight:600; margin-bottom:15px; display:none;"></p>
-
-        <div class="results ready">
-            <h2>Results</h2>
-            <div class="result-line"><strong>Spindle Speed [rpm]:</strong> <span class="value" id="nResult">-</span></div>
-            <div class="result-line"><strong>Roughing Feed (Straight) [mm/min]:</strong> <span class="value" id="vfResult">-</span></div>
-            <div class="result-line" style="display: none;"><strong>Roughing Feed (Corner) [mm/min]:</strong> <span class="value corner-value" id="vfCornerResult">-</span></div>
-            <div class="result-line"><strong>Finishing Feed [mm/min]:</strong> <span class="value" id="vfFinishResult">-</span></div>
-            <div class="result-line"><strong>Ramping <span id="alphaDisplay">2.0°</span> Helical [mm/min]:</strong> <span class="value ramp-value" id="vfRampResult">-</span></div>
-            <div class="details-box">
-                <p><strong>Roughing fz:</strong><span id="fzCorrectedResult">-</span></p>
-                <p><strong>Finishing fz:</strong><span id="fzFinishCorrectedResult">-</span></p>
-                <p><strong>Stepover ae:</strong><span id="aePercentValue">-</span></p>
-                <p><strong>Toolpath Radius:</strong><span id="rMinSafeResult">-</span></p> 
-                <p><strong>Vc:</strong><span id="vcValue">-</span></p>
-            </div>
-        </div>
-    </main>
-</div>
-<footer>Milling Data Calculator Pro – created by Jimmy Rauhala</footer>
-<script>
-    const K_1000 = 1000;
-    const PI = Math.PI;
-
-    const parseValue = (id, defaultValue = 0) => {
-        const value = parseFloat(document.getElementById(id).value);
-        return isNaN(value) ? defaultValue : value;
-    };
-    
-    const formatDecimal = (num, fixed) => {
-        return num.toFixed(fixed).replace(/\.?0+$/, "");
-    };
-
-    const toolData = {
-        steel1080: {z_base:4, name:"Steel (~1080 N/mm²)", trochoidal:{vc:200, ae_percent:10, fz_table:{1:0.002,2:0.004,3:0.007,4:0.010,5:0.012,6:0.016,8:0.022,10:0.028,12:0.032,16:0.044,20:0.055}}},
-        toolox44: {z_base:4, name:"Toolox 44 (~45 HRC)", trochoidal:{vc:100, ae_percent:8, fz_table:{1:0.002,2:0.004,3:0.006,4:0.009,5:0.011,6:0.014,8:0.020,10:0.025,12:0.030,16:0.040,20:0.050}}},
-        steel50hrc:{z_base:4, name:"Hardened Steel 50 HRC", trochoidal:{vc:80, ae_percent:5, fz_table:{1:0.0015,2:0.003,3:0.005,4:0.007,5:0.008,6:0.010,8:0.013,10:0.016,12:0.020,16:0.027,20:0.033}}},
-        steel60hrc:{z_base:4, name:"Hardened Steel 60 HRC", trochoidal:{vc:40, ae_percent:3, fz_table:{1:0.0008,2:0.0016,3:0.0024,4:0.0032,5:0.004,6:0.005,8:0.006,10:0.008,12:0.010,16:0.013,20:0.017}}},
-        vanadis: {z_base:4, name:"Vanadis / Powder Steel", trochoidal:{vc:150, ae_percent:8, fz_table:{1:0.002,2:0.004,3:0.0065,4:0.0095,5:0.0115,6:0.015,8:0.021,10:0.0265,12:0.031,16:0.042,20:0.0525}}},
-        nonferrous:{z_base:4, name:"Aluminum / Copper", trochoidal:{vc:450, ae_percent:10, fz_table:{1:0.006,2:0.012,3:0.018,4:0.024,5:0.030,6:0.038,8:0.050,10:0.061,12:0.070,16:0.093,20:0.116}}}
-    };
-
-    const rampDefaults = {
-        steel1080:  { defaultAngle: 2.0, baseFactor: 1.8, minAngle: 1.0, maxAngle: 5.0 }, 
-        toolox44:   { defaultAngle: 2.0, baseFactor: 1.9, minAngle: 1.0, maxAngle: 3.0 }, 
-        steel50hrc: { defaultAngle: 1.5, baseFactor: 2.25, minAngle: 1.0, maxAngle: 3.0 },
-        steel60hrc: { defaultAngle: 1.0, baseFactor: 2.7, minAngle: 1.0, maxAngle: 2.0 }, 
-        vanadis:    { defaultAngle: 2.0, baseFactor: 1.85, minAngle: 1.0, maxAngle: 3.0 },
-        nonferrous: { defaultAngle: 5.0, baseFactor: 1.5, minAngle: 2.0, maxAngle: 10.0 } 
-    };
-
-    let userEdited = {vc:false, fz:false, z:false, ae:false};
-
-    function updateRampAngleOptions(material) {
-        const rampData = rampDefaults[material];
-        const min = rampData.minAngle;
-        const max = rampData.maxAngle;
-        const select = document.getElementById('rampAngle');
-        
-        Array.from(select.options).forEach(option => {
-            const angle = parseFloat(option.value);
+        <main>
+            <div class="section-title">Input</div>
             
-            if (angle >= min && angle <= max) {
-                option.style.display = ''; 
-            } else {
-                option.style.display = 'none';
-            }
-        });
+            <div class="form-group">
+                <label for="diameter">1. Cutter Diameter D [mm]:</label>
+                <select id="diameter">
+                    <option value="1">1 mm</option><option value="2">2 mm</option><option value="3">3 mm</option>
+                    <option value="4">4 mm</option><option value="5">5 mm</option><option value="6">6 mm</option>
+                    <option value="8">8 mm</option><option value="10">10 mm</option>
+                    <option value="12" selected>12 mm</option><option value="16">16 mm</option>
+                    <option value="20">20 mm</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="material">2. Material:</label>
+                <select id="material">
+                    <option value="steel1080" selected>Steel (~1080 N/mm²)</option>
+                    <option value="toolox44">Toolox 44 (~45 HRC)</option>
+                    <option value="steel50hrc">Hardened Steel 50 HRC</option>
+                    <option value="steel60hrc">Hardened Steel 60 HRC</option>
+                    <option value="vanadis">Vanadis / Powder Steel</option>
+                    <option value="nonferrous">Aluminum / Copper</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="rampAngle">3. Ramping Angle (alpha) [°]:</label>
+                <select id="rampAngle">
+                    <option value="0.5">0.5°</option><option value="1.0">1.0°</option><option value="1.5">1.5°</option>
+                    <option value="2.0" selected>2.0°</option><option value="2.5">2.5°</option><option value="3.0">3.0°</option>
+                    <option value="4.0">4.0°</option><option value="5.0">5.0°</option><option value="7.0">7.0°</option>
+                    <option value="10.0">10.0°</option>
+                </select>
+            </div>
 
-        const currentAngle = parseValue('rampAngle');
-        if (currentAngle < min || currentAngle > max) {
-            select.value = rampData.defaultAngle.toFixed(1);
-        }
-    }
+            <hr>
+            
+            <div class="section-title">Cutting Data (Editable)</div>
+            <div class="form-group"><label>Cutting Speed Vc [m/min]:</label><input type="number" id="vc" value="200" step="any"></div>
+            <div class="form-group"><label>Feed per Tooth fz [mm/z]:</label><input type="number" id="fzInitial" value="0.032" step="any"></div>
+            <div class="form-group"><label>Number of Flutes z:</label><input type="number" id="z" value="4" step="any"></div>
+            <div class="form-group"><label>Radial Engagement ae [%]:</label><input type="number" id="aePercent" value="10" step="any"></div>
+            <div class="form-group"><label>Max RPM:</label><input type="number" id="maxRpm" value="12000" step="any"></div>
+            
+            <p id="aeWarning" class="warning-text" style="display:none;"></p>
 
-    function updateStandardValues() {
-        const mat = document.getElementById('material').value;
-        const D = parseValue('diameter');
-        const d = toolData[mat]?.trochoidal;
-        const rampData = rampDefaults[mat];
-        
-        if (!d || D <= 0) return;
-
-        if (!userEdited.vc) document.getElementById('vc').value = d.vc;
-        if (!userEdited.fz) document.getElementById('fzInitial').value = formatDecimal(d.fz_table[D] || 0.032, 4);
-        if (!userEdited.z) document.getElementById('z').value = toolData[mat].z_base;
-        if (!userEdited.ae) document.getElementById('aePercent').value = d.ae_percent;
-        
-        updateRampAngleOptions(mat); 
-        document.getElementById('rampAngle').value = rampData.defaultAngle.toFixed(1);
-        
-        calculate();
-    }
-
-    function calculateRampFactor(material, selectedAngle) {
-        const r = rampDefaults[material];
-        const baseFactor = r.baseFactor;
-        const diff = selectedAngle - r.defaultAngle;
-        
-        // Linjär ökning av faktorn (långsammare matning) vid brantare vinkel
-        let factor = baseFactor + diff * 0.15; 
-
-        // Klämmer faktorn mellan 1.3 och 3.5
-        return Math.max(1.3, Math.min(3.5, factor));
-    }
-
-
-    function calculate() {
-        const D = parseValue('diameter');
-        const Vc = parseValue('vc');
-        const fz = parseValue('fzInitial');
-        const z = Math.round(parseValue('z', 1));
-        const aePercent = parseValue('aePercent');
-        const maxRpm = parseValue('maxRpm');
-        const material = document.getElementById('material').value;
-        const aeWarningElement = document.getElementById('aeWarning');
-        const selectedRampAngle = parseValue('rampAngle');
-        const rMinSafeResultElement = document.getElementById('rMinSafeResult');
-
-        document.getElementById('alphaDisplay').textContent = selectedRampAngle.toFixed(1) + '°';
-
-
-        if (D <= 0 || Vc <= 0 || z <= 0 || fz <= 0) {
-            document.getElementById('nResult').textContent = 'N/A';
-            document.getElementById('vfResult').textContent = 'N/A';
-            document.getElementById('vfCornerResult').textContent = 'N/A';
-            document.getElementById('vfFinishResult').textContent = 'N/A'; 
-            document.getElementById('vfRampResult').textContent = 'N/A';
-            document.getElementById('fzCorrectedResult').textContent = '-';
-            document.getElementById('fzFinishCorrectedResult').textContent = '-'; 
-            document.getElementById('aePercentValue').textContent = '-';
-            rMinSafeResultElement.textContent = '-'; 
-            document.getElementById('vcValue').textContent = '-';
-            aeWarningElement.style.display = 'none';
-            return;
-        }
-
-        let n = (Vc * K_1000) / (PI * D);
-        if (maxRpm > 0 && n > maxRpm) n = maxRpm;
-
-        const ae_raw = D * aePercent / 100;
-        const ae = Math.max(ae_raw, 0.000001); 
-
-        // ROUGHING FZ KORRIGERING (Baserat på chip thinning)
-        let fz_korr = fz;
-        if (aePercent > 50) {
-            fz_korr = fz;
-            aeWarningElement.textContent = 'WARNING: Stepover ae > 50%. Chip thinning correction is disabled.';
-            aeWarningElement.style.display = 'block';
-        } else if (ae_raw > 0 && ae_raw < D) {
-            fz_korr = fz * Math.sqrt(D / ae);
-            aeWarningElement.style.display = 'none';
-        } else {
-            aeWarningElement.style.display = 'none';
-        }
-        
-        // NY LOGIK FÖR FINISHING FZ
-        let fz_finish_base = 0.005 * D; // Bas-fz = 0.005 * D
-        let finish_factor = 1.0; 
-
-        if (material === 'steel50hrc') {
-            finish_factor = 0.90; // 10% sänkning
-        } else if (material === 'steel60hrc') {
-            finish_factor = 0.80; // 20% sänkning
-        }
-
-        const fz_finish_korr = fz_finish_base * finish_factor;
-        // SLUT NY LOGIK FÖR FINISHING FZ
-
-
-        const Vf_normal = Math.round(n * fz_korr * z);
-        let Vf_corner = Vf_normal; 
-        const Vf_finish = Math.round(n * fz_finish_korr * z); // Använder ny fz_finish_korr
-
-        const rampFactor = calculateRampFactor(material, selectedRampAngle);
-        const Vf_ramp = Math.round(Vf_normal / rampFactor);
-
-        const R_min_safe = (D * aePercent) / 200; 
-
-        document.getElementById('nResult').textContent = Math.round(n);
-        
-        document.getElementById('fzCorrectedResult').innerHTML = formatDecimal(fz_korr, 3) + ' <sub>mm/z</sub>';
-        document.getElementById('fzFinishCorrectedResult').innerHTML = formatDecimal(fz_finish_korr, 3) + ' <sub>mm/z</sub>'; // Visar den nya fz
-        
-        document.getElementById('vfResult').textContent = Vf_normal;
-        document.getElementById('vfCornerResult').textContent = Vf_corner;
-        document.getElementById('vfFinishResult').textContent = Vf_finish; 
-        document.getElementById('vfRampResult').textContent = Vf_ramp;
-        
-        document.getElementById('aePercentValue').innerHTML = aePercent + ' <sub>%</sub>';
-        
-        rMinSafeResultElement.innerHTML = '≥' + formatDecimal(R_min_safe, 2) + ' <sub>mm</sub>'; 
-        
-        document.getElementById('vcValue').innerHTML = Vc + ' <sub>m/min</sub>';
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', () => {
-            if (el.id==='vc') userEdited.vc = true;
-            if (el.id==='fzInitial') userEdited.fz = true;
-            if (el.id==='z') userEdited.z = true;
-            if (el.id==='aePercent') userEdited.ae = true;
-            calculate();
-        }));
-        
-        document.getElementById('material').addEventListener('change', updateStandardValues);
-        document.getElementById('diameter').addEventListener('change', updateStandardValues);
-        document.getElementById('rampAngle').addEventListener('change', calculate);
-        
-        updateStandardValues();
-    });
-
-    const toggle = document.getElementById('themeToggle');
+            <div class="results" id="resultsBox">
+                <h2 id="resultTitle">Results</h2>
+                <div id="resultContent">
+                    </div>
+                <p class="missing" id="missingInput" style="display:none;">Please enter valid cutting data to calculate results.</p>
+            </div>
+        </main>
+    </div>
     
-    const updateThemeIcon = () => {
-        if (document.body.classList.contains('dark')) {
-            toggle.textContent = '☀️';
-        } else {
-            toggle.textContent = '🌙';
-        }
-    };
+    <footer>Milling Data Calculator Pro – created by Jimmy Rauhala</footer>
 
-    toggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark');
-        updateThemeIcon();
-    });
-
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-    }
-    updateThemeIcon();
-</script>
+    <script src="milling_tool_data.js"></script>
 </body>
 </html>
