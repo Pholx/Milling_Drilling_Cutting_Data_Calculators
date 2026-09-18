@@ -1,69 +1,71 @@
 /* =================================================================
-   1. GLOBAL VARIABLER (THEME SETTINGS)
-   Dessa variabler kontrollerar alla färger i kalkylatorn.
-   Ändra dessa för att snabbt byta tema.
+   1. GLOBAL VARIABLES (THEME SETTINGS)
+   These variables control all colors in the calculator.
+   Change these to quickly switch themes.
    ================================================================= */
 :root {
-    /* Ljust tema (Standard) */
-    --bg: #f8fafc;        /* Bakgrundsfärg */
-    --card: #ffffff;      /* Kortbakgrund (input/details) */
-    --text: #1e293b;      /* Huvudtextfärg */
-    --text-light: #64748b; /* Lättare text (etiketter, footers) */
-    --primary: #3b82f6;   /* Huvudfärg (sektionstitel, fokusramar) */
-    --success: #10b981;   /* Färg för positiva resultat/huvudresultat */
-    --warning: #f59e0b;   /* Varningsfärg */
-    --danger: #ef4444;    /* Fel/Maxat värde-färg */
-    --border: #e2e8f0;    /* Linjer och kantlinjer */
-    --shadow: 0 20px 40px rgba(0,0,0,0.08); /* Skugga under kortet */
-    --radius: 16px;       /* Standard hörnradie */
+    /* Light theme (default) */
+    --bg: #f8fafc;        /* Background color */
+    --card: #ffffff;      /* Card background (inputs/details) */
+    --text: #1e293b;      /* Main text color */
+    --text-light: #64748b; /* Lighter text (labels, footers) */
+    --primary: #3b82f6;   /* Primary color (section titles, focus rings) */
+    --primary-light: #eff6ff; /* Light tint of primary – used for hover states */
+    --success: #10b981;   /* Color for positive results/main results */
+    --warning: #f59e0b;   /* Warning color */
+    --danger: #ef4444;    /* Error/max value color */
+    --border: #e2e8f0;    /* Lines and borders */
+    --shadow: 0 20px 40px rgba(0,0,0,0.08); /* Shadow under the card */
+    --radius: 16px;       /* Default corner radius */
 }
 
-/* Mörkt tema: Aktiveras automatiskt om användarens system stöder det */
-@media (prefers-color-scheme: dark) {
-    :root { 
-        --bg: #0f172a;    /* Mörk bakgrund */
-        --card: #1e293b;  /* Mörka kort */
-        --text: #f1f5f9;  /* Ljus text */
-        --text-light: #94a3b8; /* Lättare ljus text */
-        --border: #334155; /* Mörka linjer */
-        --shadow: 0 20px 40px rgba(0,0,0,0.4); 
-    }
+/* Always reserve space for the scrollbar so the layout doesn't jump
+   when navigating between short and long pages. */
+html {
+    scrollbar-gutter: stable;
 }
 
-/* Tvingar fram mörkt tema om 'dark' klassen sätts via JavaScript (theme toggle) */
-body.dark { 
+/* Dark theme: activated when 'dark' is on <html>.
+   Set by an inline script in <head> (before rendering) and handled
+   by theme.js. Applying the class to <html> instead of <body>
+   allows the theme to be set before <body> exists – which
+   prevents "flash of unstyled content" (FOUC). */
+html.dark { 
     --bg: #0f172a; 
     --card: #1e293b; 
     --text: #f1f5f9; 
     --text-light: #94a3b8;
+    --primary-light: rgba(59, 130, 246, 0.15); /* Transparent blue tint for dark theme */
     --border: #334155; 
     --shadow: 0 20px 40px rgba(0,0,0,0.4); 
 }
 
 /* =================================================================
-   2. BASSTYLING
-   Grundläggande reset och kroppsinställningar.
+   2. BASE STYLING
+   Basic reset and body settings.
    ================================================================= */
 * { 
     margin:0; 
     padding:0; 
-    box-sizing:border-box; /* Räknar padding/border i bredden */
+    box-sizing:border-box; /* Includes padding/border in the width */
 }
 body { 
-    font-family:'Inter',sans-serif; /* Länkas via HTML:s <head> */
+    font-family:'Inter',sans-serif;
     background:var(--bg); 
     color:var(--text);
     min-height:100vh; 
     padding:20px; 
-    transition:all .4s; /* Mjuk övergång vid tema-/färgbyte */
+    /* Only color-related properties are animated – prevents the layout
+       from "drifting" during navigation or window resize. */
+    transition: background-color .4s ease, color .4s ease;
 }
        
 /* =================================================================
-   3. LAYOUT OCH HUVUDKOMPONENTER (CONTAINER, HEADER, TOGGLE)
+   3. LAYOUT AND MAIN COMPONENTS (CONTAINER, HEADER, TOGGLE)
    ================================================================= */
 .container { 
     max-width:650px; 
-    margin:20px auto; /* Centrerar kortet på skärmen */
+    margin:20px auto; /* Centers the card on the screen */
     background:var(--card);
     border-radius:var(--radius); 
     overflow:hidden; 
@@ -89,7 +91,7 @@ body {
 } 
 
 header { 
-    background:linear-gradient(135deg,#667eea,#764ba2); /* Lila/blå gradient */
+    background:linear-gradient(135deg,#667eea,#764ba2); /* Purple/blue gradient */
     color:white;
     padding:30px 24px; 
     text-align:center; 
@@ -105,7 +107,7 @@ h1 {
     opacity:0.9; 
 }
 
-/* Verktygsmaterial-brickan (HM / HSS) */
+/* Tool material badge (HM / HSS) */
 .tool-badge { 
     position:absolute; 
     top:16px; 
@@ -117,16 +119,16 @@ h1 {
     text-transform:uppercase; 
     letter-spacing:0.5px; 
 }
-.tool-hm { background:#1d4ed8; }   /* Blå för HM */
-.tool-hss { background:#ea580c; }  /* Orange för HSS */
+.tool-hm { background:#1d4ed8; }   /* Blue for HM */
+.tool-hss { background:#ea580c; }  /* Orange for HSS */
 
 main { 
     padding:32px 24px; 
 }
 
 /* =================================================================
-   4. FORMULÄR OCH INPUTS
-   Styling för inmatningsfält och etiketter.
+   4. FORM AND INPUTS
+   Styling for input fields and labels.
    ================================================================= */
 .section-title { 
     font-size:1.25rem; 
@@ -162,35 +164,39 @@ select, input[type=number] {
 }
 select:focus, input[type=number]:focus { 
     outline:none; 
-    border-color:var(--primary); /* Lyser upp vid fokus */
+    border-color:var(--primary); /* Highlights on focus */
     box-shadow:0 0 0 4px rgba(59,130,246,.15); 
-    transform:translateY(-2px); /* Liten upplyftande effekt vid fokus */
+    transform:translateY(-2px); /* Small lift effect on focus */
 }
 
 /* =================================================================
-   5. RESULTAT SEKTION
-   Styling för resultatboxen.
+   5. RESULTS SECTION
+   Styling for the results box.
    ================================================================= */
+   
 .results { 
     margin-top:32px; 
     padding:24px; 
-    background:linear-gradient(to bottom,#f8fafc,#e2e8f0); /* Lätt gradient */
+    background:linear-gradient(to bottom,#f8fafc,#e2e8f0); /* Light gradient */
     border-radius:14px; 
     border:2px solid #cbd5e1; 
     min-height:120px; 
-    transition:all .4s; 
+    /* Background is a gradient, which browsers cannot animate smoothly.
+       We animate only border-color – this gives a soft impression anyway. */
+    transition: border-color .4s ease;
 }
-body.dark .results { 
+
+html.dark .results { 
     background:linear-gradient(to bottom,#1e293b,#334155); 
     border-color:#475569; 
 }
 
-/* Färg när resultaten är beräknade (grön ton) */
+/* Color when results are calculated (green tone) */
 .results.ready { 
     background:linear-gradient(to bottom,#ecfdf5,#d1fae5); 
     border-color:#34d399; 
 }
-body.dark .results.ready { 
+html.dark .results.ready { 
     background:linear-gradient(to bottom,#064e3b,#065f46); 
 }
 
@@ -203,10 +209,10 @@ body.dark .results.ready {
 }
 .result-line { 
     display:flex; 
-    justify-content:space-between; /* Sprider ut text och värde */
+    justify-content:space-between; /* Spreads text and value apart */
     padding:10px 0;
     font-size:1.1rem; 
-    border-bottom:1px dashed var(--border); /* Delar upp resultatraderna */
+    border-bottom:1px dashed var(--border); /* Separates the result rows */
 }
 .result-line:last-child { 
     border-bottom:none; 
@@ -222,7 +228,7 @@ body.dark .results.ready {
     color:var(--text); 
 }
 .capped { 
-    color:var(--danger); /* Markerar varvtal om det begränsats av Max RPM */
+    color:var(--danger); /* Highlights spindle speed if limited by Max RPM */
 }
 .warning-text { 
     font-size:0.85rem; 
@@ -231,8 +237,8 @@ body.dark .results.ready {
 }
 
 /* =================================================================
-   6. DETALJBOXEN
-   Styling för de mindre beräkningsdetaljerna.
+   6. DETAILS BOX
+   Styling for the smaller calculation details.
    ================================================================= */
 .details-box {
     margin-top: 18px;
@@ -243,7 +249,7 @@ body.dark .results.ready {
     font-size: 0.9rem;
     line-height: 1.35;
 }
-body.dark .details-box { 
+html.dark .details-box { 
     background:#334155; 
 }
 .details-box p {
@@ -263,7 +269,7 @@ body.dark .details-box {
 .details-box span {
     color: var(--text);
     font-weight: 700;
-    white-space: nowrap; /* Förhindrar att resultatet bryts */
+    white-space: nowrap; /* Prevents the result from wrapping */
     text-align: right;
     flex-shrink: 0;
     flex-basis: auto;
@@ -275,7 +281,7 @@ body.dark .details-box {
     padding-left: 2px;
 }
 
-/* Meddelande om att inmatning saknas */
+/* Message when input is missing */
 .missing { 
     color:#dc2626; 
     font-weight:600; 
@@ -295,8 +301,8 @@ footer {
 }
 
 /* =================================================================
-   8. FACE MILLING SPECIFIKT (GEOMETRY TOGGLE)
-   Styling för att växla mellan Kappa-vinkel och Rund skär.
+   8. FACE MILLING SPECIFIC (GEOMETRY TOGGLE)
+   Styling for switching between Kappa angle and Round insert.
    ================================================================= */
 .geometry-toggle { 
     display:flex; 
@@ -313,7 +319,7 @@ footer {
     cursor:pointer; 
     font-weight:600;
     transition:all .3s; 
-    user-select: none; /* Förhindrar att text markeras vid klick */
+    user-select: none; /* Prevents text from being selected on click */
 }
 .geo-btn:hover {
     opacity: 0.9;
@@ -325,11 +331,11 @@ footer {
 }
 
 /* =================================================================
-   9. T-SLOT & SIDE MILLING SPECIFIKT
-   Tillägg för lägesväljare, underrubrik och varningar.
+   9. T-SLOT & SIDE MILLING SPECIFIC
+   Additions for mode selector, subheading and warnings.
    ================================================================= */
 
-/* Underrubrik i header (Header Subtext) */
+/* Header subtext */
 .header-subtext {
     font-size: 0.85rem;
     font-weight: 400;
@@ -338,7 +344,7 @@ footer {
     color: white;
 }
 
-/* Lägesväljare (Mode Selector) */
+/* Mode selector */
 .mode-selector { 
     display: flex; 
     gap: 10px; 
@@ -367,11 +373,11 @@ footer {
 .mode-selector input[type="radio"]:hover + label {
     background-color: rgba(59, 130, 246, 0.1); /* Light theme hover */
 }
-body.dark .mode-selector input[type="radio"]:hover + label {
+html.dark .mode-selector input[type="radio"]:hover + label {
     background-color: rgba(59, 130, 246, 0.3); /* Dark theme hover */
 }
 
-/* Varningsruta */
+/* Warning box */
 .warning { 
     color: var(--danger); 
     font-weight: 600; 
@@ -385,20 +391,15 @@ body.dark .mode-selector input[type="radio"]:hover + label {
 }
 
 /* =================================================================
-   10. INDEX.HTML SPECIFIKT (Layout och Navigering)
+   10. INDEX.HTML SPECIFIC (Layout and Navigation)
    ================================================================= */
 
-/* Body padding: Vi använder den globala padding:20px (se Sektion 2) för att få utrymme runt kortet. */
-
-/* Global layout för startsidan: Gör den till ett kort */
+/* Global layout for the start page: turns it into a card */
 .app-container { 
     max-width:650px; 
-    /* ÄNDRING 1: Matchar .container marginal: 20px auto */
     margin: 20px auto; 
     display:flex; 
     flex-direction:column; 
-    
-    /* GÖR DEN TILL ETT KORT (som .container) */
     background:var(--card);
     border-radius:var(--radius); 
     overflow:hidden; 
@@ -412,7 +413,6 @@ body.dark .mode-selector input[type="radio"]:hover + label {
     color:white; 
     padding:30px 24px; 
     text-align:center; 
-    /* ÄNDRING 2: Borttagen/ändrad margin-bottom för att matcha kalkylatorsidorna */
     margin-bottom: 0; 
 }
 .logo-text { 
@@ -427,7 +427,6 @@ body.dark .mode-selector input[type="radio"]:hover + label {
 
 /* === CALCULATOR LIST === */
 .calculator-list { 
-    /* ÄNDRING 3: Lägger till 32px padding uppe/nere för att matcha kalkylatorns "main" padding */
     padding: 32px 24px; 
     flex-grow:1; 
     background:var(--card); 
@@ -437,7 +436,6 @@ body.dark .mode-selector input[type="radio"]:hover + label {
     text-decoration:none; 
     color:inherit; 
     background:var(--card); 
-    /* NYTT: Lägger till en tunn ram med din standardkantfärg */
     border: 1px solid var(--border); 
     padding:16px 20px; 
     margin-bottom:12px; 
@@ -449,23 +447,112 @@ body.dark .mode-selector input[type="radio"]:hover + label {
     box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
 }
 .calc-item:last-child {
-    /* Denna marginal är kvar för att ge lite extra utrymme före footern */
     margin-bottom: 30px; 
 }
 .calc-item:hover { 
     background:var(--primary-light); 
-    border-color: var(--primary); /* Lyser upp kanten vid hover */
+    border-color: var(--primary); 
     transform: translateY(-1px); 
 }
 .calc-item:active { transform: translateY(0); }
-/* Fixar färg vid besökta länkar */
 .calc-item:visited { color: inherit; } 
 .calc-item:visited span { color: var(--text); } 
 .calc-item:focus { 
     outline: none; 
-    box-shadow: 0 0 0 4px rgba(59,130,246,.15); /* Matchar fokusringen på inputfälten */
+    box-shadow: 0 0 0 4px rgba(59,130,246,.15); 
     background: var(--card) !important; 
     border-color: var(--primary) !important;
 } 
 .calc-item span { font-weight: 600; font-size: 1.1rem; color: var(--text); }
 .calc-item::after { content: '→'; font-size: 1.5rem; color: var(--primary); }
+
+/* =================================================================
+   11. TOOLTIPS
+   Small "?" bubbles that show helper text on hover (desktop) or tap (mobile).
+   Uses position:fixed to avoid being clipped by .container's
+   overflow:hidden. Position is fully calculated by JS (--tt-x, --tt-y).
+   ================================================================= */
+.tooltip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--text-light);
+    color: var(--card);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: help;
+    margin-left: 6px;
+    vertical-align: middle;
+    position: relative;
+    user-select: none;
+    transition: background-color .2s;
+}
+
+.tooltip:hover,
+.tooltip:focus {
+    background: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary);  /* synlig fokus-ring */
+}
+
+/* The bubble – position:fixed prevents it from being clipped by
+   overflow:hidden on .container. Position is fully controlled by JS
+   via --tt-x and --tt-y. transform: translateX(-50%) makes --tt-x
+   represent the center-x. */
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: fixed;
+    left: var(--tt-x, 0px);
+    top: var(--tt-y, 0px);
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--card);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.4;
+    white-space: normal;
+    width: 220px;
+    max-width: calc(100vw - 16px);
+    text-align: left;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* =================================================================
+   12. DISABLED MODE SELECTOR
+   Used when a mode selector is locked (e.g. coolant method for HSS).
+   The selector remains visible to prevent layout shifts, but is not
+   interactive. The currently active option still shows highlighted.
+   ================================================================= */
+.mode-selector.disabled {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* =================================================================
+   13. DISABLED INPUT FIELDS
+   Used when a field is locked by mode (e.g. ae = 100% during Full
+   Slotting). The field stays visible to prevent layout shifts.
+   ================================================================= */
+.form-group.disabled label {
+    opacity: 0.55;
+}
+.form-group.disabled input[type=number]:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: var(--bg);
+    color: var(--text-light);
+}
+
+.tooltip:hover::after,
+.tooltip:focus::after {
+    opacity: 1;
+}

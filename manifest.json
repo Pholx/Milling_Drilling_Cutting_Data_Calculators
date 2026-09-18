@@ -1,9 +1,12 @@
 {
+  "id": "./",
   "name": "Cutting Data PRO",
   "short_name": "CuttingData",
-  "description": "Calculate cutting data for face milling, drilling, and dynamic milling quickly and easily.",
-  "start_url": "/Milling_Drilling_Cutting_Data_Calculators/index.html",
-  "scope": "/Milling_Drilling_Cutting_Data_Calculators/",
+  "description": "Cutting data calculators for face milling, drilling, reaming, dynamic milling, chamfering, T-slot milling and slitting – with HM and HSS tool support.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f8fafc",
@@ -12,26 +15,42 @@
     {
       "src": "icon-72.png",
       "sizes": "72x72",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon-96.png",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon-128.png",
       "sizes": "128x128",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon-152.png",
       "sizes": "152x152",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon-192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },

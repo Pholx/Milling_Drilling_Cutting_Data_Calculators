@@ -4,81 +4,94 @@
     <meta charset="UTF-8">
     <title>Chamfer Milling Calculator Pro</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- FOUC fix: Apply the correct theme on <html> BEFORE the page is rendered. -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme = saved || (prefersDark ? 'dark' : 'light');
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) { /* localStorage may be blocked */ }
+        })();
+    </script>
+
+    <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
+    <link rel="apple-touch-icon" href="../icon-192.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css"> 
 </head>
+
 <body>
 <div class="container">
     <button class="theme-toggle" id="themeToggle">🌙</button>
-    <div class="tool-badge tool-hm">HM</div>
    
     <header>
+        <div class="tool-badge tool-hm" id="toolBadge">HM</div>
         <h1>Chamfer Milling Calculator Pro</h1>
-        <h2 class="header-subtext">Cutting Data for Chamfer Milling based on Effective Diameter (D<sub>eff</sub>)</h2> 
+        <p class="subtitle">Cutting Data for Chamfer Milling based on Effective Diameter (D<sub>eff</sub>)</p> 
     </header>
     <main>
         <div class="section-title">Geometry & Material</div>
         
         <div class="form-group">
-            <label for="material">1. Material:</label>
+            <label for="material">Material:<span class="tooltip" data-tooltip="Select the workpiece material. Controls Vc and the fz table." tabindex="0">?</span></label>
             <select id="material">
-                <option value="steel1080" selected>Steel (~1080 N/mm²)</option>
-                <option value="toolox44">Toolox 44 (~45 HRC)</option>
-                <option value="steel50hrc">Hardened Steel 50 HRC</option>
-                <option value="steel60hrc">Hardened Steel 60 HRC</option>
-                <option value="vanadis">Vanadis / Powder Steel</option>
-                <option value="nonferrous">Aluminum / Copper</option>
+                <!-- Options are populated dynamically from toolData -->
             </select>
         </div>
 
         <div class="form-group">
-            <label for="Dtip">2. Tip Diameter D<sub>tip</sub> [mm]:</label>
-            <select id="Dtip">
-                <option value="0.0" selected>0.0 mm (Pointed)</option>
-                <option value="0.5">0.5 mm</option>
-                <option value="1.0">1.0 mm</option>
-                <option value="2.0">2.0 mm</option>
-                <option value="3.0">3.0 mm</option>
-                <option value="5.0">5.0 mm</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="fasVinkel">3. Chamfer Angle θ [°]:</label>
-            <select id="fasVinkel">
-                <option value="30">30°</option>
-                <option value="45" selected>45°</option>
+            <label for="toolAngle">Tool Included Angle θ [°]:<span class="tooltip" data-tooltip="The tool's full included angle (tip angle). 90° is the most common for chamfering." tabindex="0">?</span></label>
+            <select id="toolAngle">
                 <option value="60">60°</option>
+                <option value="82">82°</option>
+                <option value="90" selected>90°</option>
+                <option value="100">100°</option>
+                <option value="120">120°</option>
             </select>
         </div>
         
         <div class="form-group">
-            <label for="fasDjup">4. Chamfer Depth a<sub>p</sub> [mm] (Axial depth of cut):</label>
-            <input type="number" id="fasDjup" value="1.0" step="0.1" min="0.1">
+            <label for="chamferSize">Chamfer Size [mm] (Horizontal width):<span class="tooltip" data-tooltip="Desired chamfer width, measured horizontally from the material's edge inward." tabindex="0">?</span></label>
+            <input type="number" id="chamferSize" value="1.0" step="0.1" min="0.1">
+        </div>
+        
+        <div class="form-group">
+            <label for="extraZ">Extra Z Depth [mm] (Beyond required depth):<span class="tooltip" data-tooltip="Extra depth beyond what the chamfer width requires. Increases D_eff and thereby fz." tabindex="0">?</span></label>
+            <input type="number" id="extraZ" value="0.0" step="0.1" min="0">
         </div>
 
         <hr>
         <div class="section-title">Cutting Data (Editable)</div>
-        <div class="form-group"><label>Cutting Speed Vc [m/min]:</label><input type="number" id="vc" value="150" step="any"></div>
-        <div class="form-group"><label>Base Feed Per Tooth f<sub>z,bas</sub> [mm/z]:</label><input type="number" id="fzBase" value="0.032" step="any"></div>
-        <div class="form-group"><label>Number of Flutes z:</label><input type="number" id="z" value="4" step="1"></div>
-        <div class="form-group"><label>Max RPM:</label><input type="number" id="maxRpm" value="8000" step="any"></div>
+        <div class="form-group">
+            <label for="vc">Cutting Speed Vc [m/min]:<span class="tooltip" data-tooltip="Cutting speed. Automatically adjusted based on the selected material." tabindex="0">?</span></label>
+            <input type="number" id="vc" value="150" step="10">
+        </div>
+        <div class="form-group">
+            <label for="fzBase">Base Feed Per Tooth f<sub>z,bas</sub> [mm/z]:<span class="tooltip" data-tooltip="Base feed per tooth. Adjusted for D_eff unless you edit it manually." tabindex="0">?</span></label>
+            <input type="number" id="fzBase" value="0.032" step="0.001">
+        </div>
+        <div class="form-group">
+            <label for="z">Number of Flutes z:<span class="tooltip" data-tooltip="Number of cutting edges on the tool." tabindex="0">?</span></label>
+            <input type="number" id="z" value="4" step="1">
+        </div>
+        <div class="form-group">
+            <label for="maxRpm">Max RPM:<span class="tooltip" data-tooltip="Maximum machine spindle speed. Limits N if the calculated speed exceeds this." tabindex="0">?</span></label>
+            <input type="number" id="maxRpm" value="8000" step="100">
+        </div>
         
-        
-        <div class="results ready">
-            <h2>Results</h2>
-            <div class="result-line"><strong>Spindle Speed N [rpm]:</strong> <span class="value" id="nResult">-</span></div>
-            <div class="result-line"><strong>V<sub>f</sub> (Internal/Std) [mm/min]:</strong> <span class="value" id="vfResultStandard">-</span></div>
-            <div class="result-line"><strong>V<sub>f</sub> (External/Prod) [mm/min]:</strong> <span class="value capped" id="vfResultProd">-</span></div>
-            
-            <div class="details-box">
-                <p><strong>D<sub>eff</sub>:</strong><span id="dEffResult">-</span></p> 
-                <p><strong>Std. f<sub>z</sub>:</strong><span id="fzCorrectedStandard">-</span></p>
-                <p><strong>Prod. f<sub>z</sub> (Std. f<sub>z</sub> * 1.5):</strong><span id="fzCorrectedProd">-</span></p>
-                <p><strong>Feed Reduction R<sub>f</sub>:</strong><span id="rfFactorResult">-</span></p>
-                <p><strong>Vc:</strong><span id="actualVcResult">-</span></p> 
-            </div>
+        <!-- ============================================================ -->
+        <!-- RESULTS                                                        -->
+        <!-- ============================================================ -->
+        <div class="results" id="results">
+            <p style="color:var(--text-light); text-align:center; padding:20px 0;">
+                Fill in the fields above to get cutting data
+            </p>
         </div>
     </main>
 </div>
@@ -88,9 +101,8 @@
 
 <script>
     // =====================================================================
-    // Kritiska Hjälpfunktioner
+    // Helper functions
     // =====================================================================
-
     const parseValue = (id, defaultValue = 0) => {
         const value = parseFloat(document.getElementById(id).value);
         return isNaN(value) ? defaultValue : value;
@@ -98,142 +110,177 @@
     
     const formatDecimal = (num, fixed) => {
         if (isNaN(num)) return "N/A";
-        return num.toFixed(fixed).replace(/\.?0+$/, "");
+        const s = num.toFixed(fixed);
+        return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
     };
 
-
-    // Flaggar för att kontrollera om användaren har redigerat Vc, fz, eller z manuellt
     const userEdited = {vc: false, fz: false, z: false};
 
-    // Funktion för att uppdatera alla resultat i HTML-gränssnittet
-    function updateResults(n, Vf_standard, Vf_prod, D_eff, fz_korr_standard, fz_korr_prod, Rf_standard, Vc, maxRpm, isCapped, actualVc) {
-        document.getElementById('nResult').textContent = Math.round(n);
-        document.getElementById('vfResultStandard').textContent = Vf_standard;
-        document.getElementById('vfResultProd').textContent = Vf_prod; 
-        
-        // Sätter färg på varvtalet om det begränsats av Max RPM
-        document.getElementById('nResult').classList.toggle('capped', isCapped);
-        
-        // Uppdaterar detaljboxen
-        document.getElementById('dEffResult').innerHTML = formatDecimal(D_eff, 3) + ' <sub>mm</sub>';
-        document.getElementById('fzCorrectedStandard').innerHTML = formatDecimal(fz_korr_standard, 4) + ' <sub>mm/z</sub>';
-        document.getElementById('fzCorrectedProd').innerHTML = formatDecimal(fz_korr_prod, 4) + ' <sub>mm/z</sub>';
-        document.getElementById('rfFactorResult').innerHTML = formatDecimal(Rf_standard, 2) + ' <sub>(x)</sub>';
-        
-        // VISAR DET FAKTISKA Vc-VÄRDET
-        document.getElementById('actualVcResult').innerHTML = formatDecimal(actualVc, 1) + ' <sub>m/min</sub>';
+    // =====================================================================
+    // Populate material dropdown from toolData
+    // =====================================================================
+    function generateMaterialOptions() {
+        const select = document.getElementById('material');
+        select.innerHTML = '';
+
+        for (const key in toolData) {
+            if (Object.prototype.hasOwnProperty.call(toolData, key)) {
+                const option = new Option(toolData[key].name, key);
+                if (key === 'steel1080') option.selected = true;
+                select.options.add(option);
+            }
+        }
     }
 
-    // Huvudberäkningsfunktion som anropar logiken i Chamfer_tool_data.js
+    // =====================================================================
+    // Main calculation and result rendering
+    // =====================================================================
     function calculate() {
-        // Hämta inmatningsvärden från HTML via parseValue()
-        const D_tip = parseValue('Dtip');
-        const fasVinkel = parseValue('fasVinkel');
-        const ap = parseValue('fasDjup');
+        const chamfer_size = parseValue('chamferSize');
+        const angle = parseValue('toolAngle');
+        const extraZ = parseValue('extraZ');
         const Vc = parseValue('vc');
-        const fz_bas = parseValue('fzBase'); 
+        const fz_bas = parseValue('fzBase');
         const z = Math.round(parseValue('z', 1));
         const maxRpm = parseValue('maxRpm');
-        const mat = document.getElementById('material').value;
 
-        // Kontrollerar om nödvändiga värden finns. 
-        if (D_tip < 0 || ap <= 0 || Vc <= 0 || z <= 0 || fz_bas <= 0 || typeof runCalculations === 'undefined') {
-            // Rensa resultat om inmatning saknas eller om JS-filen inte laddades
-            const results = ['nResult', 'vfResultStandard', 'vfResultProd', 'dEffResult', 'fzCorrectedStandard', 'fzCorrectedProd', 'rfFactorResult', 'actualVcResult'];
-            results.forEach(id => document.getElementById(id).textContent = 'N/A');
-            document.getElementById('nResult').classList.remove('capped');
+        const resultsEl = document.getElementById('results');
+
+        // Input validation
+        if (chamfer_size < 0.1 || extraZ < 0 || Vc <= 0 || z <= 0 || fz_bas <= 0
+            || typeof runCalculations === 'undefined') {
+            resultsEl.classList.remove('ready');
+            resultsEl.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px 0;">Please enter valid cutting data to calculate results.</p>';
             return;
         }
 
-        // Anropar beräkningslogiken (funktionalitet från Chamfer_tool_data.js)
-        const results = runCalculations(D_tip, fasVinkel, ap, Vc, fz_bas, z, maxRpm, mat);
+        const res = runCalculations(chamfer_size, angle, extraZ, Vc, fz_bas, z, maxRpm);
 
-        // Uppdaterar gränssnittet
-        updateResults(
-            results.n, 
-            results.Vf_standard, 
-            results.Vf_prod, 
-            results.D_eff, 
-            results.fz_korr_standard, 
-            results.fz_korr_prod, 
-            results.Rf_standard, 
-            Vc, 
-            maxRpm, 
-            results.isCapped,
-            results.actualVc
-        );
+        // Render results
+        resultsEl.classList.add('ready');
+        resultsEl.innerHTML = `
+            <h2>Results</h2>
+            <div class="result-line"><strong>Spindle Speed N [rpm]:<span class="tooltip" data-tooltip="Calculated spindle speed. Red text = limited by Max RPM." tabindex="0">?</span></strong> <span class="value ${res.isCapped ? 'capped' : ''}">${Math.round(res.n)}</span></div>
+            <div class="result-line"><strong>V<sub>f</sub> (Finish) [mm/min]:<span class="tooltip" data-tooltip="Conservative feed for fine surface finish (fz × 0.6)." tabindex="0">?</span></strong> <span class="value">${res.Vf_finish}</span></div>
+            <div class="result-line"><strong>V<sub>f</sub> (Internal/Std) [mm/min]:<span class="tooltip" data-tooltip="Base feed without chip thinning." tabindex="0">?</span></strong> <span class="value">${res.Vf_std}</span></div>
+            <div class="result-line"><strong>V<sub>f</sub> (External/Prod) [mm/min]:<span class="tooltip" data-tooltip="Aggressive feed with chip thinning compensation." tabindex="0">?</span></strong> <span class="value">${res.Vf_prod}</span></div>
+            
+            <div class="details-box">
+                <p><strong>D<sub>eff</sub>:<span class="tooltip" data-tooltip="Effective diameter at engagement (largest diameter in the material)." tabindex="0">?</span></strong><span>${formatDecimal(res.D_eff, 3)} <sub>mm</sub></span></p> 
+                <p><strong>Z-depth (required):<span class="tooltip" data-tooltip="Z-depth required to achieve the desired chamfer width." tabindex="0">?</span></strong><span>${formatDecimal(res.Z_req, 3)} <sub>mm</sub></span></p>
+                <p><strong>Z-depth (total):<span class="tooltip" data-tooltip="Total Z-depth including extra depth." tabindex="0">?</span></strong><span>${formatDecimal(res.Z_total, 3)} <sub>mm</sub></span></p>
+                <p><strong>Radial Engagement ae:<span class="tooltip" data-tooltip="Radial engagement in the side direction. Equal to chamfer_size." tabindex="0">?</span></strong><span>${formatDecimal(res.ae, 3)} <sub>mm</sub></span></p>
+                <p><strong>Chip thinning factor:<span class="tooltip" data-tooltip="Compensation factor for thinner chips. Cap: 2.0." tabindex="0">?</span></strong><span>${formatDecimal(res.chip_thinning, 3)} <sub>(x)</sub></span></p>
+                <p><strong>Finish f<sub>z</sub>:<span class="tooltip" data-tooltip="Feed per tooth for fine surface finish (fz_bas × 0.6)." tabindex="0">?</span></strong><span>${formatDecimal(res.fz_finish, 4)} <sub>mm/z</sub></span></p>
+                <p><strong>Std. f<sub>z</sub>:<span class="tooltip" data-tooltip="Base fz without compensation." tabindex="0">?</span></strong><span>${formatDecimal(res.fz_std, 4)} <sub>mm/z</sub></span></p>
+                <p><strong>Prod. f<sub>z</sub> (chip thinning):<span class="tooltip" data-tooltip="fz with chip thinning compensation." tabindex="0">?</span></strong><span>${formatDecimal(res.fz_prod, 4)} <sub>mm/z</sub></span></p>
+                <p><strong>Vc:<span class="tooltip" data-tooltip="Actual cutting speed. May deviate from the desired value if N was limited." tabindex="0">?</span></strong><span>${formatDecimal(res.actualVc, 1)} <sub>m/min</sub></span></p> 
+            </div>
+        `;
     }
-    
-    // Funktion för att uppdatera Vc och fz baserat på materialval. Anropar calculate.
+
+    // =====================================================================
+    // Default values per material
+    // =====================================================================
     function updateStandardValuesAndCalculate() {
-        // Kontrollerar att beroenden från Chamfer_tool_data.js är definierade
-        if (typeof toolData === 'undefined' || typeof getFzFromTable === 'undefined' || typeof calculateDeff === 'undefined') {
-             console.error("Chamfer_tool_data.js verkar inte ha laddats korrekt.");
-             calculate(); 
-             return;
+        if (typeof toolData === 'undefined' || typeof getFzFromTable === 'undefined'
+            || typeof calculateDeff === 'undefined') {
+            calculate();
+            return;
         }
 
         const mat = document.getElementById('material').value;
         const matData = toolData[mat];
-        
         if (!matData) return;
-        
-        // Hämta aktuella geometrivärden
-        const current_Dtip = parseValue('Dtip');
-        const current_fasVinkel = parseValue('fasVinkel');
-        const current_ap = parseValue('fasDjup');
-        
-        // Beräkna den aktuella D_eff och använd den för att slå upp fz.
-        const actual_D_eff = calculateDeff(current_Dtip, current_fasVinkel, current_ap); 
-        const default_fz = getFzFromTable(mat, actual_D_eff);
-        
-        // Uppdatera Vc, fzBase och z endast om användaren INTE redigerat dem
+
+        const chamfer_size = parseValue('chamferSize');
+        const angle = parseValue('toolAngle');
+        const extraZ = parseValue('extraZ');
+
+        const D_eff = calculateDeff(chamfer_size, angle, extraZ);
+        const default_fz = getFzFromTable(mat, D_eff);
+
         if (!userEdited.vc) document.getElementById('vc').value = matData.vc;
         if (!userEdited.fz) document.getElementById('fzBase').value = formatDecimal(default_fz, 4);
         if (!userEdited.z) document.getElementById('z').value = matData.z_base;
-        
+
         calculate();
     }
 
+    // =====================================================================
+    // Tooltip positioning
+    // =====================================================================
+    function positionTooltip(el) {
+        const rect = el.getBoundingClientRect();
+        const bubbleWidth = Math.min(220, window.innerWidth - 16);
+        const bubbleHeight = 90;
+        const padding = 8;
+        const gap = 8;
+        const vw = window.innerWidth;
 
-    // Huvudfunktion som körs när sidan laddas
+        let centerX = rect.left + rect.width / 2;
+        if (centerX - bubbleWidth / 2 < padding) {
+            centerX = padding + bubbleWidth / 2;
+        } else if (centerX + bubbleWidth / 2 > vw - padding) {
+            centerX = vw - padding - bubbleWidth / 2;
+        }
+
+        let topY = rect.top - bubbleHeight - gap;
+        if (topY < padding) {
+            topY = rect.bottom + gap;
+        }
+
+        el.style.setProperty('--tt-x', centerX + 'px');
+        el.style.setProperty('--tt-y', topY + 'px');
+    }
+
+    // =====================================================================
+    // Initialization
+    // =====================================================================
     document.addEventListener('DOMContentLoaded', () => {
-        // Event listeners för att markera om användaren redigerat ett värde
+        // Populate material dropdown from toolData
+        generateMaterialOptions();
+
+        // Tooltip listeners via event delegation
+        // Handles tooltips created dynamically inside the results box.
+        document.addEventListener('mouseover', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('focusin', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('touchstart', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        }, { passive: true });
+
+        window.addEventListener('scroll', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        });
+
+        // Input listeners
         document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', () => {
             if (el.id === 'vc') userEdited.vc = true;
             if (el.id === 'fzBase') userEdited.fz = true;
             if (el.id === 'z') userEdited.z = true;
-            calculate(); // Kör beräkningen vid varje inmatningsändring
+            calculate();
         }));
-        
-        // Event listeners för ändringar i input
+
         document.getElementById('material').addEventListener('change', updateStandardValuesAndCalculate);
-        document.getElementById('Dtip').addEventListener('change', updateStandardValuesAndCalculate);
-        document.getElementById('fasVinkel').addEventListener('change', updateStandardValuesAndCalculate);
-        document.getElementById('fasDjup').addEventListener('input', updateStandardValuesAndCalculate); 
+        document.getElementById('chamferSize').addEventListener('input', updateStandardValuesAndCalculate);
+        document.getElementById('toolAngle').addEventListener('change', updateStandardValuesAndCalculate);
+        document.getElementById('extraZ').addEventListener('input', updateStandardValuesAndCalculate);
         document.getElementById('maxRpm').addEventListener('input', calculate);
 
-        // Initial beräkning när sidan laddats
         updateStandardValuesAndCalculate();
     });
-
-    // Dark Mode Toggle Logic
-    const toggle = document.getElementById('themeToggle');
-    const updateThemeIcon = () => {
-        if (document.body.classList.contains('dark')) {
-            toggle.textContent = '☀️';
-        } else {
-            toggle.textContent = '🌙';
-        }
-    };
-    toggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark');
-        updateThemeIcon();
-    });
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-    }
-    updateThemeIcon();
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

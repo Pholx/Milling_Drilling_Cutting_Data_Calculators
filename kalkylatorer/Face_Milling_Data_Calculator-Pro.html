@@ -4,62 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cutting Data Calculator - Face Milling</title>
+
+    <!-- FOUC fix: Apply the correct theme on <html> BEFORE the page is rendered. -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme = saved || (prefersDark ? 'dark' : 'light');
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) { /* localStorage may be blocked */ }
+        })();
+    </script>
+
+    <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
+    <link rel="apple-touch-icon" href="../icon-192.png">
+
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
-<div class="container" style="max-width:650px; margin:20px auto 0;">
+<div class="container">
     <button class="theme-toggle" id="themeToggle">🌙</button>
     
     <header>
+        <div class="tool-badge tool-hm" id="toolBadge">HM</div>
         <h1>Face Milling Calculator</h1>
         <p class="subtitle">Face Milling – Kappa & Round Inserts</p>
     </header>
 
     <main>
+        <!-- ============================================================ -->
+        <!-- SECTION 1: Tool & Material                                    -->
+        <!-- ============================================================ -->
+        <div class="section-title">Tool & Material</div>
+
         <div class="form-group">
-            <label for="material_group">Material Group</label>
+            <label for="material_group">Material Group:<span class="tooltip" data-tooltip="Select the workpiece material. Controls Vc and the recommended chip thickness (hm)." tabindex="0">?</span></label>
             <select id="material_group">
-                <option value="P2">Steel: Soft (< 1100 N/mm²)</option>
-                <option value="M1">Stainless: Austenitic (< 850 N/mm²)</option>
-                <option value="P3">Steel: Hard (> 1100 N/mm²)</option>
-                <option value="T44">Steel: Toolox 44 (< 50 HRC)</option>
-                <option value="K1">Gjutjärn (Cast Iron)</option>
-                <option value="N1">Aluminum</option>
+                <!-- Options are populated dynamically from materialData -->
             </select>
         </div>
 
         <div class="form-group">
-            <label for="vc">Cutting Speed (Vc) (m/min)</label>
-            <input type="number" id="vc" step="10" value="176">
-        </div>
-
-        <div class="form-group">
-            <label for="hm">Desired Chip Thickness (hm) (mm)</label>
-            <input type="number" id="hm" step="0.01" value="0.15">
-        </div>
-
-        <div class="form-group">
-            <label for="D">Tool Diameter (D) (mm)</label>
+            <label for="D">Tool Diameter D [mm]:<span class="tooltip" data-tooltip="Cutter diameter in mm." tabindex="0">?</span></label>
             <input type="number" id="D" step="1" value="63">
         </div>
 
         <div class="form-group">
-            <label for="Z">Number of Teeth (Z)</label>
+            <label for="Z">Number of Teeth Z:<span class="tooltip" data-tooltip="Number of cutting inserts in the cutter." tabindex="0">?</span></label>
             <input type="number" id="Z" step="1" value="6">
         </div>
 
-        <div class="form-group">
-            <label for="ap">Axial Depth of Cut (ap) (mm)</label>
-            <input type="number" id="ap" step="0.1" value="2.0">
-            <p class="warning-text" id="ap-note" style="margin-top:6px;"></p>
-        </div>
+        <hr>
 
-        <div class="form-group">
-            <label for="n_max">Machine Max Spindle Speed (RPM)</label>
-            <input type="number" id="n_max" step="100" value="10000">
-        </div>
+        <!-- ============================================================ -->
+        <!-- SECTION 2: Insert Geometry                                    -->
+        <!-- ============================================================ -->
+        <div class="section-title">Insert Geometry</div>
 
         <div class="geometry-toggle">
             <div class="geo-btn active" data-geo="kappa">Fixed Rake Angle (κ)</div>
@@ -67,7 +73,7 @@
         </div>
 
         <div id="kappa-input" class="form-group">
-            <label for="kappa">Rake Angle (κ)</label>
+            <label for="kappa">Rake Angle κ:<span class="tooltip" data-tooltip="The cutting edge's lead angle. Lower κ (high feed) allows higher feed rates." tabindex="0">?</span></label>
             <select id="kappa">
                 <option value="90">90° (Shoulder Milling)</option>
                 <option value="75">75°</option>
@@ -77,12 +83,49 @@
             </select>
         </div>
 
-        <div id="radius-input" class="form-group" style="display:none;">
-            <label for="R">Insert Radius (R) (mm)</label>
+        <div id="radius-R" class="form-group" style="display:none;">
+            <label for="R">Insert Radius R [mm]:<span class="tooltip" data-tooltip="Radius of the round insert. Together with ap it determines the effective chip thinning." tabindex="0">?</span></label>
             <input type="number" id="R" step="1" value="10">
+        </div>
+
+        <div id="radius-ap" class="form-group" style="display:none;">
+            <label for="ap">Axial Depth of Cut a<sub>p</sub> [mm]:<span class="tooltip" data-tooltip="Axial depth of cut. Together with R it determines the effective lead angle for round inserts." tabindex="0">?</span></label>
+            <input type="number" id="ap" step="0.1" value="2.0">
             <p class="warning-text" id="radius-warning" style="margin-top:6px;"></p>
         </div>
 
+        <div class="form-group">
+            <label for="aePercent">Radial Engagement a<sub>e</sub> [% of D]:<span class="tooltip" data-tooltip="Radial engagement as percentage of cutter diameter. Recommended range depends on the insert geometry." tabindex="0">?</span></label>
+            <input type="number" id="aePercent" step="1" value="75">
+            <p class="warning-text" id="ae-warning" style="margin-top:6px;"></p>
+            <p style="font-size:0.8rem; color:var(--text-light); margin-top:4px; line-height:1.4;" id="ae-hint"></p>
+        </div>
+
+        <hr>
+
+        <!-- ============================================================ -->
+        <!-- SECTION 3: Cutting Data (Editable)                            -->
+        <!-- ============================================================ -->
+        <div class="section-title">Cutting Data (Editable)</div>
+
+        <div class="form-group">
+            <label for="vc">Cutting Speed Vc [m/min]:<span class="tooltip" data-tooltip="Cutting speed. Automatically adjusted based on the selected material." tabindex="0">?</span></label>
+            <input type="number" id="vc" step="10" value="176">
+        </div>
+
+        <div class="form-group">
+            <label for="hm">Desired Chip Thickness h<sub>m</sub> [mm]:<span class="tooltip" data-tooltip="Desired average chip thickness. Controls feed per tooth via chip thinning." tabindex="0">?</span></label>
+            <input type="number" id="hm" step="0.01" value="0.15">
+        </div>
+
+        <div class="form-group">
+            <label for="n_max">Machine Max Spindle Speed [RPM]:<span class="tooltip" data-tooltip="Maximum spindle speed of your machine. Limits n if the calculated speed exceeds this." tabindex="0">?</span></label>
+            <input type="number" id="n_max" step="100" value="10000">
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- RESULTS                                                        -->
+        <!-- ============================================================ -->
         <div class="results" id="results">
             <p style="color:var(--text-light); text-align:center; padding:20px 0;">
                 Fill in the fields above to get cutting data
@@ -91,11 +134,336 @@
     </main>
 </div>
 
-<footer>
-    <p>Face Milling Data Calculator Pro – created by Jimmy Rauhala</p>
-</footer>
+<footer>Face Milling Data Calculator Pro – created by Jimmy Rauhala</footer>
 
 <script src="Face_Milling_tool_data.js"></script>
+<script>
+    // =====================================================================
+    // UI LOGIC FOR FACE MILLING
+    // =====================================================================
+
+    // kappa is handled separately (own change listener) so it is NOT
+    // included here to avoid double-binding.
+    const inputIds = ['vc','hm','D','Z','ap','n_max','R','aePercent'];
+
+    // =====================================================================
+    // Helper functions
+    // =====================================================================
+    const formatDecimal = (num, fixed) => {
+        if (isNaN(num)) return "N/A";
+        const s = num.toFixed(fixed);
+        return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
+    };
+
+    /**
+     * Computes the chip thinning factor K for face milling.
+     *
+     *   hm = fz × K
+     *   K  = sin(κ) × √(ae/D)
+     *
+     * For round inserts, sin(κ) is replaced by the effective value
+     * sin(κ_eff) = √(ap/R × (2 − ap/R)).
+     */
+    function chipThinningFactor(aePercent, sinKappa) {
+        const u = aePercent / 100;
+        if (u <= 0 || u > 1) return null;
+        return sinKappa * Math.sqrt(u);
+    }
+
+    /** Populates the material dropdown dynamically from materialData. */
+    function populateMaterialOptions() {
+        const select = document.getElementById('material_group');
+        select.innerHTML = '';
+
+        let firstKey = null;
+        for (const key in materialData) {
+            if (!Object.prototype.hasOwnProperty.call(materialData, key)) continue;
+            if (firstKey === null) firstKey = key;
+
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = materialData[key].name;
+            select.appendChild(option);
+        }
+
+        if (firstKey !== null) select.value = firstKey;
+    }
+
+    /** Loads default Vc and hm based on the selected material. */
+    function loadMaterialData() {
+        const sel = document.getElementById('material_group').value;
+        document.getElementById('vc').value = materialData[sel].vc;
+        document.getElementById('hm').value = materialData[sel].hm;
+        calculate();
+    }
+
+    /**
+     * Returns the current recommended ae range based on the active geometry.
+     */
+    function getCurrentAeRange() {
+        const geoType = document.querySelector('.geo-btn.active').dataset.geo;
+        if (geoType === 'kappa') {
+            const kappa = document.getElementById('kappa').value;
+            return kappaRanges[kappa] || kappaRanges['45'];
+        }
+        return radiusRange;
+    }
+
+    /**
+     * Resets ae to the recommended default for the current geometry,
+     * then updates the hint and warning text.
+     */
+    function resetAeToDefault() {
+        const range = getCurrentAeRange();
+        document.getElementById('aePercent').value = range.default;
+        updateAeHintAndWarning();
+    }
+
+    /**
+     * Updates only the hint and warning text — does not change the value.
+     */
+    function updateAeHintAndWarning() {
+        const range = getCurrentAeRange();
+        document.getElementById('ae-hint').innerHTML = range.hint;
+
+        const current = parseFloat(document.getElementById('aePercent').value);
+        const warningEl = document.getElementById('ae-warning');
+        if (isNaN(current)) {
+            warningEl.textContent = '';
+            return;
+        }
+
+        if (current < range.min) {
+            warningEl.textContent = `Note: ae ${current}% is below the recommended range (${range.min}–${range.max}%). Verify that the insert supports this high-feed scenario.`;
+        } else if (current > range.max) {
+            warningEl.textContent = `Note: ae ${current}% exceeds the recommended range (${range.min}–${range.max}%). Chip thinning benefits are reduced.`;
+        } else {
+            warningEl.textContent = '';
+        }
+    }
+
+    /** Handles switching between Kappa angle and Round insert geometry. */
+    function toggleGeometry(event) {
+        const target = event ? event.target : document.querySelector('.geo-btn.active');
+        
+        const btns = document.querySelectorAll('.geo-btn');
+        btns.forEach(b => b.classList.remove('active'));
+        if (target) target.classList.add('active');
+        
+        const type = target ? target.dataset.geo : 'kappa'; 
+        document.getElementById('kappa-input').style.display  = type === 'kappa'  ? 'block' : 'none';
+        document.getElementById('radius-R').style.display     = type === 'radius' ? 'block' : 'none';
+        document.getElementById('radius-ap').style.display    = type === 'radius' ? 'block' : 'none';
+
+        // Reset ae to the default for the newly selected geometry
+        resetAeToDefault();
+        
+        calculate();
+    }
+
+    function calculate() {
+        const results = document.getElementById('results');
+        results.classList.remove('ready');
+
+        // 1. Read input values
+        const vc = parseFloat(document.getElementById('vc').value) || 0;
+        const hm = parseFloat(document.getElementById('hm').value) || 0;
+        const D  = parseFloat(document.getElementById('D').value)  || 0;
+        const Z  = parseInt(document.getElementById('Z').value)   || 0;
+        const ap = parseFloat(document.getElementById('ap').value) || 0;
+        const n_max = parseFloat(document.getElementById('n_max').value) || Infinity;
+        const aePercent = parseFloat(document.getElementById('aePercent').value) || 0;
+        const geoType = document.querySelector('.geo-btn.active').dataset.geo;
+
+        // Reset warnings
+        document.getElementById('radius-warning').textContent = '';
+        
+        // Validation
+        if (!vc || !hm || !D || !Z || D <= 0 || Z <= 0) {
+            results.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px 0;">Fill in all fields with valid numbers</p>';
+            return;
+        }
+
+        if (aePercent <= 0 || aePercent > 100) {
+            results.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px 0;">Radial engagement must be between 1% and 100%.</p>';
+            return;
+        }
+
+        // Refresh hint/warning (in case ae was manually edited)
+        updateAeHintAndWarning();
+
+        // 2. Spindle speed (n) – theoretical and capped
+        let n_theoretical = (vc * 1000) / (Math.PI * D);
+        let n = n_theoretical;
+        let capped = false;
+        let actualVc = vc;
+
+        if (n > n_max) {
+            n = n_max;
+            capped = true;
+            actualVc = (n * Math.PI * D) / 1000;
+        }
+
+        // 3. Compute sin(κ) or sin(κ_eff) depending on geometry
+        let sinKappa = 1;
+        let geometryDetail = '';
+        let apRow = '';
+
+        if (geoType === 'kappa') {
+            const kappa_deg = parseFloat(document.getElementById('kappa').value) || 0;
+
+            if (kappa_deg <= 0) {
+                results.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px 0;">Enter a valid rake angle (κ &gt; 0).</p>';
+                return;
+            }
+
+            sinKappa = Math.sin(kappa_deg * Math.PI / 180);
+            geometryDetail = `<p><strong>Rake Angle κ:<span class="tooltip" data-tooltip="The cutting edge's lead angle." tabindex="0">?</span></strong><span>${kappa_deg}°</span></p>`;
+            // apRow left empty — ap is not used in Kappa mode
+
+        } else if (geoType === 'radius') {
+            const R = parseFloat(document.getElementById('R').value) || 0;
+
+            if (!R || R <= 0 || !ap) {
+                results.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px 0;">Enter R and a<sub>p</sub> for round inserts.</p>';
+                return;
+            } else if (ap > R) {
+                document.getElementById('radius-warning').textContent = 'Warning: ap > R → No chip thinning. Consider a lower ap.';
+                sinKappa = 1;
+            } else {
+                const ratio = ap / R;
+
+                if (ratio > 0.5) {
+                    document.getElementById('radius-warning').textContent = 
+                        'Note: ap > 50% of R → Reduced chip thinning efficiency (recommended max ap: 0.4–0.5 × R).';
+                } else if (ratio < 0.1) {
+                    document.getElementById('radius-warning').textContent = 
+                        'Note: Very shallow a<sub>p</sub> (ap/R &lt; 0.1) → Very high chip thinning. Verify that the machine and insert support the resulting high feed.';
+                }
+
+                sinKappa = Math.sqrt(ratio * (2 - ratio));
+            }
+
+            geometryDetail = `<p><strong>Insert Radius R:<span class="tooltip" data-tooltip="Radius of the round insert." tabindex="0">?</span></strong><span>${formatDecimal(R, 1)} <sub>mm</sub></span></p>`;
+            apRow = `<p><strong>Depth of Cut a<sub>p</sub>:<span class="tooltip" data-tooltip="Axial depth of cut." tabindex="0">?</span></strong><span>${formatDecimal(ap, 2)} <sub>mm</sub></span></p>`;
+        }
+
+        // 4. Chip thinning factor from ae and sin(κ)
+        const K = chipThinningFactor(aePercent, sinKappa);
+
+        if (K === null || K <= 0) {
+            results.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px 0;">Invalid chip thinning factor. Check your inputs.</p>';
+            return;
+        }
+
+        const fz = hm / K;
+        const ae_mm = D * aePercent / 100;
+
+        // 5. Final results
+        const vf = Math.round(fz * Z * n);
+        const n_display_formatted = Math.round(n).toLocaleString('en'); 
+
+        // 6. Render results
+        results.classList.add('ready');
+        results.innerHTML = `
+            <h2>Results</h2>
+            
+            <div class="result-line"><strong>Spindle Speed N [rpm]:<span class="tooltip" data-tooltip="Calculated spindle speed. Red text = limited by Max RPM." tabindex="0">?</span></strong> <span class="value ${capped?'capped':''}">${n_display_formatted}${capped?' *':''}</span></div>
+            <div class="result-line"><strong>Feed Rate V<sub>f</sub> [mm/min]:<span class="tooltip" data-tooltip="Table feed rate (mm/min)." tabindex="0">?</span></strong> <span class="value">${vf.toLocaleString('en')}</span></div>
+
+            ${capped ? '<p class="warning-text">* Limited by machine max RPM</p>' : ''}
+            
+            <div class="details-box">
+                ${geometryDetail}
+                ${apRow}
+                <p><strong>Radial Engagement a<sub>e</sub>:<span class="tooltip" data-tooltip="Radial engagement as % of D and the actual width in mm." tabindex="0">?</span></strong><span>${aePercent} % (${formatDecimal(ae_mm, 1)} <sub>mm</sub>)</span></p>
+                <p><strong>Cutting Speed Vc:<span class="tooltip" data-tooltip="Actual cutting speed. May be lower than requested if n is capped by Max RPM." tabindex="0">?</span></strong><span>${formatDecimal(actualVc, 0)} <sub>m/min</sub></span></p>
+                <p><strong>Feed per Tooth f<sub>z</sub>:<span class="tooltip" data-tooltip="Feed per tooth after chip thinning correction." tabindex="0">?</span></strong><span>${formatDecimal(fz, 3)} <sub>mm/z</sub></span></p>
+                <p><strong>Chip Thinning Factor K:<span class="tooltip" data-tooltip="Combined chip thinning from lead angle and radial engagement. hm = fz × K." tabindex="0">?</span></strong><span>${formatDecimal(K, 4)}</span></p>
+            </div>
+        `;
+    }
+
+    // =====================================================================
+    // Tooltip positioning
+    // =====================================================================
+    function positionTooltip(el) {
+        const rect = el.getBoundingClientRect();
+        const bubbleWidth = Math.min(220, window.innerWidth - 16);
+        const bubbleHeight = 90;
+        const padding = 8;
+        const gap = 8;
+        const vw = window.innerWidth;
+
+        let centerX = rect.left + rect.width / 2;
+        if (centerX - bubbleWidth / 2 < padding) {
+            centerX = padding + bubbleWidth / 2;
+        } else if (centerX + bubbleWidth / 2 > vw - padding) {
+            centerX = vw - padding - bubbleWidth / 2;
+        }
+
+        let topY = rect.top - bubbleHeight - gap;
+        if (topY < padding) {
+            topY = rect.bottom + gap;
+        }
+
+        el.style.setProperty('--tt-x', centerX + 'px');
+        el.style.setProperty('--tt-y', topY + 'px');
+    }
+
+    // =====================================================================
+    // Initialization
+    // =====================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        // Populate the material dropdown from data
+        populateMaterialOptions();
+
+        // Tooltip listeners via event delegation
+        document.addEventListener('mouseover', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('focusin', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('touchstart', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        }, { passive: true });
+
+        window.addEventListener('scroll', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        });
+
+        // When κ changes, reset ae to the new default and recalculate
+        document.getElementById('kappa').addEventListener('change', () => {
+            resetAeToDefault();
+            calculate();
+        });
+
+        // Material updates default values
+        document.getElementById('material_group').addEventListener('change', loadMaterialData);
+        
+        // Geometry toggle
+        document.querySelectorAll('.geo-btn').forEach(btn => btn.addEventListener('click', toggleGeometry));
+
+        // Other input fields trigger calculation on change
+        inputIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', calculate);
+        });
+
+        // Start the calculator on load
+        loadMaterialData();
+        toggleGeometry(null);
+    });
+</script>
+<script src="theme.js"></script>
 
 </body>
 </html>

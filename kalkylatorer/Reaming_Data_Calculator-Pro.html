@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reaming Data Calculator Pro</title>
+
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme = saved || (prefersDark ? 'dark' : 'light');
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) { /* localStorage may be blocked */ }
+        })();
+    </script>
+
+    <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
+    <link rel="apple-touch-icon" href="../icon-192.png">
+
+    <link rel="stylesheet" href="style.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container">
+    <button class="theme-toggle" id="themeToggle">🌙</button> 
+    
+    <header>
+        <div class="tool-badge tool-hm" id="toolBadge">HM</div>
+        <h1>Reaming Data Calculator Pro</h1>
+        <p class="subtitle">Reaming – Carbide & HSS (1–40 mm)</p>
+    </header>
+
+    <main>
+        <div class="section-title">Input Parameters</div>
+
+        <div class="form-group">
+            <label for="toolType">Tool Material:<span class="tooltip" data-tooltip="Select the reamer material. Carbide (HM) runs faster, HSS is tougher and more forgiving." tabindex="0">?</span></label>
+            <select id="toolType">
+                <option value="HM" selected>Carbide (HM)</option>
+                <option value="HSS">High-Speed Steel (HSS)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Internal Coolant:<span class="tooltip" data-tooltip="Through-tool coolant allows higher cutting speed and feed, especially for deep holes. Without internal channels, values must be more conservative." tabindex="0">?</span></label>
+            <div class="mode-selector" id="coolantSelector">
+                <input type="radio" id="coolantYes" name="coolantMethod" value="with_coolant">
+                <label for="coolantYes">With Internal Coolant</label>
+                <input type="radio" id="coolantNo" name="coolantMethod" value="without_coolant" checked>
+                <label for="coolantNo">Without Internal Coolant</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="material">Workpiece Material:<span class="tooltip" data-tooltip="Select the material being reamed. Controls Vc, Fm and the allowance table." tabindex="0">?</span></label>
+            <select id="material">
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="diameter">Reamer Diameter (mm):<span class="tooltip" data-tooltip="Nominal reamer diameter in mm. Valid range: 1–40 mm." tabindex="0">?</span></label>
+            <input type="number" id="diameter" value="10.0" step="0.1" min="1" max="40" placeholder="e.g. 10.0">
+        </div>
+
+        <div class="form-group">
+            <label for="teeth">Number of Teeth z:<span class="tooltip" data-tooltip="Number of cutting edges on the reamer. Recommended value is auto-filled based on diameter, but can be overridden." tabindex="0">?</span></label>
+            <input type="number" id="teeth" value="6" step="1" min="3" max="16">
+        </div>
+
+        <div class="form-group">
+            <label for="maxRpm">Machine Max RPM:<span class="tooltip" data-tooltip="Maximum spindle speed of your machine. Limits n if the calculated speed exceeds this." tabindex="0">?</span></label>
+            <input type="number" id="maxRpm" value="12000" step="100" placeholder="e.g. 12000">
+        </div>
+
+        <div class="results" id="results">
+            <p style="color:var(--text-light); text-align:center; padding:20px 0;">
+                Fill in the fields above to get cutting data
+            </p>
+        </div>
+    </main>
+</div>
+
+<footer>Reaming Data Calculator Pro – created by Jimmy Rauhala</footer>
+
+<script src="Reaming_tool_data.js"></script>
+
+<script>
+    // =====================================================================
+    // Helper functions
+    // =====================================================================
+    const parseValue = (id, defaultValue = 0) => {
+        const value = parseFloat(document.getElementById(id).value);
+        return isNaN(value) ? defaultValue : value;
+    };
+    
+    const formatDecimal = (num, fixed) => {
+        if (isNaN(num)) return "N/A";
+        const s = num.toFixed(fixed);
+        return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
+    };
+
+    // =====================================================================
+    // UI state for coolant (placeholder for future rules)
+    // =====================================================================
+    let lastToolType = null;
+
+    function updateCoolantUI(toolType) {
+        // Both HSS and HM reamers can have internal coolant – no lock needed.
+        lastToolType = toolType;
+    }
+
+    // =====================================================================
+    // Tool badge update
+    // =====================================================================
+    function updateToolBadge(toolType) {
+        const badge = document.getElementById('toolBadge');
+        if (!badge) return;
+        badge.textContent = toolType;
+        badge.className = `tool-badge tool-${toolType.toLowerCase()}`;
+    }
+
+    // =====================================================================
+    // Populate material dropdown
+    // =====================================================================
+    function populateMaterialOptions() {
+        const toolType = document.getElementById('toolType').value;
+        const select = document.getElementById('material');
+        const data = toolType === 'HM' ? materialDataHM : materialDataHSS;
+
+        select.innerHTML = '';
+        for (const key in data) {
+            if (!Object.prototype.hasOwnProperty.call(data, key)) continue;
+            const option = new Option(data[key].name, key);
+            if (key === 'soft_steel') option.selected = true;
+            select.appendChild(option);
+        }
+    }
+
+    // =====================================================================
+    // Auto-fill recommended teeth count
+    // =====================================================================
+    let userEditedTeeth = false;
+
+    function updateRecommendedTeeth() {
+        if (userEditedTeeth) return;
+        const D = parseValue('diameter');
+        if (D <= 0) return;
+        const recommended = getRecommendedTeeth(D);
+        document.getElementById('teeth').value = recommended;
+    }
+
+    // =====================================================================
+    // Main calculation and result rendering
+    // =====================================================================
+    function calculateReamingData() {
+        const toolType = document.getElementById('toolType').value;
+        const materialKey = document.getElementById('material').value;
+        const coolantMethod = document.querySelector('input[name="coolantMethod"]:checked').value;
+
+        updateCoolantUI(toolType);
+        updateToolBadge(toolType);
+
+        const diameter = parseValue('diameter');
+        const teeth = Math.round(parseValue('teeth', 6));
+        const maxRpm = parseValue('maxRpm');
+
+        const resultsDiv = document.getElementById('results');
+
+        // Input validation
+        if (diameter < 1 || diameter > 40 || teeth < 3) {
+            resultsDiv.classList.remove('ready');
+            resultsDiv.innerHTML = `<p style="color:var(--text-light); text-align:center; padding:20px 0;">
+                Enter a valid diameter (1–40 mm) and at least 3 teeth.</p>`;
+            return;
+        }
+
+        const data = toolType === 'HM' ? materialDataHM : materialDataHSS;
+        const mat = data[materialKey];
+
+        if (!mat) {
+            resultsDiv.classList.remove('ready');
+            resultsDiv.innerHTML = `<p class="missing">Selected material is not supported.</p>`;
+            return;
+        }
+
+        // --- 1. Cutting speed Vc ---
+        let vcBase = mat.Vc;
+        // Coolant bonus: internal coolant allows higher Vc
+        const coolantVcFactor = coolantMethod === 'with_coolant' ? 1.10 : 1.00;
+        // Safety factor
+        const vcSafety = toolType === 'HM' ? VC_SAFETY_FACTOR_HM : VC_SAFETY_FACTOR_HSS;
+
+        const Vc_effective = vcBase * coolantVcFactor * vcSafety;
+
+        // --- 2. Spindle speed N ---
+        const n_calc = (Vc_effective * K_1000) / (PI * diameter);
+        let n_final = Math.round(n_calc);
+        let actualVc = Vc_effective;
+        let capped = false;
+
+        if (maxRpm && n_calc > maxRpm) {
+            n_final = Math.round(maxRpm);
+            actualVc = (n_final * PI * diameter) / K_1000;
+            capped = true;
+        }
+
+        // --- 3. Feed per tooth and feed per revolution ---
+        const fzBase = getFzFromTable(diameter, toolType);
+        const fzSafety = toolType === 'HM' ? FZ_SAFETY_FACTOR_HM : FZ_SAFETY_FACTOR_HSS;
+
+        // Coolant bonus for feed (smaller effect than Vc)
+        const coolantFzFactor = coolantMethod === 'with_coolant' ? 1.05 : 1.00;
+
+        const fz_effective = fzBase * fzSafety * coolantFzFactor;
+        const f_rev = fz_effective * teeth;
+        const Vf = Math.round(n_final * f_rev);
+
+        // --- 4. Reaming allowance ---
+        const allowance = getAllowance(diameter, materialKey);
+        const preDrillMin = diameter - allowance.max;
+        const preDrillMax = diameter - allowance.min;
+
+        // --- Aluminum-specific warning (BUE prevention) ---
+        const isAluminum = materialKey === 'aluminium';
+        const aluminumWarning = isAluminum
+            ? `<p class="warning-text">* Aluminum: Use a sharp reamer, high cutting speed, generous feed, and kerosene or high-pressure coolant to prevent built-up edge (BUE) in the first millimeters of the hole.</p>`
+            : '';
+
+        // --- 5. Render results ---
+        resultsDiv.classList.add('ready');
+        resultsDiv.innerHTML = `
+            <h2>Results</h2>
+            <div class="result-line">
+                <strong>Spindle Speed N [rpm]:</strong> 
+                <span class="value ${capped ? 'capped' : ''}">${n_final}${capped ? ' *' : ''}</span>
+            </div>
+            <div class="result-line">
+                <strong>Feed Rate V<sub>f</sub> [mm/min]:</strong> 
+                <span class="value">${Vf.toLocaleString('en')}</span>
+            </div>
+            ${capped ? '<p class="warning-text">* Limited by machine max RPM</p>' : ''}
+            
+            <div class="details-box">
+                <p><strong>Pre-drill hole:</strong><span>${formatDecimal(preDrillMin, 2)} – ${formatDecimal(preDrillMax, 2)} <sub>mm</sub></span></p>
+                <p><strong>Reaming allowance:</strong><span>${formatDecimal(allowance.min, 2)} – ${formatDecimal(allowance.max, 2)} <sub>mm</sub></span></p>
+                <p><strong>f<sub>z</sub> (feed/tooth):</strong><span>${formatDecimal(fz_effective, 4)} <sub>mm/z</sub></span></p>
+                <p><strong>f<sub>n</sub> (feed/rev):</strong><span>${formatDecimal(f_rev, 3)} <sub>mm/rev</sub></span></p>
+                <p><strong>Cutting Speed Vc:</strong><span>${formatDecimal(actualVc, 1)} <sub>m/min</sub></span></p>
+                <p><strong>Recommended Vc range:</strong><span>${mat.vcRange}</span></p>
+                <p><strong>Material factor Fm:</strong><span>${formatDecimal(mat.Fm, 2)}</span></p>
+                <p><strong>Teeth z:</strong><span>${teeth}</span></p>
+                <p><strong>Coolant:</strong><span>${coolantMethod === 'with_coolant' ? 'Internal (through-tool)' : 'External / none'}</span></p>
+            </div>
+            
+            ${aluminumWarning}
+        `;
+    }
+
+    // =====================================================================
+    // Tooltip positioning
+    // =====================================================================
+    function positionTooltip(el) {
+        const rect = el.getBoundingClientRect();
+        const bubbleWidth = Math.min(220, window.innerWidth - 16);
+        const bubbleHeight = 90;
+        const padding = 8;
+        const gap = 8;
+        const vw = window.innerWidth;
+
+        let centerX = rect.left + rect.width / 2;
+        if (centerX - bubbleWidth / 2 < padding) {
+            centerX = padding + bubbleWidth / 2;
+        } else if (centerX + bubbleWidth / 2 > vw - padding) {
+            centerX = vw - padding - bubbleWidth / 2;
+        }
+
+        let topY = rect.top - bubbleHeight - gap;
+        if (topY < padding) {
+            topY = rect.bottom + gap;
+        }
+
+        el.style.setProperty('--tt-x', centerX + 'px');
+        el.style.setProperty('--tt-y', topY + 'px');
+    }
+
+    // =====================================================================
+    // Initialization
+    // =====================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        // Populate materials
+        populateMaterialOptions();
+
+        // Tooltip listeners
+        document.addEventListener('mouseover', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('focusin', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('touchstart', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        }, { passive: true });
+
+        window.addEventListener('scroll', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        });
+
+        // Input listeners
+        document.getElementById('toolType').addEventListener('change', () => {
+            populateMaterialOptions();
+            userEditedTeeth = false; // reset teeth edit on tool type change
+            updateRecommendedTeeth();
+            calculateReamingData();
+        });
+
+        document.getElementById('material').addEventListener('change', calculateReamingData);
+        document.getElementById('diameter').addEventListener('input', () => {
+            updateRecommendedTeeth();
+            calculateReamingData();
+        });
+        document.getElementById('maxRpm').addEventListener('input', calculateReamingData);
+        document.getElementById('teeth').addEventListener('input', () => {
+            userEditedTeeth = true;
+            calculateReamingData();
+        });
+
+        document.querySelectorAll('input[name="coolantMethod"]').forEach(el => {
+            el.addEventListener('change', calculateReamingData);
+        });
+
+        // Initial calculation
+        updateRecommendedTeeth();
+        calculateReamingData();
+    });
+</script>
+<script src="theme.js"></script>
+</body>
+</html>

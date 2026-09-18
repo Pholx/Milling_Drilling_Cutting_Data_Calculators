@@ -2,112 +2,183 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>T-Slot & Side Milling Calculator</title>
+    <title>T-Slot Milling Calculator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- FOUC fix: Apply the correct theme on <html> BEFORE the page is rendered. -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme = saved || (prefersDark ? 'dark' : 'light');
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) { /* localStorage may be blocked */ }
+        })();
+    </script>
+
+    <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
+    <link rel="apple-touch-icon" href="../icon-192.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 <div class="container">
     <button class="theme-toggle" id="themeToggle">🌙</button>
     
     <header>
-        <h1>T-Slot & Side Milling Calculator</h1>
-        <h2 class="header-subtext" id="headerSubtext">T-Slot Full Slotting (100% Radial Engagement)</h2> 
+        <div class="tool-badge tool-hm" id="toolBadge">HM</div>
+        <h1>T-Slot Milling Calculator</h1>
+        <p class="subtitle" id="headerSubtext">Full Slotting (100% Radial Engagement)</p> 
     </header>
     
     <main>
-        <div class="section-title">1. Calculation Mode</div>
+        <!-- ============================================================ -->
+        <!-- SECTION 1: Mode & Tool                                        -->
+        <!-- ============================================================ -->
+        <div class="section-title">Mode & Tool</div>
+        
         <div class="mode-selector">
             <input type="radio" id="modeTSlotFull" name="calcMode" value="tslot_full" checked>
-            <label for="modeTSlotFull">T-Slot Full Slotting (ae=100%)</label>
+            <label for="modeTSlotFull">Full Slotting (ae=100%)</label>
             <input type="radio" id="modeTSlotSide" name="calcMode" value="tslot_side">
-            <label for="modeTSlotSide">T-Slot Side Milling (Low ae)</label>
+            <label for="modeTSlotSide">Side Milling (Low ae)</label>
         </div>
 
-        <div class="section-title">Input</div>
-        
         <div class="form-group">
-            <label for="toolMaterial">2. Tool Material:</label>
-            <select id="toolMaterial">
-                <option value="hm" selected>Carbide (HM)</option>
-                <option value="hss">High-Speed Steel (HSS)</option>
+            <label for="toolType">Tool Type:<span class="tooltip" data-tooltip="Select the T-slot cutter type. HSS and solid carbide cutters have many teeth and low fz per tooth. Indexable insert cutters have few inserts and high fz per tooth. All use the same fundamental equation, but with different Vc and fz tables." tabindex="0">?</span></label>
+            <select id="toolType">
+                <option value="hss_solid" selected>HSS T-Slot Cutter</option>
+                <option value="hm_solid">Solid Carbide T-Slot Cutter</option>
+                <option value="hm_indexable">Indexable Insert T-Slot Cutter</option>
             </select>
         </div>
 
         <div class="form-group" id="diameterGroup">
-            <label for="diameter" id="diameterLabel">3. Cutter Diameter D [mm]:</label>
-            <select id="diameter">
-                </select>
+            <label for="diameter">Cutter Diameter D [mm]:<span class="tooltip" data-tooltip="Cutter diameter in mm. Valid range: 10–150 mm. 25 mm corresponds to a standard M14 T-slot." tabindex="0">?</span></label>
+            <input type="number" id="diameter" value="25" step="1" min="10" max="150">
         </div>
-        
+
         <div class="form-group">
-            <label for="material">4. Work Material:</label>
+            <label for="material">Work Material:<span class="tooltip" data-tooltip="Select the workpiece material. Controls Vc and the fz table." tabindex="0">?</span></label>
             <select id="material">
-                <option value="steel1080" selected>Steel (~1080 N/mm²)</option>
-                <option value="toolox44">Toolox 44 (~45 HRC)</option>
-                <option value="steel50hrc">Hardened Steel 50 HRC</option>
-                <option value="vanadis">Vanadis / Powder Steel (~60 HRC)</option>
-                <option value="nonferrous">Aluminum / Copper</option>
             </select>
         </div>
-        
-        <div class="form-group">
-            <label for="cornerRadius">5. Corner Radius R [mm]:</label>
-            <input type="number" id="cornerRadius" value="0.5" step="any" min="0">
-        </div>
-
-        <div class="form-group" id="aePercentGroup">
-            <label for="aePercent">6. Radial Engagement ae [% of D]:</label>
-            <input type="number" id="aePercent" value="10" step="any" min="0.1" max="100">
-        </div>
-
-        <div class="form-group" id="apGroup">
-            <label for="ap">7. Axial Depth of Cut ap [mm]:</label>
-            <input type="number" id="ap" value="5" step="any" min="0.1">
-        </div>
-        
-        <div class="form-group">
-            <label for="overhang">8. Tool Overhang L [mm] (L/D):</label>
-            <input type="number" id="overhang" value="30" step="any" min="0">
-        </div>
-
 
         <hr>
-        <div class="section-title">Cutting Data (Editable)</div>
-        <div class="form-group"><label>Cutting Speed Vc [m/min]:</label><input type="number" id="vc" value="70" step="any"></div>
-        <div class="form-group"><label id="fzLabel">Feed per Tooth fz [mm/z] (Table Value):</label><input type="number" id="fzInitial" value="0.018" step="any"></div>
-        
-        <div class="form-group">
-            <label>Number of Flutes z:</label>
-            <input type="number" id="z" value="4" step="1" min="1">
-            <p style="font-size:0.8rem; color:var(--text-light); margin-top:4px;">
-                Recommended: <span id="recommendedZ">4</span> Flutes
-            </p>
+
+        <!-- ============================================================ -->
+        <!-- SECTION 2: Strategy                                            -->
+        <!-- ============================================================ -->
+        <div class="section-title">Strategy</div>
+
+        <div class="form-group" id="aePercentGroup">
+            <label for="aePercent">Radial Engagement a<sub>e</sub> [% of D]:<span class="tooltip" data-tooltip="Radial engagement. Typical range for side milling is 5–30%. Lower ae → thinner chips → higher feed allowed (chip thinning). Locked to 100% during Full Slotting." tabindex="0">?</span></label>
+            <input type="number" id="aePercent" value="100" step="1" min="1" max="100" disabled>
         </div>
         
-        <div class="form-group"><label>Max RPM (Machine Limit):</label><input type="number" id="maxRpm" value="12000" step="any"></div>
+        <div class="form-group" id="overhangGroup">
+            <label for="overhang">Tool Overhang L [mm]:<span class="tooltip" data-tooltip="Tool overhang length. L/D ratio above 2.5 reduces cutting speed and feed to prevent chatter. The hint below shows the current L/D ratio." tabindex="0">?</span></label>
+            <input type="number" id="overhang" value="30" step="5" min="0">
+            <p style="font-size:0.8rem; color:var(--text-light); margin-top:4px; line-height:1.4;" id="overhangHint"></p>
+        </div>
+
+        <hr>
+
+        <!-- ============================================================ -->
+        <!-- SECTION 3: Cutting Data (Editable)                            -->
+        <!-- ============================================================ -->
+        <div class="section-title">Cutting Data (Editable)</div>
+
+        <div class="form-group">
+            <label for="vc">Cutting Speed Vc [m/min]:<span class="tooltip" data-tooltip="Cutting speed. Automatically adjusted based on the selected tool type and material." tabindex="0">?</span></label>
+            <input type="number" id="vc" value="70" step="5">
+        </div>
+
+        <div class="form-group">
+            <label for="fzInitial">Base Feed per Tooth f<sub>z</sub> [mm/z]:<span class="tooltip" data-tooltip="Reference feed per tooth. The programmed feed is this value multiplied by L/D correction and chip thinning (in side milling). The value auto-adjusts when you change the tooth count or tool type — override it manually if you know the tool's specific recommendation." tabindex="0">?</span></label>
+            <input type="number" id="fzInitial" value="0.018" step="0.001">
+        </div>
         
-
-        <div class="results ready">
-            <h2>Results</h2>
-            <div class="result-line"><strong>Spindle Speed N [rpm]:</strong> <span class="value" id="nResult">-</span></div>
-            <div class="result-line"><strong>Feed Rate Vf [mm/min]:</strong> <span class="value" id="vfResult">-</span></div>
-            
-            <div class="details-box">
-                <p id="fzEffectiveDetail"><strong>Effective Fz [mm/z]:</strong><span id="fzEffectiveResult">-</span></p> 
-                <p id="fzTotalPerRevDetail"><strong>Effective Fz/Rev [mm/rev]:</strong><span id="fzTotalPerRevResult">-</span></p>
-
-                <p id="aeValueDetail"><strong>Radial Engagement ae:</strong><span id="aePercentValue">-</span></p>
-                <p><strong>Cutting Speed Vc:</strong><span id="vcValue">-</span></p>
-                <p id="apFactorDetail"><strong>Vf Reduction Factor (due to ap):</strong><span id="apFactorResult">-</span></p>
-                <p id="rpmLimitDetail"><strong>RPM Limitation (due to L/D):</strong><span id="rpmLimitFactorResult">-</span></p>
-            </div>
+        <div class="form-group">
+            <label for="z">Number of Flutes z:<span class="tooltip" data-tooltip="Number of cutting edges. HSS and solid carbide T-slot cutters have more teeth (6–10), indexable cutters have fewer inserts (4–8). Recommended value auto-fills based on diameter and tool type but can be overridden." tabindex="0">?</span></label>
+            <input type="number" id="z" value="4" step="1" min="1">
+        </div>
+        
+        <div class="form-group">
+            <label for="maxRpm">Machine Max RPM:<span class="tooltip" data-tooltip="Maximum spindle speed of your machine. Limits n if the calculated speed exceeds this." tabindex="0">?</span></label>
+            <input type="number" id="maxRpm" value="12000" step="100">
+        </div>
+        
+        <!-- ============================================================ -->
+        <!-- RESULTS                                                        -->
+        <!-- ============================================================ -->
+        <div class="results" id="results">
+            <p style="color:var(--text-light); text-align:center; padding:20px 0;">
+                Fill in the fields above to get cutting data
+            </p>
         </div>
     </main>
 </div>
-<footer>T-Slot & Side Milling Calculator – created by Jimmy Rauhala</footer>
+<footer>T-Slot Milling Calculator – created by Jimmy Rauhala</footer>
 
 <script src="T-slot_Milling_tool_data.js"></script>
+<script>
+    // =====================================================================
+    // UI INITIALIZATION AND EVENT HANDLING
+    // =====================================================================
+
+    function positionTooltip(el) {
+        const rect = el.getBoundingClientRect();
+        const bubbleWidth = Math.min(220, window.innerWidth - 16);
+        const bubbleHeight = 90;
+        const padding = 8;
+        const gap = 8;
+        const vw = window.innerWidth;
+
+        let centerX = rect.left + rect.width / 2;
+        if (centerX - bubbleWidth / 2 < padding) {
+            centerX = padding + bubbleWidth / 2;
+        } else if (centerX + bubbleWidth / 2 > vw - padding) {
+            centerX = vw - padding - bubbleWidth / 2;
+        }
+
+        let topY = rect.top - bubbleHeight - gap;
+        if (topY < padding) {
+            topY = rect.bottom + gap;
+        }
+
+        el.style.setProperty('--tt-x', centerX + 'px');
+        el.style.setProperty('--tt-y', topY + 'px');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('mouseover', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('focusin', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('touchstart', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        }, { passive: true });
+
+        window.addEventListener('scroll', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        });
+    });
+</script>
+<script src="theme.js"></script>
 </body>
 </html>
