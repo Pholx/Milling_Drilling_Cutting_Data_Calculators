@@ -11,6 +11,7 @@ A web-based cutting data calculator for metal machining. The app works as a PWA 
 | **Reaming** | Reaming with HM/HSS, through-tool coolant, auto-recommended tooth count and pre-drill allowance (1-40 mm). |
 | **Dynamic Milling** | Dynamic/trochoidal milling with ramping, roughing/standard tools and flute-adjusted radial engagement. |
 | **Chamfer** | Chamfer milling based on effective diameter (D_eff), chip thinning and finish/std/prod feeds. |
+| **Helical Chamfer** | Helical interpolation chamfering. Auto-detects tool engagement based on path radius to find the optimal "Sweet Spot" feed rate. |
 | **T-Slot Milling** | T-slot milling with full slotting or side milling, HM/HSS/indexable tools and L/D correction. |
 | **Slitting Cutter** | Slitting with HSS saw blades, solid carbide saws or indexable insert cutters. RCTF chip thinning and L/D correction. |
 
@@ -180,6 +181,30 @@ For HM tools the combined reduction is ~23%, for HSS ~15%. This keeps every valu
 
 ---
 
+### Helical Chamfer
+
+**Takes into account:** Tool diameter, pre-drill hole diameter, final chamfer diameter, tool path radius, Z-pitch, ramp angle. 
+
+**Core idea:** In helical chamfering, adjusting the CAM path radius drastically changes which part of the chamfer mill is cutting the material. This creates a feed rate "Sweet Spot". The calculator auto-detects the effective tool engagement based on path radius and applies a physics engine to calculate the actual spindle RPM and feed limit. 
+
+**Equations:**
+
+    Z_req          = r_top / tan(θ/2)                   Z-depth required to reach final diameter
+    D_engagement   = r_top × 2                          Max tool diameter cutting the surface
+    N              = (Vc × 1000) / (π × D_engagement)   Engagement-based RPM
+    ACTF           = 1 / sin(θ/2)                       Axial Chip Thinning Factor
+    Ramp_reduction = (1 / cos(rampRad)) × (1 + sin(rampRad) × 0.35) 
+
+**Why:**
+- **Engagement-based RPM:** Instead of calculating RPM from the nominal tool diameter, the RPM is based exactly on the outermost point of the tool currently cutting the material, ensuring proper cutting speeds.
+- **The Sweet Spot Engine:** If the path radius is too small, circular center compensation drastically lowers the machine feed. If the path radius is too large, the tool cuts purely with the weakest tip, forcing a lower base feed per tooth (Scale factor). The calculator guides the operator to balance these forces.
+- **Volumetric Ramp compensation:** Steeper helical angles mean a larger physical plunge path per revolution. The 3D chip volume increases, which automatically triggers a feed rate reduction to protect the tool.
+- **Crash Detection:** If the path radius forces the tool outside its nominal diameter, or causes the tip to miss the pre-drilled hole (leaving an uncut step), the calculator automatically throws a geometric crash error.
+
+**Result:** Required Z-depth, Engagement-based RPM, and a mathematically sound programmed Feed Rate (Vf Center) fully adjusted for axial thinning, radial thinning, circular compensation, and volumetric ramping.
+
+---
+
 ### T-Slot Milling
 
 **Takes into account:** Mode (full slotting or side milling), tool type (HSS, solid carbide, indexable insert), cutter diameter, material, radial engagement (side milling only), tool overhang, cutting speed, base fz, number of flutes, machine max RPM.
@@ -264,7 +289,7 @@ For HM tools the combined reduction is ~23%, for HSS ~15%. This keeps every valu
 
 When you change any file in the cache list (or update the app files) – bump CACHE_NAME in service-worker.js:
 
-    const CACHE_NAME = 'cutting-data-pro-cache-v1.45.20';
+    const CACHE_NAME = 'cutting-data-pro-cache-v1.46.0';
 
 This ensures that the users' cached version is cleared and replaced.
 

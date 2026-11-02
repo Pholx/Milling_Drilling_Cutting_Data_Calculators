@@ -19,7 +19,8 @@ const log   = (...args) => { if (DEBUG) console.log('[SW]', ...args); };
 const warn  = (...args) => { if (DEBUG) console.warn('[SW]', ...args); };
 const error = (...args) => console.error('[SW]', ...args); // Fel visas alltid
 
-const CACHE_NAME = 'cutting-data-pro-cache-v1.45.20';
+// BUMPAD CACHE-VERSION FÖR HELICAL CHAMFER
+const CACHE_NAME = 'cutting-data-pro-cache-v1.46.0';
 
 // Lista över alla filer som ska cachas initialt (App Shell).
 // Alla sökvägar är relativa till denna fils placering.
@@ -35,27 +36,29 @@ const urlsToCache = [
     './icon-192.png',
     './icon-512.png',
 
-    // Gemensam CSS och JS för alla kalkylatorer
+    // Gemensam CSS och JS
     './kalkylatorer/style.css',
     './kalkylatorer/theme.js',
 
-    // Kalkylatorer (HTML)
+    // Kalkylatorer (HTML - Exakt skiftläge enligt din mapp)
     './kalkylatorer/Face_Milling_Data_Calculator-Pro.html',
     './kalkylatorer/Drilling_Data_Calculator-Pro.html',
     './kalkylatorer/Reaming_Data_Calculator-Pro.html',
     './kalkylatorer/Milling_Data_Calculator-Pro.html',
     './kalkylatorer/Chamfer_Data_Calculator-Pro.html',
+    './kalkylatorer/Helical-Chamfer_Data_Calculator-Pro.html',
     './kalkylatorer/T-slot_Milling_Data_Calculator-Pro.html',
     './kalkylatorer/Slitting-cutter_Data_Calculator-Pro.html',
 
-    // Kalkylatorer (data- och logikfiler)
-    './kalkylatorer/Face_Milling_tool_data.js',
+    // Kalkylatorer (Data/Logik - KORRIGERADE TILL SMÅ BOKSTÄVER)
+    './kalkylatorer/face_milling_tool_data.js',
     './kalkylatorer/drilling_tool_data.js',
-    './kalkylatorer/Reaming_tool_data.js',
+    './kalkylatorer/reaming_tool_data.js',
     './kalkylatorer/milling_tool_data.js',
-    './kalkylatorer/Chamfer_tool_data.js',
-    './kalkylatorer/T-slot_Milling_tool_data.js',
-    './kalkylatorer/Slitting-cutter_tool_data.js'
+    './kalkylatorer/chamfer_tool_data.js',
+    './kalkylatorer/helical-chamfer_tool_data.js',
+    './kalkylatorer/t-slot_milling_tool_data.js',
+    './kalkylatorer/slitting-cutter_tool_data.js'
 ];
 
 // =================================================================
@@ -119,7 +122,6 @@ self.addEventListener('activate', event => {
 
 // =================================================================
 // 3. FETCH
-// Strategi: Cache-first med network-fallback.
 // =================================================================
 self.addEventListener('fetch', event => {
     if (event.request.method !== 'GET') return;
