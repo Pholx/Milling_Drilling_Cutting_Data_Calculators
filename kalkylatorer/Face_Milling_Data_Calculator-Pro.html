@@ -35,6 +35,10 @@
         <div class="tool-badge tool-hm" id="toolBadge">HM</div>
         <h1>Face Milling Calculator</h1>
         <p class="subtitle">Face Milling – Kappa & Round Inserts</p>
+		
+		<!-- Guide & Teori Knapp -->
+        <button id="theoryBtn" class="theory-btn">📖 Guide & Teori</button>
+		
     </header>
 
     <main>
@@ -131,12 +135,42 @@
                 Fill in the fields above to get cutting data
             </p>
         </div>
+		
+		<!-- Guide & Teori Modal Rutan -->
+        <div id="theoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeModal">&times;</span>
+                <h2>Teori: Planfräsning i Praktiken</h2>
+
+                <h3>Spåntjocklek ($h_m$) & Säkerhet</h3>
+                <p>Vid planfräsning varierar spånan i tjocklek under skärets väg genom materialet. Denna kalkylator är byggd med extrem säkerhet i fokus för att skona standardmaskiner och budgetskär: Ekvationerna beräknar den <em>absolut maximala</em> spåntjockleken (vid skärets utgång) och ser till att den aldrig överstiger ditt valda $h_m$-värde. Det förhindrar överbelastning och garanterar stabil gång.</p>
+                
+                <h3>Kylning (Mycket viktigt för planfräsning)</h3>
+                <p>Eftersom din maskin kör standard spoltryck är det viktigt att veta att skärvätska ibland gör mer skada än nytta vid fräsning med vändskär:</p>
+                <ul>
+                    <li><strong>Stål & Gjutjärn:</strong> Kör <strong>TORRT</strong> (eller med tryckluft). Om du använder skärvätska värms skäret upp i materialet och kyls brutalt ner utanför. Denna termiska chock skapar mikrosprickor ("kamsprickor") och skäret går sönder i förtid.</li>
+                    <li><strong>Rostfritt & Aluminium:</strong> Använd <strong>skärvätska</strong>. Dessa material är kletiga och kräver smörjning för att förhindra löseggsbildning (att materialet svetsar fast på skäret).</li>
+                </ul>
+
+                <h3>Ställvinkel ($\kappa$) & Maskinens Stabilitet</h3>
+                <p>Ställvinkeln avgör åt vilket håll skärkrafterna riktas, vilket är kritiskt i en maskin med normal styvhet:</p>
+                <ul>
+                    <li><strong>90° (Hörnfräsning):</strong> Riktar kraften radiellt. Tuffast för maskinen och uppställningen; kan lätt skapa vibrationer.</li>
+                    <li><strong>45° (Standard):</strong> Den absolut bästa allround-vinkeln. Skärkraften fördelas 50/50 axiellt och radiellt, vilket ger en mjuk gång som minimerar vibrationer och skonar spindellagren.</li>
+                    <li><strong>High Feed (10°–25°):</strong> Riktar nästan all kraft axiellt upp i spindeln. Möjliggör enormt höga matningar ($f_z$) eftersom spånan tunnas ut extremt mycket, men kräver mycket små skärdjup ($a_p$).</li>
+                </ul>
+
+                <h3>Runda skär (R)</h3>
+                <p>Ett runt skär har ingen fast vinkel. Ställvinkeln blir flackare ju mindre skärdjup ($a_p$) du kör. Kalkylatorn beräknar den exakta effektiva vinkeln dynamiskt. Håll $a_p$ under halva radien för optimal spånförtunning och stabilitet.</p>
+            </div>
+        </div>
+		
     </main>
 </div>
 
 <footer>Face Milling Data Calculator Pro – created by Jimmy Rauhala</footer>
 
-<script src="Face_Milling_tool_data.js"></script>
+<script src="face_milling_tool_data.js"></script>
 <script>
     // =====================================================================
     // UI LOGIC FOR FACE MILLING
@@ -155,19 +189,29 @@
         return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
     };
 
-    /**
+/**
      * Computes the chip thinning factor K for face milling.
      *
      *   hm = fz × K
-     *   K  = sin(κ) × √(ae/D)
      *
-     * For round inserts, sin(κ) is replaced by the effective value
-     * sin(κ_eff) = √(ap/R × (2 − ap/R)).
+     * UPPDATERAD LOGIK FÖR STABILITET OCH SÄKERHET:
+     * Skyddar verktyget mot att *maxtjockleken* (hex) blir för stor.
+     * Om ae >= 50% (skäret passerar centrumlinjen) binds faktorn till 1.0.
+     * För ae < 50% används en exakt geometrisk funktion för att beräkna
+     * maximal spåntjocklek, vilket hindrar övermatning vid låga ingrepp.
      */
     function chipThinningFactor(aePercent, sinKappa) {
         const u = aePercent / 100;
         if (u <= 0 || u > 1) return null;
-        return sinKappa * Math.sqrt(u);
+        
+        let radialFactor;
+        if (u >= 0.5) {
+            radialFactor = 1.0; 
+        } else {
+            radialFactor = 2 * Math.sqrt(u * (1 - u));
+        }
+        
+        return sinKappa * radialFactor;
     }
 
     /** Populates the material dropdown dynamically from materialData. */
@@ -457,6 +501,18 @@
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', calculate);
         });
+		
+		// Modal Logic för Guide & Teori
+        const theoryModal = document.getElementById("theoryModal");
+        const theoryBtn = document.getElementById("theoryBtn");
+        const closeModal = document.getElementById("closeModal");
+        if (theoryBtn && theoryModal && closeModal) {
+            theoryBtn.addEventListener("click", () => theoryModal.style.display = "block");
+            closeModal.addEventListener("click", () => theoryModal.style.display = "none");
+            window.addEventListener("click", (event) => { 
+                if (event.target === theoryModal) theoryModal.style.display = "none"; 
+            });
+        }
 
         // Start the calculator on load
         loadMaterialData();
@@ -464,6 +520,7 @@
     });
 </script>
 <script src="theme.js"></script>
+
 
 </body>
 </html>

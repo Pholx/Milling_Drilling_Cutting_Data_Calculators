@@ -34,6 +34,10 @@
         <div class="tool-badge tool-hm" id="toolBadge">HM</div>
         <h1>Slitting Cutter Calculator</h1>
         <p class="subtitle">HSS Saw · Solid Carbide Saw · Indexable Insert Cutter</p> 
+		
+		<!-- Guide & Teori Knapp -->
+        <button id="theoryBtn" class="theory-btn">📖 Guide & Teori</button>
+		
     </header>
     
     <main>
@@ -116,11 +120,37 @@
                 Fill in the fields above to get cutting data
             </p>
         </div>
+		
+		<!-- Guide & Teori Modal Rutan -->
+        <div id="theoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeModal">&times;</span>
+                <h2>Teori: Kapfräsning & Spårfräsning</h2>
+
+                <h3>Verktygstyper & Kuggantal</h3>
+                <p>Kalkylatorn hanterar tre olika typer av kap- och spårverktyg som har helt olika förutsättningar:</p>
+                <ul>
+                    <li><strong>HSS-sågklingor:</strong> Många tänder (32–180 st), låg skärhastighet och låg matning per tand ($f_z$). Segt material som tål vibrationer och förlåter en ostabil uppspänning.</li>
+                    <li><strong>Solida hårdmetallklingor:</strong> Många tänder och hög skärhastighet. Mycket styva men sköra – kräver en stabil maskin och exakt kastfri rotation (runout).</li>
+                    <li><strong>Vändskärsspårfräsar:</strong> Få tänder (5–12 st), hög skärhastighet och mycket hög matning per tand. Klarar tuffare tag och bredare spår.</li>
+                </ul>
+
+                <h3>Spånevakuering & Kylning (Standardtryck)</h3>
+                <p>Vid djupa spår (högt $a_e$) är den största risken <strong>spånpackning</strong>, vilket spränger klingan direkt. Eftersom din maskin har standard spoltryck orkar skärvätskan sällan hela vägen ner i botten av ett djupt spår. <strong>Tips:</strong> Rika munstyckena extremt noga direkt in i spåret. Om klingan låter illa eller nyper: minska det radiella ingreppet ($a_e$) och ta spåret i flera ytligare passeringar istället för ett djupt svep.</p>
+
+                <h3>Radiell Spånförtunning (RCTF)</h3>
+                <p>Vid lågt radiellt ingrepp ($a_e < 50\%$) vinklas skäreggen in i materialet så att den faktiska spåntjockleken ($h_m$) blir tunnare än din inmatade $f_z$. Kalkylatorn kompenserar detta automatiskt (RCTF) och skruvar upp matningen vid låga ingrepp för att behålla ett konstant skärtryck och förhindra att verktyget bara "gnuggar".</p>
+
+                <h3>Verktygshäng (L/D-förhållande)</h3>
+                <p>Kap- och spårfräsar är extremt känsliga för häng eftersom skivan lätt böjer sig eller börjar huttra (chatter). Om uthänget ($L$) i förhållande till diametern ($D$) överstiger 2.5×D reducerar kalkylatorn stegvis både skärhastighet ($V_c$) och matning ($f_z$) drastiskt för att garantera en säker bearbetning.</p>
+            </div>
+        </div>
+		
     </main>
 </div>
 <footer>Slitting Cutter Calculator – created by Jimmy Rauhala</footer>
 
-<script src="Slitting-cutter_tool_data.js"></script>
+<script src="slitting-cutter_tool_data.js"></script>
 <script>
     // =====================================================================
     // UI INITIALIZATION AND EVENT HANDLING
@@ -171,6 +201,19 @@
         window.addEventListener('resize', () => {
             document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
         });
+		
+		// Modal Logic för Guide & Teori
+        const theoryModal = document.getElementById("theoryModal");
+        const theoryBtn = document.getElementById("theoryBtn");
+        const closeModal = document.getElementById("closeModal");
+        if (theoryBtn && theoryModal && closeModal) {
+            theoryBtn.addEventListener("click", () => theoryModal.style.display = "block");
+            closeModal.addEventListener("click", () => theoryModal.style.display = "none");
+            window.addEventListener("click", (event) => { 
+                if (event.target === theoryModal) theoryModal.style.display = "none"; 
+            });
+        }
+		
     });
 </script>
 <script src="theme.js"></script>

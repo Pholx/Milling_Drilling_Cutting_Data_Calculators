@@ -41,10 +41,10 @@ const curveAdjustmentPoints = [
 const materialDataHM = {
     "soft_steel": { name: "Steel: Soft (< 1100 N/mm²)", Fm: 1.0, Vc_safe: 80 },
     "hard_steel": { name: "Steel: Hard (> 1100 N/mm²)", Fm: 0.9, Vc_safe: 55 },
-    "stainless_austenitic": { name: "Stainless: Austenitic (< 850 N/mm²)", Fm: 0.9, Vc_safe: 40 },
+    "stainless_austenitic": { name: "Stainless: Austenitic (< 850 N/mm²)", Fm: 0.85, Vc_safe: 40 }, 
     "toolox_44": { name: "Steel: Toolox 44 (< 50 HRC)", Fm: 0.77, Vc_safe: 15 },
     "hardened_steel_65": { name: "Steel: Hardened (<65 HRC)", Fm: 0.6, Vc_safe: 10 },
-    "aluminium": { name: "Aluminum / Copper", Fm: 1.913, Vc_safe: 250 },
+    "aluminium": { name: "Aluminum / Copper", Fm: 1.4, Vc_safe: 200 }, 
     "cast_iron": { name: "Cast Iron", Fm: 0.85, Vc_safe: 70 }
 };
 
@@ -52,32 +52,32 @@ const materialDataHM = {
 const materialDataHSS = {
     "soft_steel": { name: "Steel: Soft (< 1100 N/mm²)", Fm: 1.0, Vc_safe: 20 },
     "hard_steel": { name: "Steel: Hard (> 1100 N/mm²)", Fm: 0.9, Vc_safe: 15 },
-    "stainless_austenitic": { name: "Stainless: Austenitic (< 850 N/mm²)", Fm: 0.8, Vc_safe: 12 },
+    "stainless_austenitic": { name: "Stainless: Austenitic (< 850 N/mm²)", Fm: 0.8, Vc_safe: 10 }, 
     "toolox_44": { name: "Steel: Toolox 44 (< 50 HRC)", Fm: 0.7, Vc_safe: 10 },
     "hardened_steel_65": { name: "Steel: Hardened (<65 HRC)", Fm: 0.6, Vc_safe: 5 },
-    "aluminium": { name: "Aluminum", Fm: 1.4, Vc_safe: 60 },
+    "aluminium": { name: "Aluminum", Fm: 1.3, Vc_safe: 60 }, 
     "cast_iron": { name: "Cast Iron", Fm: 0.8, Vc_safe: 25 }
 };
 
-// 5. Feed factor Fd – HSS
+// 5. Feed factor Fd – HSS (Reducerad med ~15% för ökad stabilitet)
 const FdTableHSS = [
-    { D: 0.5, '5xD': 0.028, '8xD': 0.024, '12xD': 0.020, '15xD': 0.016 },
-    { D: 1.0, '5xD': 0.031, '8xD': 0.027, '12xD': 0.022, '15xD': 0.018 },
-    { D: 2.0, '5xD': 0.042, '8xD': 0.036, '12xD': 0.030, '15xD': 0.024 },
-    { D: 2.5, '5xD': 0.049, '8xD': 0.042, '12xD': 0.035, '15xD': 0.028 },
-    { D: 3.0, '5xD': 0.052, '8xD': 0.045, '12xD': 0.037, '15xD': 0.030 },
-    { D: 4.0, '5xD': 0.056, '8xD': 0.048, '12xD': 0.040, '15xD': 0.032 },
-    { D: 5.0, '5xD': 0.063, '8xD': 0.054, '12xD': 0.045, '15xD': 0.036 },
-    { D: 6.0, '5xD': 0.105, '8xD': 0.090, '12xD': 0.075, '15xD': 0.060 },
-    { D: 8.0, '5xD': 0.140, '8xD': 0.120, '12xD': 0.100, '15xD': 0.080 },
-    { D: 10.0, '5xD': 0.161, '8xD': 0.138, '12xD': 0.115, '15xD': 0.092 },
-    { D: 12.0, '5xD': 0.196, '8xD': 0.168, '12xD': 0.140, '15xD': 0.112 },
-    { D: 14.0, '5xD': 0.217, '8xD': 0.186, '12xD': 0.155, '15xD': 0.124 },
-    { D: 16.0, '5xD': 0.231, '8xD': 0.198, '12xD': 0.165, '15xD': 0.132 },
-    { D: 18.0, '5xD': 0.245, '8xD': 0.210, '12xD': 0.175, '15xD': 0.140 },
-    { D: 20.0, '5xD': 0.259, '8xD': 0.222, '12xD': 0.185, '15xD': 0.148 },
-    { D: 22.0, '5xD': 0.266, '8xD': 0.228, '12xD': 0.190, '15xD': 0.152 },
-    { D: 25.0, '5xD': 0.266, '8xD': 0.228, '12xD': 0.190, '15xD': 0.152 }
+    { D: 0.5, '5xD': 0.024, '8xD': 0.020, '12xD': 0.017, '15xD': 0.014 },
+    { D: 1.0, '5xD': 0.026, '8xD': 0.023, '12xD': 0.019, '15xD': 0.015 },
+    { D: 2.0, '5xD': 0.036, '8xD': 0.031, '12xD': 0.026, '15xD': 0.020 },
+    { D: 2.5, '5xD': 0.042, '8xD': 0.036, '12xD': 0.030, '15xD': 0.024 },
+    { D: 3.0, '5xD': 0.044, '8xD': 0.038, '12xD': 0.031, '15xD': 0.026 },
+    { D: 4.0, '5xD': 0.048, '8xD': 0.041, '12xD': 0.034, '15xD': 0.027 },
+    { D: 5.0, '5xD': 0.054, '8xD': 0.046, '12xD': 0.038, '15xD': 0.031 },
+    { D: 6.0, '5xD': 0.089, '8xD': 0.077, '12xD': 0.064, '15xD': 0.051 },
+    { D: 8.0, '5xD': 0.119, '8xD': 0.102, '12xD': 0.085, '15xD': 0.068 },
+    { D: 10.0, '5xD': 0.137, '8xD': 0.117, '12xD': 0.098, '15xD': 0.078 },
+    { D: 12.0, '5xD': 0.167, '8xD': 0.143, '12xD': 0.119, '15xD': 0.095 },
+    { D: 14.0, '5xD': 0.184, '8xD': 0.158, '12xD': 0.132, '15xD': 0.105 },
+    { D: 16.0, '5xD': 0.196, '8xD': 0.168, '12xD': 0.140, '15xD': 0.112 },
+    { D: 18.0, '5xD': 0.208, '8xD': 0.179, '12xD': 0.149, '15xD': 0.119 },
+    { D: 20.0, '5xD': 0.220, '8xD': 0.189, '12xD': 0.157, '15xD': 0.126 },
+    { D: 22.0, '5xD': 0.226, '8xD': 0.194, '12xD': 0.162, '15xD': 0.129 },
+    { D: 25.0, '5xD': 0.226, '8xD': 0.194, '12xD': 0.162, '15xD': 0.129 }
 ];
 
 // 6. Length factors for cutting speed (Vc)
@@ -100,8 +100,8 @@ const lengthFactors = {
 //                      with depth because chips cannot escape.
 const coolantFactors = {
     'with_channel': {
-        Vc: { '5xD': 1.00, '8xD': 1.00, '12xD': 1.00, '15xD': 1.00 },
-        Fd: { '5xD': 1.00, '8xD': 1.00, '12xD': 1.00, '15xD': 1.00 }
+        Vc: { '5xD': 1.00, '8xD': 1.00, '12xD': 0.95, '15xD': 0.90 },
+        Fd: { '5xD': 1.00, '8xD': 1.00, '12xD': 0.90, '15xD': 0.85 }
     },
     'without_channel': {
         Vc: { '5xD': 0.95, '8xD': 0.85, '12xD': 0.75, '15xD': 0.65 },

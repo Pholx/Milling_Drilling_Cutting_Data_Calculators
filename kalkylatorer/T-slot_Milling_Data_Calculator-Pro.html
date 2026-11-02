@@ -34,6 +34,10 @@
         <div class="tool-badge tool-hm" id="toolBadge">HM</div>
         <h1>T-Slot Milling Calculator</h1>
         <p class="subtitle" id="headerSubtext">Full Slotting (100% Radial Engagement)</p> 
+		
+		<!-- KLISTRA IN DENNA KNAPP I DIN <header> (T.ex. under din subtitle) -->
+<button id="theoryBtn" class="theory-btn">📖 Guide & Teori</button>
+		
     </header>
     
     <main>
@@ -122,11 +126,39 @@
                 Fill in the fields above to get cutting data
             </p>
         </div>
+		
+		<!-- ========================================================================= -->
+<!-- KLISTRA IN DETTA INNAN DIN </main> (Själva popup-rutan som är dold som standard) -->
+<div id="theoryModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeModal">&times;</span>
+        <h2>Teori & Tips för T-spårsfräsning</h2>
+        
+        <h3>Vad är T-spårsfräsning?</h3>
+        <p>T-spårsfräsning skapar breda spår i botten av ett redan existerande spår. Det är en av de tuffaste operationerna för ett verktyg eftersom spånorna är instängda och verktyget drivs via en mycket tunn hals, vilket gör det extremt känsligt för vridkrafter och vibrationer.</p>
+        
+        <h3>Så får du en stabil operation</h3>
+        <ul>
+            <li><strong>Livsviktig urspåning:</strong> Eftersom maskinen har standard spoltryck kommer vatten ofta inte ner i spåret för att spola ut spånorna. I stål bör du använda <strong>kraftigt luftblås</strong>. Om spånorna ligger kvar och klipps en andra gång, kommer fräsens hals att gå av direkt.</li>
+            <li><strong>Förfräs det vertikala spåret rätt:</strong> Det raka spåret som T-fräsen ska åka ner i måste vara lite bredare än T-fräsens hals. Om halsen skaver mot väggarna byggs friktionsvärme upp och verktyget nyper.</li>
+            <li><strong>Respektera matningssänkningen:</strong> Vid <em>Full Slotting</em> sänker kalkylatorn automatiskt matningen med 20 % för att skydda verktyget. Försök inte "optimera" upp detta värde för mycket med budgetverktyg – halsbrott sker utan förvarning.</li>
+        </ul>
+
+        <h3>Vanliga fel & Felsökning</h3>
+        <ul>
+            <li><strong>Verktyget går av på mitten (Halsbrott):</strong> Orsakas nästan alltid av <em>spånstockning</em> (dålig urspåning) eller för hög matning per tand ($f_z$). Säkerställ att spånorna blåses bort framför verktyget.</li>
+            <li><strong>Kraftiga vibrationer / Oljud:</strong> T-fräsar har ofta långt utstick. Om det skriker, kontrollera att kalkylatorn har rätt överhäng (L) inmatat så att den kan sänka $Vc$ och $f_z$. Vibrationer kan också bero på att verktyget är slött och "trycker" material istället för att skära.</li>
+            <li><strong>Dålig ytfinhet i spårets tak/botten:</strong> Matningen kan vara för låg (verktyget gnuggar), eller så har spånor kletat fast på skäreggen (löseggsbildning). Säkerställ att du använder rätt skärhastighet enligt kalkylatorn.</li>
+        </ul>
+    </div>
+</div>
+<!-- ========================================================================= -->
+		
     </main>
 </div>
 <footer>T-Slot Milling Calculator – created by Jimmy Rauhala</footer>
 
-<script src="T-slot_Milling_tool_data.js"></script>
+<script src="t-slot_milling_tool_data.js"></script>
 <script>
     // =====================================================================
     // UI INITIALIZATION AND EVENT HANDLING
@@ -178,6 +210,28 @@
             document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
         });
     });
+	
+	// =====================================================================
+    // Guide & Teori Modal Logic
+    // =====================================================================
+    const theoryModal = document.getElementById("theoryModal");
+    const theoryBtn = document.getElementById("theoryBtn");
+    const closeModal = document.getElementById("closeModal");
+
+    if (theoryBtn && theoryModal && closeModal) {
+        theoryBtn.addEventListener("click", () => {
+            theoryModal.style.display = "block";
+        });
+        closeModal.addEventListener("click", () => {
+            theoryModal.style.display = "none";
+        });
+        window.addEventListener("click", (event) => {
+            if (event.target === theoryModal) {
+                theoryModal.style.display = "none";
+            }
+        });
+    }
+	
 </script>
 <script src="theme.js"></script>
 </body>

@@ -34,6 +34,13 @@
             <div class="tool-badge tool-hm" id="toolBadge">HM</div> 
             <h1>Dynamic Milling Calculator</h1>
             <p class="subtitle">Dynamic Milling – Solid Carbide End Mill (1–20 mm)</p> 
+			
+			<!-- KLISTRA IN DENNA KNAPP I DIN <header> (T.ex. under din subtitle) -->
+<button id="theoryBtn" class="theory-btn">📖 Guide & Teori</button>
+
+<!-- ========================================================================= -->
+
+			
         </header>
         
         <main>
@@ -130,6 +137,32 @@
                     Fill in the fields above to get cutting data
                 </p>
             </div>
+			
+			<!-- Själv popup-rutan som är dold som standard -->
+<div id="theoryModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeModal">&times;</span>
+        <h2>Teori & Tips för Dynamisk Fräsning</h2>
+        
+        <h3>Vad är dynamisk fräsning?</h3>
+        <p>Dynamisk fräsning (trochoidal fräsning) är en höghastighetsmetod där man använder ett litet radiellt ingrepp ($a_e$) och stort skärdjup. Genom att sprida slitaget längs hela skärets längd och hålla nere värmen tack vare tunna spånor skonas verktyget maximalt, vilket gör det perfekt för budgetverktyg i alla material.</p>
+        
+        <h3>Så får du en perfekt operation</h3>
+        <ul>
+            <li><strong>Kör torrt med tryckluft:</strong> Eftersom maskinen har standardspoltryck ska du i stället köra med ett kraftigt luftblås i stål och verktygsstål. Flodkylning skapar termiska chocker (varmt/kallt om vartannat) som spräcker billig hårdmetall. Spånorna är så tunna att luften räcker för att hålla rent.</li>
+            <li><strong>Matning vs. Skärhastighet ($Vc$):</strong> Tack vare den låga radiella anliggningen (litet $ae$) tillåts en hög skärhastighet, men spånan tunnas ut geometriskt. Kalkylatorn kompenserar detta med spånförtunning så att skäret faktiskt arbetar och inte bara gnuggar.</li>
+            <li><strong>Ramping och ingång:</strong> Använd alltid helisk ramping med sänkt matning (enligt kalkylatorns rekommendation) när du dyker ner i materialet, så att inte verktygets botten överbelastas.</li>
+        </ul>
+
+        <h3>Vanliga fel & Felsökning</h3>
+        <ul>
+            <li><strong>Verktyget flisar ur i förtid:</strong> Beror nästan uteslutande på att standardkylvätska används i stål (termisk chock) eller att det är för mycket radiellt ingrepp ($ae$) vilket dödar effekten av den dynamiska rörelsen.</li>
+            <li><strong>Långa, sega spånor som lindar sig:</strong> Matningen ($fz$) är för låg i förhållande till skärhastigheten. Öka matningen en aning eller sänk $Vc$ så spånan bryts av ordentligt.</li>
+            <li><strong>Vibrationer och missljud:</strong> Dåligt optimerad verktygsbana (för liten radie i svängarna) eller att $ae$ är satt för högt för det aktuella antalet skär ($z$).</li>
+        </ul>
+    </div>
+</div>
+			
         </main>
     </div>
     
@@ -210,6 +243,31 @@
             setupEventListeners();
             updateStandardValues();
         });
+		
+		// =====================================================================
+    // Guide & Teori Modal Logic
+    // =====================================================================
+    const theoryModal = document.getElementById("theoryModal");
+    const theoryBtn = document.getElementById("theoryBtn");
+    const closeModal = document.getElementById("closeModal");
+
+    if (theoryBtn && theoryModal && closeModal) {
+        // Öppna rutan
+        theoryBtn.addEventListener("click", () => {
+            theoryModal.style.display = "block";
+        });
+        // Stäng på kryss
+        closeModal.addEventListener("click", () => {
+            theoryModal.style.display = "none";
+        });
+        // Stäng om man klickar utanför rutan
+        window.addEventListener("click", (event) => {
+            if (event.target === theoryModal) {
+                theoryModal.style.display = "none";
+            }
+        });
+    }
+		
     </script>
     <script src="theme.js"></script>
 </body>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Helical Chamfer Calculator Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme = saved || (prefersDark ? 'dark' : 'light');
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) { }
+        })();
+    </script>
+
+    <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
+    <link rel="apple-touch-icon" href="../icon-192.png">
+    <link rel="stylesheet" href="style.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+       
+        <header>
+            <div class="tool-badge tool-hm" id="toolBadge">HM</div> 
+            <h1>Helical Chamfer Calculator</h1>
+            <p class="subtitle">Spiral Interpolation Chamfering</p> 
+            <button id="theoryBtn" class="theory-btn">📖 Guide & Teori</button>
+        </header>
+        
+        <main>
+            <!-- SECTION 1: Tool & Material -->
+            <div class="section-title">Tool & Material</div>
+
+            <div class="form-group">
+                <label for="material">Material:<span class="tooltip" data-tooltip="Select the workpiece material." tabindex="0">?</span></label>
+                <select id="material"></select>
+            </div>
+
+            <div class="form-group">
+                <label for="chamferAngle">Chamfer Angle (Half Angle) [°]:<span class="tooltip" data-tooltip="The angle of the cutting edge relative to the vertical Z-axis." tabindex="0">?</span></label>
+                <select id="chamferAngle">
+                    <option value="30">30° (60° Inclusive)</option>
+                    <option value="45" selected>45° (90° Inclusive)</option>
+                    <option value="60">60° (120° Inclusive)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="diameter">Tool Nominal Diameter D [mm]:<span class="tooltip" data-tooltip="The maximum outer diameter of the chamfer mill. Used to verify that the tool is large enough for the chosen path." tabindex="0">?</span></label>
+                <input type="number" id="diameter" value="8" step="1" min="1">
+            </div>
+
+            <div class="form-group">
+                <label for="z">Number of Flutes z:<span class="tooltip" data-tooltip="Number of cutting edges." tabindex="0">?</span></label>
+                <input type="number" id="z" value="4" step="1" min="1">
+            </div>
+
+            <hr>
+
+            <!-- SECTION 2: Operation Dimensions -->
+            <div class="section-title">Operation Dimensions</div>
+
+            <div class="form-group">
+                <label for="holeDiameter">Final Chamfer Outer Diameter [mm]:<span class="tooltip" data-tooltip="The final maximum diameter you want the chamfer to have at the surface." tabindex="0">?</span></label>
+                <input type="number" id="holeDiameter" value="11" step="0.1">
+            </div>
+
+            <div class="form-group">
+                <label for="preDrillDiameter">Pre-drilled Hole Diameter [mm]:<span class="tooltip" data-tooltip="The diameter of the existing hole. Determines the absolute maximum path radius allowed." tabindex="0">?</span></label>
+                <input type="number" id="preDrillDiameter" value="5" step="0.1" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="pathRadius">Path Radius (Tool Center) R<sub>path</sub> [mm]:<span class="tooltip" data-tooltip="The radius the tool center follows. Adjust this to find the sweet spot for the highest feed rate!" tabindex="0">?</span></label>
+                <input type="number" id="pathRadius" value="2.0" step="0.1" min="0.1">
+            </div>
+
+            <div class="form-group">
+                <label for="zPitch">Z-Pitch (Step down per rev) [mm]:<span class="tooltip" data-tooltip="How deep the tool drops in Z per one full circle. Linked with Ramp Angle." tabindex="0">?</span></label>
+                <input type="number" id="zPitch" value="0.5" step="0.05" min="0.01">
+            </div>
+            
+            <div class="form-group">
+                <label for="rampAngle">Helical Ramp Angle α [°]:<span class="tooltip" data-tooltip="The plunge angle. Linked with Z-Pitch. A steeper angle increases chip load and automatically reduces the feed rate." tabindex="0">?</span></label>
+                <input type="number" id="rampAngle" value="2.28" step="0.1" min="0.1" max="45">
+            </div>
+
+            <hr>
+
+            <!-- SECTION 3: Cutting Data -->
+            <div class="section-title">Cutting Data (Editable)</div>
+
+            <div class="form-group">
+                <label for="vc">Cutting Speed Vc [m/min]:<span class="tooltip" data-tooltip="Cutting speed for the nominal tool diameter." tabindex="0">?</span></label>
+                <input type="number" id="vc" value="140" step="1">
+            </div>
+
+            <div class="form-group">
+                <label for="fzInitial">Base Feed per Tooth f<sub>z</sub> [mm/z]:<span class="tooltip" data-tooltip="Base feed for the nominal tool diameter. Automatically scaled down if you cut with the tip." tabindex="0">?</span></label>
+                <input type="number" id="fzInitial" value="0.020" step="0.001">
+            </div>
+
+            <div class="form-group">
+                <label for="maxRpm">Machine Max RPM:<span class="tooltip" data-tooltip="Limits the spindle speed." tabindex="0">?</span></label>
+                <input type="number" id="maxRpm" value="12000" step="100">
+            </div>
+
+            <!-- RESULTS -->
+            <div class="results" id="results">
+                <p style="color:var(--text-light); text-align:center; padding:20px 0;">
+                    Fill in the fields above to get cutting data
+                </p>
+            </div>
+
+            <!-- Guide & Teori Modal -->
+            <div id="theoryModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn" id="closeModal">&times;</span>
+<h2>Guide & Teori – Helical Chamfer</h2>
+
+<h3>Vad är målet?</h3>
+<p>
+    Att hitta stabila skärdata som fungerar bra från början, ger lång verktygslivslängd och fungerar med vanlig spoltryck (ingen högtryckspump). 
+    Därefter kan man optimera vidare.
+</p>
+
+<h3>Hitta "Sweet Spot" för Path Radius</h3>
+<p>
+    Matningen bildar en kulle när du ändrar <strong>Path Radius</strong>. Det finns två begränsande krafter som drar åt olika håll:
+</p>
+<ul>
+    <li>
+        <strong>För liten banradie:</strong><br>
+        Circular compensation sänker center-matningen kraftigt (verktygscentrum går en mycket kortare väg än skäreggen). 
+        Dessutom blir rampvinkeln brantare för samma Z-pitch, vilket ökar belastningen.
+    </li>
+    <li>
+        <strong>För stor banradie:</strong><br>
+        Du tvingas skära närmare spetsen. Spetsen har lägre skärhastighet och sämre styvhet, vilket kräver lägre matning per tand 
+        (Size Factor) och ger generellt sämre verktygsliv.
+    </li>
+</ul>
+<p>
+    Prova att justera Path Radius upp och ner – du kommer se att matningen når ett maximum någonstans mitt emellan. 
+    Det är "sweet spot".
+</p>
+
+<h3>Hur kalkylatorn räknar</h3>
+<ul>
+    <li>
+        <strong>Engagement-baserad RPM:</strong><br>
+        Varvtalet beräknas utifrån den största diametern som faktiskt skär (ytteryttan av fasen), 
+        inte verktygets nominella diameter. Då stämmer den programmerade Vc bättre med verkligheten.
+    </li>
+    <li>
+        <strong>Spånförtunning (chip thinning):</strong>
+        <ul>
+            <li>Radiell (RCTF) – när engagemanget är mindre än halva effektiva diametern.</li>
+            <li>Axiell (ACTF) – beroende på fasvinkeln (t.ex. ×1,41 för 45°).</li>
+        </ul>
+        Kalkylatorn ökar matningen automatiskt för att kompensera och undvika gnidning.
+    </li>
+    <li>
+        <strong>Ramp-kompensering:</strong><br>
+        När rampvinkeln ökar går verktygscentrum en längre väg per varv (1/cos α) och den axiella lastkomponenten ökar. 
+        Därför sänks X/Y-matningen automatiskt så att skärtrycket hålls på en rimlig nivå.
+    </li>
+    <li>
+        <strong>Circular compensation:</strong><br>
+        Programmerad center-feed = edge-feed × (path-diameter / hole-diameter). 
+        Detta håller chip load korrekt vid skäreggen.
+    </li>
+</ul>
+
+<h3>Geometriska spärrar (Auto-Detection)</h3>
+<p>Kalkylatorn simulerar ditt ingrepp och skyddar mot felprogrammering:</p>
+<ul>
+    <li>
+        <strong>Max Path Radius = R<sub>pre</sub>:</strong><br>
+        Om banradien är större når inte spetsen in över förborrningens kant → oslipad klack i botten av fasen.
+    </li>
+    <li>
+        <strong>Verktyget måste nå ut:</strong><br>
+        Om banradien är för liten krävs större verktygsdiameter för att nå önskad ytterdiameter på fasen.
+    </li>
+    <li>
+        <strong>Automatiskt Z-djup:</strong><br>
+        Kalkylatorn räknar ut hur djupt den teoretiska spetsen måste gå för att fasen ska få rätt ytterdiameter. 
+        Du behöver inte gissa.
+    </li>
+</ul>
+
+<h3>Praktiska tips för stabil data</h3>
+<ul>
+    <li>Håll rampvinkeln måttlig (ca 1,5–3,5° i stål/rostfritt, något högre i aluminium).</li>
+    <li>Lyssna och titta på spånorna. Tunna, jämna spånor + lagom temperatur = bra.</li>
+</ul>
+
+<p style="margin-top:1.5em; opacity:0.85; font-size:0.95em;">
+    Data är avsedd som stabil utgångspunkt för standard/budget allround-fräsar med vanlig intern + extern spolning. 
+    Optimera alltid vidare utifrån din maskin, fixtur och verktygsskick.
+</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer>Helical Chamfer Calculator Pro – created by Jimmy Rauhala</footer>
+
+    <script src="helical_milling_tool_data.js"></script>
+    <script>
+        function populateMaterialOptions() {
+            const select = document.getElementById('material');
+            select.innerHTML = '';
+            for (const key in toolData) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = toolData[key].name;
+                select.appendChild(option);
+            }
+        }
+
+        function positionTooltip(el) {
+            const rect = el.getBoundingClientRect();
+            const bubbleWidth = Math.min(220, window.innerWidth - 16);
+            const bubbleHeight = 90;
+            const padding = 8;
+            const gap = 8;
+            const vw = window.innerWidth;
+
+            let centerX = rect.left + rect.width / 2;
+            if (centerX - bubbleWidth / 2 < padding) { centerX = padding + bubbleWidth / 2; } 
+            else if (centerX + bubbleWidth / 2 > vw - padding) { centerX = vw - padding - bubbleWidth / 2; }
+
+            let topY = rect.top - bubbleHeight - gap;
+            if (topY < padding) { topY = rect.bottom + gap; }
+
+            el.style.setProperty('--tt-x', centerX + 'px');
+            el.style.setProperty('--tt-y', topY + 'px');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateMaterialOptions();
+            document.addEventListener('mouseover', (e) => { const el = e.target.closest('.tooltip'); if (el) positionTooltip(el); });
+            document.addEventListener('focusin', (e) => { const el = e.target.closest('.tooltip'); if (el) positionTooltip(el); });
+            
+            const theoryModal = document.getElementById("theoryModal");
+            const theoryBtn = document.getElementById("theoryBtn");
+            const closeModal = document.getElementById("closeModal");
+            if (theoryBtn && theoryModal && closeModal) {
+                theoryBtn.addEventListener("click", () => theoryModal.style.display = "block");
+                closeModal.addEventListener("click", () => theoryModal.style.display = "none");
+                window.addEventListener("click", (event) => { if (event.target === theoryModal) theoryModal.style.display = "none"; });
+            }
+
+            setupEventListeners();
+            updateStandardValues();
+        });
+    </script>
+	<script src="theme.js"></script>
+    <script src="helical-chamfer_tool_data.js"></script>
+</body>
+</html>

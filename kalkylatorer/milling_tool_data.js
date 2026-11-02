@@ -45,7 +45,7 @@ const toolData = {
         z_base: 4,
         name: "Steel (~1080 N/mm²)",
         trochoidal: {
-            vc: 200, ae_percent: 12,
+            vc: 160, ae_percent: 12,
             fz_table: {1:0.002, 2:0.004, 3:0.007, 4:0.010, 5:0.012, 6:0.016, 8:0.022, 10:0.028, 12:0.032, 16:0.044, 20:0.055}
         }
     },
@@ -77,7 +77,7 @@ const toolData = {
         z_base: 4,
         name: "Vanadis / Powder Steel",
         trochoidal: {
-            vc: 150, ae_percent: 10,
+            vc: 120, ae_percent: 10,
             fz_table: {1:0.002, 2:0.004, 3:0.0065, 4:0.0095, 5:0.0115, 6:0.015, 8:0.021, 10:0.0265, 12:0.031, 16:0.042, 20:0.0525}
         }
     },
@@ -366,21 +366,31 @@ function calculate() {
     let chipThinningFactor = 1.0;
     let fz_korr = fz_adjusted;
 
-    if (aePercent > 50) {
-        chipThinningFactor = 1.0;
-        aeWarningElement.textContent = 'WARNING: Stepover ae > 50%. Chip thinning correction is disabled — this is not a trochoidal operation.';
-        aeWarningElement.style.display = 'block';
-    } else if (ae_raw > 0 && ae_raw < D) {
-        chipThinningFactor = Math.sqrt(D / ae);
+    if (aePercent >= 50) {
+		chipThinningFactor = 1.0;
+		aeWarningElement.textContent = 'WARNING: Stepover ae ≥ 50%. Chip thinning correction is disabled — this is not a trochoidal operation.';
+		aeWarningElement.style.display = 'block';
+	} else if (ae_raw > 0 && ae_raw < D) {
+        // 1. Exakt fysikalisk formel för radiell spånförtunning (RCTF)
+        let exactFactor = D / (2 * Math.sqrt(ae * (D - ae)));
+        
+        // 2. HSM-Boost (Termisk kompensation)
+        // Eftersom ingreppet är litet hinner skäret kylas ner. Källorna (Seco/Sandvik) 
+        // rekommenderar att man övermatar med ca 50-60% utöver den rent geometriska 
+        // spånförtunningen för att verktyget ska klippa och inte "gneta" (rubbing).
+        let hsmBoost = 1.55; 
+        
+        let dynamicFactor = exactFactor * hsmBoost;
+        
+        // Spärr (Max 3.5) för att skydda budgetverktyg vid extremt lågt ae
+        chipThinningFactor = Math.min(dynamicFactor, 3.5); 
         fz_korr = fz_adjusted * chipThinningFactor;
-        aeWarningElement.style.display = 'none';
-    } else {
         aeWarningElement.style.display = 'none';
     }
     
     // Effective chip thickness (hm)
     // hm = fz × √(ae/D)  — the inverse of the chip thinning formula
-    const hm_effective = fz_korr * Math.sqrt(ae / D);
+    const hm_effective = fz_korr * ((2 * Math.sqrt(ae * (D - ae))) / D);
     
     const Vf_normal = Math.round(n * fz_korr * z);
 

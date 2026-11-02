@@ -34,6 +34,10 @@
         <div class="tool-badge tool-hm" id="toolBadge">HM</div>
         <h1>Chamfer Milling Calculator Pro</h1>
         <p class="subtitle">Cutting Data for Chamfer Milling based on Effective Diameter (D<sub>eff</sub>)</p> 
+		
+		<!-- Guide & Teori Knapp -->
+        <button id="theoryBtn" class="theory-btn">📖 Guide & Teori</button>
+		
     </header>
     <main>
         <div class="section-title">Geometry & Material</div>
@@ -93,11 +97,39 @@
                 Fill in the fields above to get cutting data
             </p>
         </div>
+		
+		<!-- Guide & Teori Modal Rutan -->
+        <div id="theoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeModal">&times;</span>
+                <h2>Teori: Fasfräsning i Praktiken</h2>
+
+                <h3>Effektiv Diameter ($D_{eff}$)</h3>
+                <p>Till skillnad från vanlig fräsning styrs skärdatan vid fasfräsning av den <strong>effektiva diametern ($D_{eff}$)</strong> – den faktiska diametern på konan som rör vid materialet. En liten fasbredd ger en liten $D_{eff}$, vilket kräver högre varvtal. <em>Notera: Kalkylatorn utgår från ett spetsigt verktyg. Har din fräs en trubbig spets (platt botten) blir den verkliga diametern något större.</em></p>
+                
+                <h3>Vibrationer (Chatter) & Maskinstabilitet</h3>
+                <p>Fasfräsning skapar höga radiella tryckkrafter som trycker verktyget bort från arbetsstycket. I en standardmaskin, eller vid svag fastspänning, leder detta lätt till vibrationer. För att motverka detta:</p>
+                <ul>
+                    <li><strong>Använd "Finish" eller "Std":</strong> Dessa matningar är konservativa och minskar skärtrycket.</li>
+                    <li><strong>Öka Extra Z-Depth:</strong> Om det finns plats under kanten, lägg till extra Z-djup. Det flyttar upp skärpunkten till en tjockare och stabilare del av verktyget, vilket ger en större $D_{eff}$ och mjukare gång.</li>
+                </ul>
+
+                <h3>Spånförtunning (Prod-läge)</h3>
+				<p>Eftersom radiellt ingrepp (<em>a<sub>e</sub></em>) vid fasning ofta är mycket litet blir spånan tunn. 
+				Kalkylatorns <em>Prod-läge</em> kompenserar för både radiell och axiell spånförtunning så att skäret får tillräcklig spåntjocklek och inte bara gnuggar.</p>
+				<p>För att ge <strong>stabila startvärden</strong> på standardmaskiner (utan högtryckskylning) är kompensationen dämpad på små faser och har ett tak på <strong>1.55×</strong>. 
+				Det ger längre verktygslivslängd och mindre risk för vibrationer.</p>
+            </div>
+        </div>
+		
     </main>
+	
+	
+	
 </div>
 <footer>Chamfer Milling Calculator Pro – created by Jimmy Rauhala</footer>
 
-<script src="Chamfer_tool_data.js"></script>
+<script src="chamfer_tool_data.js"></script>
 
 <script>
     // =====================================================================
@@ -170,7 +202,7 @@
                 <p><strong>Z-depth (required):<span class="tooltip" data-tooltip="Z-depth required to achieve the desired chamfer width." tabindex="0">?</span></strong><span>${formatDecimal(res.Z_req, 3)} <sub>mm</sub></span></p>
                 <p><strong>Z-depth (total):<span class="tooltip" data-tooltip="Total Z-depth including extra depth." tabindex="0">?</span></strong><span>${formatDecimal(res.Z_total, 3)} <sub>mm</sub></span></p>
                 <p><strong>Radial Engagement ae:<span class="tooltip" data-tooltip="Radial engagement in the side direction. Equal to chamfer_size." tabindex="0">?</span></strong><span>${formatDecimal(res.ae, 3)} <sub>mm</sub></span></p>
-                <p><strong>Chip thinning factor:<span class="tooltip" data-tooltip="Compensation factor for thinner chips. Cap: 2.0." tabindex="0">?</span></strong><span>${formatDecimal(res.chip_thinning, 3)} <sub>(x)</sub></span></p>
+                <p><strong>Chip thinning factor:<span class="tooltip" data-tooltip="Compensation factor for thinner chips. Cap: 1.55." tabindex="0">?</span></strong><span>${formatDecimal(res.chip_thinning, 3)} <sub>(x)</sub></span></p>
                 <p><strong>Finish f<sub>z</sub>:<span class="tooltip" data-tooltip="Feed per tooth for fine surface finish (fz_bas × 0.6)." tabindex="0">?</span></strong><span>${formatDecimal(res.fz_finish, 4)} <sub>mm/z</sub></span></p>
                 <p><strong>Std. f<sub>z</sub>:<span class="tooltip" data-tooltip="Base fz without compensation." tabindex="0">?</span></strong><span>${formatDecimal(res.fz_std, 4)} <sub>mm/z</sub></span></p>
                 <p><strong>Prod. f<sub>z</sub> (chip thinning):<span class="tooltip" data-tooltip="fz with chip thinning compensation." tabindex="0">?</span></strong><span>${formatDecimal(res.fz_prod, 4)} <sub>mm/z</sub></span></p>
@@ -263,6 +295,19 @@
         window.addEventListener('resize', () => {
             document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
         });
+		
+		
+		// Modal Logic för Guide & Teori
+        const theoryModal = document.getElementById("theoryModal");
+        const theoryBtn = document.getElementById("theoryBtn");
+        const closeModal = document.getElementById("closeModal");
+        if (theoryBtn && theoryModal && closeModal) {
+            theoryBtn.addEventListener("click", () => theoryModal.style.display = "block");
+            closeModal.addEventListener("click", () => theoryModal.style.display = "none");
+            window.addEventListener("click", (event) => { 
+                if (event.target === theoryModal) theoryModal.style.display = "none"; 
+            });
+        }
 
         // Input listeners
         document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', () => {

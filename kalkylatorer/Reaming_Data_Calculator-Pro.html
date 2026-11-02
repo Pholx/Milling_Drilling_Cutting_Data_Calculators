@@ -34,6 +34,39 @@
         <div class="tool-badge tool-hm" id="toolBadge">HM</div>
         <h1>Reaming Data Calculator Pro</h1>
         <p class="subtitle">Reaming – Carbide & HSS (1–40 mm)</p>
+		
+		
+		
+		<!-- KLISTRA IN DENNA KNAPP I DIN <header> (T.ex. under din subtitle) -->
+<button id="theoryBtn" class="theory-btn">📖 Guide & Teori</button>
+
+<!-- ========================================================================= -->
+<!-- KLISTRA IN DETTA INNAN DIN </main> (Själva popup-rutan som är dold som standard) -->
+<div id="theoryModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeModal">&times;</span>
+        <h2>Teori & Tips för Brotschning</h2>
+        
+        <h3>Vad är brotschning?</h3>
+        <p>Brotschning är en finbearbetningsmetod för att skapa cylindriska hål med snäva dimensionstoleranser (ofta H7) och hög ytfinhet. Operationen är inte avverkande i första hand, utan skalar enbart bort en mycket liten, kontrollerad mängd material.</p>
+        
+        <h3>Så får du en perfekt yta</h3>
+        <ul>
+            <li><strong>Fet emulsion / Smörjning:</strong> Till skillnad från borrning handlar vätskan här mer om <em>smörjning</em> än kylning. Använd gärna en fet emulsion (8–12 %) för att förhindra att mikromaterial kletar fast på skäreggen och repar ytan.</li>
+            <li><strong>Rätt arbetsmån:</strong> Lämna inte för mycket material! För tuffa material (rostfritt, Toolox) ska arbetsmånen halveras jämfört med mjuka stål för att undvika skärbrott.</li>
+            <li><strong>Konstant matning:</strong> Stanna aldrig mitt i hålet. Gå in med full matning och backa ut med samma (eller dubbla) matning. Spindeln ska <strong>alltid</strong> rotera åt samma håll även vid utgång, annars repar du hålet.</li>
+        </ul>
+
+        <h3>Vanliga fel & Felsökning</h3>
+        <ul>
+            <li><strong>För stora eller koniska hål:</strong> Beror nästan alltid på kast i verktygshållaren (runout). Använd en flytande hållare (floating chuck) eller en högprecisionschuck (t.ex. hydraulik eller krymp) om du kör stumt.</li>
+            <li><strong>Dålig yta / Revor:</strong> Ofta orsakat av löseggsbildning (BUE) eller att spånor trycks fast. Lösning: Öka skärhastigheten ($Vc$) något, säkerställ fet kylvätska och använd mycket vassa verktyg. I bottenhål utan högtryckskylning kan spånor bli kvar i hålet och repas mot väggarna – överväg då en brotsch med vänsterspiral (som trycker spånorna framåt) för genomgående hål, och rak/högerspiral för bottenhål.</li>
+            <li><strong>Brotschen nyper / Skärbrott:</strong> Beror på för stor arbetsmån (för litet förborrat hål), att matningen är för låg (bygger värme istället för att skära), eller att materialet har deformationshärdat under förborrningen.</li>
+        </ul>
+    </div>
+</div>
+<!-- ========================================================================= -->
+		
     </header>
 
     <main>
@@ -88,7 +121,7 @@
 
 <footer>Reaming Data Calculator Pro – created by Jimmy Rauhala</footer>
 
-<script src="Reaming_tool_data.js"></script>
+<script src="reaming_tool_data.js"></script>
 
 <script>
     // =====================================================================
@@ -210,14 +243,15 @@
             capped = true;
         }
 
-        // --- 3. Feed per tooth and feed per revolution ---
+		// --- 3. Feed per tooth and feed per revolution ---
         const fzBase = getFzFromTable(diameter, toolType);
         const fzSafety = toolType === 'HM' ? FZ_SAFETY_FACTOR_HM : FZ_SAFETY_FACTOR_HSS;
 
         // Coolant bonus for feed (smaller effect than Vc)
         const coolantFzFactor = coolantMethod === 'with_coolant' ? 1.05 : 1.00;
 
-        const fz_effective = fzBase * fzSafety * coolantFzFactor;
+        // KORRIGERING: Inkluderade mat.Fm för att skydda verktyget i tuffa material
+        const fz_effective = fzBase * fzSafety * coolantFzFactor * mat.Fm;
         const f_rev = fz_effective * teeth;
         const Vf = Math.round(n_final * f_rev);
 
@@ -344,6 +378,31 @@
         // Initial calculation
         updateRecommendedTeeth();
         calculateReamingData();
+		
+		// =====================================================================
+    // Guide & Teori Modal Logic
+    // =====================================================================
+    const theoryModal = document.getElementById("theoryModal");
+    const theoryBtn = document.getElementById("theoryBtn");
+    const closeModal = document.getElementById("closeModal");
+
+    if (theoryBtn && theoryModal && closeModal) {
+        // Öppna rutan
+        theoryBtn.addEventListener("click", () => {
+            theoryModal.style.display = "block";
+        });
+        // Stäng på kryss
+        closeModal.addEventListener("click", () => {
+            theoryModal.style.display = "none";
+        });
+        // Stäng om man klickar utanför rutan
+        window.addEventListener("click", (event) => {
+            if (event.target === theoryModal) {
+                theoryModal.style.display = "none";
+            }
+        });
+    }
+		
     });
 </script>
 <script src="theme.js"></script>

@@ -35,6 +35,9 @@
         <div class="tool-badge tool-hm" id="toolBadge">HM</div>
         <h1>Drilling Data Calculator Pro</h1>
         <p class="subtitle">Drilling – Carbide & HSS (0.5–25 mm)</p>
+		
+		<!-- Guide & Teori Knapp -->
+        <button id="theoryBtn" class="theory-btn">📖 Guide & Teori</button>
     </header>
 
     <main>
@@ -96,6 +99,31 @@
                 Fill in the fields above to get cutting data
             </p>
         </div>
+		
+		<!-- Guide & Teori Modal Rutan -->
+        <div id="theoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeModal">&times;</span>
+                <h2>Teori: Optimerad Borrning</h2>
+
+                <h3>Hårdmetall (HM) vs HSS</h3>
+                <p><strong>Hårdmetall</strong> tål enorm värme och tillåter mycket höga skärhastigheter (Vc) och hög matning, men materialet är skört. Det kräver en stabil maskinuppspänning. <strong>HSS</strong> (snabbstål) är segare och förlåter en ostabil uppspänning eller vinklade ytor, men skärhastigheten måste sänkas rejält för att borret inte ska brinna upp.</p>
+                
+                <h3>Kylning & Spoltryck</h3>
+                <p>Kylningens primära uppgift vid borrning är spånevakuering. Denna kalkylator utgår från <strong>maskiner med standard spoltryck</strong> (utan extern högtryckspump), vilket påverkar strategin:</p>
+                <ul>
+                    <li><strong>Med kylkanaler (Through-coolant):</strong> Spånorna tvingas upp ur hålet kontinuerligt. För solida HM-borr upp till 8xD behöver du sällan "pecka" (spånborra), och kalkylatorn rekommenderar "Through" (kör rakt igenom). Vid extrema djup (12xD+) räcker sällan standardtryck för att evakuera spånorna säkert, och kalkylatorn rekommenderar då spånborrning trots invändig kylning.</li>
+                    <li><strong>Utan kylkanaler:</strong> Spånorna fastnar lätt i spåren. Kalkylatorn sänker då automatiskt skärhastigheten och matningen kraftigt, och ger dig ett rekommenderat djup per inmatning (Pecking). HSS förutsätts alltid köras med utvändig kylning.</li>
+                </ul>
+
+                <h3>Varför sänks datan vid långa borr (L/D)?</h3>
+                <p>Ett långt borr (t.ex. 12xD eller 15xD) fungerar som en hävarm. Om du kör med samma skärhastighet och matning som ett 5xD-borr kommer verktyget att böja sig, börja vibrera och till slut gå av. Kalkylatorn drar automatiskt av upp till 40 % på hastigheten och matningen vid extrema djup.</p>
+
+                <h3>Curve Adjustment (Skonsam för stora HM-borr)</h3>
+                <p>Matningsfaktorn skalar med borrets diameter – ett stort borr kräver kraftigare matning per varv för att skäret ska bita och inte gnugga. Men stora solida hårdmetallborr kräver oerhörd spindeleffekt och axiell tryckkraft. För att skydda maskinspindeln och förhindra urflisning av skäreggen har kalkylatorn en inbyggd <strong>Curve Adjustment</strong> som mjukt reducerar matningen på HM-borr över 3 mm (ger upp till 55 % reduktion på ett D25-borr). Detta garanterar en vibrationsfri och säker operation i standardmaskiner.</p>
+            </div>
+        </div>
+		
     </main>
 </div>
 
@@ -343,12 +371,12 @@
             coolantFdRow = `<p><strong>Coolant Fd Factor:<span class="tooltip" data-tooltip="Applied reduction due to cooling method." tabindex="0">?</span></strong><span>${coolantFd.toFixed(2)}</span></p>`;
         }
         
-        // --- Pecking recommendation ---
+		// --- Pecking recommendation ---
         // Always show this row to prevent layout shifts.
-        // With through-coolant (HM only): continuous chip evacuation → "Through".
-        // Otherwise: compute a recommended peck depth range (min–max).
+        // With through-coolant (HM only): continuous chip evacuation → "Through" (only for 5xD and 8xD).
+        // Otherwise (or deep holes 12xD+): compute a recommended peck depth range (min–max).
         let peckDisplay;
-        if (toolType === 'HM' && coolantMethod === 'with_channel') {
+        if (toolType === 'HM' && coolantMethod === 'with_channel' && (lengthType === '5xD' || lengthType === '8xD')) {
             peckDisplay = 'Through';
         } else {
             const peckMax = peckFactors[materialKey] * peckLengthFactors[lengthType] * diameter;
@@ -414,8 +442,19 @@
     // Initialization
     // =====================================================================
     document.addEventListener('DOMContentLoaded', () => {
-        // Tooltip listeners via event delegation.
-        // Handles tooltips created dynamically inside the results box.
+        // Modal Logic för Guide & Teori
+        const theoryModal = document.getElementById("theoryModal");
+        const theoryBtn = document.getElementById("theoryBtn");
+        const closeModal = document.getElementById("closeModal");
+        if (theoryBtn && theoryModal && closeModal) {
+            theoryBtn.addEventListener("click", () => theoryModal.style.display = "block");
+            closeModal.addEventListener("click", () => theoryModal.style.display = "none");
+            window.addEventListener("click", (event) => { 
+                if (event.target === theoryModal) theoryModal.style.display = "none"; 
+            });
+        }
+
+        // Tooltip listeners via event delegation
         document.addEventListener('mouseover', (e) => {
             const el = e.target.closest('.tooltip');
             if (el) positionTooltip(el);
