@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drilling Data Calculator Pro</title>
+
+    <!-- FOUC fix: Apply the correct theme on <html> BEFORE the page is rendered. -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme = saved || (prefersDark ? 'dark' : 'light');
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) { /* localStorage may be blocked */ }
+        })();
+    </script>
+
+    <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
+    <link rel="apple-touch-icon" href="../icon-192.png">
+
+    <link rel="stylesheet" href="style.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container">
+    <button class="theme-toggle" id="themeToggle">🌙</button> 
+    
+    <header>
+        <div class="tool-badge tool-hm" id="toolBadge">HM</div>
+        <h1>Drilling Data Calculator Pro</h1>
+        <p class="subtitle">Drilling – Carbide & HSS (0.5–25 mm)</p>
+		
+		<!-- Guide & Teori Knapp -->
+        <button id="theoryBtn" class="theory-btn">📖 Guide & Teori</button>
+    </header>
+
+    <main>
+        <div class="section-title">Input Parameters</div>
+
+        <div class="form-group">
+            <label for="toolType">Tool Material:<span class="tooltip" data-tooltip="Select the drill material. Carbide (HM) runs faster, HSS is tougher." tabindex="0">?</span></label>
+            <select id="toolType">
+                <option value="HM" selected>Carbide (HM)</option>
+                <option value="HSS">High-Speed Steel (HSS)</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="coolantGroup">
+            <label>Cooling Method:<span class="tooltip" data-tooltip="Through-coolant channels allow higher feed and speed, especially for deep holes. External flood cooling requires more conservative values." tabindex="0">?</span></label>
+            <div class="mode-selector" id="coolantSelector">
+                <input type="radio" id="coolantWith" name="coolantMethod" value="with_channel" checked>
+                <label for="coolantWith">With Coolant Channel</label>
+                <input type="radio" id="coolantWithout" name="coolantMethod" value="without_channel">
+                <label for="coolantWithout">Without Coolant Channel</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="material">Workpiece Material:<span class="tooltip" data-tooltip="Select the material being drilled. Controls Vc, Fm and the Fd table." tabindex="0">?</span></label>
+            <select id="material">
+                <option value="soft_steel" selected>Steel: Soft (&lt; 1100 N/mm²)</option>
+                <option value="hard_steel">Steel: Hard (&gt; 1100 N/mm²)</option>
+                <option value="stainless_austenitic">Stainless: Austenitic (&lt; 850 N/mm²)</option>
+                <option value="toolox_44">Steel: Toolox 44 (&lt; 50 HRC)</option>
+                <option value="hardened_steel_65">Steel: Hardened (&lt;65 HRC)</option>
+                <option value="aluminium">Aluminum</option>
+                <option value="cast_iron">Cast Iron</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="length">Drill Length (L/D):<span class="tooltip" data-tooltip="Length-to-diameter ratio. Longer drills require lower Vc and feed to prevent deflection." tabindex="0">?</span></label>
+            <select id="length">
+                <option value="5xD" selected>5xD</option>
+                <option value="8xD">8xD</option>
+                <option value="12xD">12xD</option>
+                <option value="15xD">15xD</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="diameter">Drill Diameter (mm):<span class="tooltip" data-tooltip="Drill diameter in mm. Valid range: 0.5–25 mm." tabindex="0">?</span></label>
+            <input type="number" id="diameter" value="8.0" step="0.1" min="0.5" max="25" placeholder="e.g. 8.5">
+        </div>
+
+        <div class="form-group">
+            <label for="maxRpm">Machine Max RPM:<span class="tooltip" data-tooltip="Maximum spindle speed of your machine. Limits n if the calculated speed exceeds this." tabindex="0">?</span></label>
+            <input type="number" id="maxRpm" value="12000" step="100" placeholder="e.g. 12000">
+        </div>
+
+        <div class="results" id="results">
+            <p style="color:var(--text-light); text-align:center; padding:20px 0;">
+                Fill in the fields above to get cutting data
+            </p>
+        </div>
+		
+		<!-- Guide & Teori Modal Rutan -->
+        <div id="theoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeModal">&times;</span>
+                <h2>Teori: Optimerad Borrning</h2>
+
+                <h3>Hårdmetall (HM) vs HSS</h3>
+                <p><strong>Hårdmetall</strong> tål enorm värme och tillåter mycket höga skärhastigheter (Vc) och hög matning, men materialet är skört. Det kräver en stabil maskinuppspänning. <strong>HSS</strong> (snabbstål) är segare och förlåter en ostabil uppspänning eller vinklade ytor, men skärhastigheten måste sänkas rejält för att borret inte ska brinna upp.</p>
+                
+                <h3>Kylning & Spoltryck</h3>
+                <p>Kylningens primära uppgift vid borrning är spånevakuering. Denna kalkylator utgår från <strong>maskiner med standard spoltryck</strong> (utan extern högtryckspump), vilket påverkar strategin:</p>
+                <ul>
+                    <li><strong>Med kylkanaler (Through-coolant):</strong> Spånorna tvingas upp ur hålet kontinuerligt. För solida HM-borr upp till 8xD behöver du sällan "pecka" (spånborra), och kalkylatorn rekommenderar "Through" (kör rakt igenom). Vid extrema djup (12xD+) räcker sällan standardtryck för att evakuera spånorna säkert, och kalkylatorn rekommenderar då spånborrning trots invändig kylning.</li>
+                    <li><strong>Utan kylkanaler:</strong> Spånorna fastnar lätt i spåren. Kalkylatorn sänker då automatiskt skärhastigheten och matningen kraftigt, och ger dig ett rekommenderat djup per inmatning (Pecking). HSS förutsätts alltid köras med utvändig kylning.</li>
+                </ul>
+
+                <h3>Varför sänks datan vid långa borr (L/D)?</h3>
+                <p>Ett långt borr (t.ex. 12xD eller 15xD) fungerar som en hävarm. Om du kör med samma skärhastighet och matning som ett 5xD-borr kommer verktyget att böja sig, börja vibrera och till slut gå av. Kalkylatorn drar automatiskt av upp till 40 % på hastigheten och matningen vid extrema djup.</p>
+
+                <h3>Curve Adjustment (Skonsam för stora HM-borr)</h3>
+                <p>Matningsfaktorn skalar med borrets diameter – ett stort borr kräver kraftigare matning per varv för att skäret ska bita och inte gnugga. Men stora solida hårdmetallborr kräver oerhörd spindeleffekt och axiell tryckkraft. För att skydda maskinspindeln och förhindra urflisning av skäreggen har kalkylatorn en inbyggd <strong>Curve Adjustment</strong> som mjukt reducerar matningen på HM-borr över 3 mm (ger upp till 55 % reduktion på ett D25-borr). Detta garanterar en vibrationsfri och säker operation i standardmaskiner.</p>
+            </div>
+        </div>
+		
+    </main>
+</div>
+
+<footer>Drilling Data Calculator Pro – created by Jimmy Rauhala</footer>
+
+<script src="drilling_tool_data.js"></script>
+
+<script>
+    // =====================================================================
+    // Helper functions
+    // =====================================================================
+    const parseValue = (id, defaultValue = 0) => {
+        const value = parseFloat(document.getElementById(id).value);
+        return isNaN(value) ? defaultValue : value;
+    };
+    
+    const formatDecimal = (num, fixed) => {
+        if (isNaN(num)) return "N/A";
+        const s = num.toFixed(fixed);
+        return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
+    };
+
+    // =====================================================================
+    // Coolant UI state
+    // When HSS is selected, the coolant selector is locked to
+    // "Without Coolant Channel" and visually disabled. The user's last
+    // HM choice is remembered and restored when switching back to HM.
+    // =====================================================================
+    let lastToolType = null;
+    let lastHmCoolantChoice = 'with_channel';
+
+    function updateCoolantUI(toolType) {
+        const selector = document.getElementById('coolantSelector');
+
+        if (toolType === 'HSS') {
+            // Save the user's HM choice only when just switching to HSS
+            if (lastToolType !== 'HSS') {
+                const current = document.querySelector('input[name="coolantMethod"]:checked');
+                if (current) lastHmCoolantChoice = current.value;
+            }
+            // Force "Without Coolant Channel" and disable the group
+            document.getElementById('coolantWithout').checked = true;
+            selector.classList.add('disabled');
+        } else {
+            // HM: re-enable the selector
+            selector.classList.remove('disabled');
+            // Restore the user's last HM choice when coming back
+            if (lastToolType !== 'HM' && lastToolType !== null) {
+                const restoreId = (lastHmCoolantChoice === 'with_channel')
+                    ? 'coolantWith'
+                    : 'coolantWithout';
+                document.getElementById(restoreId).checked = true;
+            }
+        }
+
+        lastToolType = toolType;
+    }
+
+    // =====================================================================
+    // Curve adjustment logic (for HM drills)
+    // =====================================================================
+    function getCurveAdjustmentFactor(D) {
+        if (D <= curveAdjustmentPoints[0].D) {
+            return curveAdjustmentPoints[0].factor; 
+        }
+        
+        if (D >= curveAdjustmentPoints[curveAdjustmentPoints.length - 1].D) {
+            return curveAdjustmentPoints[curveAdjustmentPoints.length - 1].factor; 
+        }
+        
+        for (let i = 1; i < curveAdjustmentPoints.length; i++) {
+            const lower = curveAdjustmentPoints[i - 1];
+            const upper = curveAdjustmentPoints[i];
+            
+            if (D <= upper.D) {
+                const ratio = (D - lower.D) / (upper.D - lower.D);
+                return lower.factor + ratio * (upper.factor - lower.factor);
+            }
+        }
+        
+        return curveAdjustmentPoints[curveAdjustmentPoints.length - 1].factor;
+    }
+    
+    // =====================================================================
+    // Build the adjusted HM table
+    // =====================================================================
+    function getAdjustedHMTable() {
+        return FdTableHM_Original.map(row => {
+            const factor = getCurveAdjustmentFactor(row.D);
+            return {
+                D: row.D,
+                '5xD': parseFloat((row['5xD'] * factor).toFixed(4)),
+                '8xD': parseFloat((row['8xD'] * factor).toFixed(4)),
+                '12xD': parseFloat((row['12xD'] * factor).toFixed(4)),
+                '15xD': parseFloat((row['15xD'] * factor).toFixed(4)),
+            };
+        });
+    }
+
+    // =====================================================================
+    // Interpolate Fd value
+    // =====================================================================
+    function interpolateFd(D, lengthType, toolType) {
+        let table;
+        if (toolType === 'HM') {
+            table = getAdjustedHMTable();
+        } else {
+            table = FdTableHSS;
+        }
+
+        if (D < 0.5) D = 0.5;
+        if (D > 25) D = 25;
+        
+        const lower = table.slice().reverse().find(row => row.D <= D);
+        const upper = table.find(row => row.D > D);
+        
+        if (!upper || lower.D === D) return lower[lengthType];
+        
+        const ratio = (D - lower.D) / (upper.D - lower.D);
+        return parseFloat((lower[lengthType] + ratio * (upper[lengthType] - lower[lengthType])).toFixed(4));
+    }
+
+    // =====================================================================
+    // Adjustment factor display
+    // =====================================================================
+    function getAdjustmentFactorDisplay(D, toolType) {
+        if (toolType === 'HSS') {
+            return '1.00 (no reduction)';
+        }
+        
+        const factor = getCurveAdjustmentFactor(D);
+        const reduction = ((1 - factor) * 100).toFixed(0);
+        return `${factor.toFixed(2)} (${reduction}% reduction)`;
+    }
+
+    // =====================================================================
+    // Main calculation and result rendering
+    // =====================================================================
+    function calculateCuttingData() {
+        const toolType = document.getElementById('toolType').value;
+        const materialKey = document.getElementById('material').value;
+        const lengthType = document.getElementById('length').value;
+        
+        // Update coolant selector UI (lock/restore depending on tool type)
+        updateCoolantUI(toolType);
+        
+        const coolantMethod = document.querySelector('input[name="coolantMethod"]:checked').value;
+        
+        const diameter = parseFloat(document.getElementById('diameter').value.replace(',', '.'));
+        const maxRpm = parseFloat(document.getElementById('maxRpm').value.replace(',', '.'));
+        
+        const resultsDiv = document.getElementById('results');
+        const badge = document.getElementById('toolBadge');
+
+        // Update tool badge (HM/HSS)
+        badge.textContent = toolType;
+        badge.className = `tool-badge tool-${toolType.toLowerCase()}`;
+
+        // Reset results
+        resultsDiv.classList.remove('ready');
+        resultsDiv.innerHTML = `<p style="color:var(--text-light); text-align:center; padding:20px 0;">
+            Fill in the fields above to get cutting data
+        </p>`;
+
+        // Input validation
+        let missing = [];
+        if (!materialKey) missing.push("Material");
+        if (!lengthType) missing.push("Drill Length");
+        if (!diameter || diameter < 0.5 || diameter > 25) missing.push("Diameter (0.5–25 mm)");
+
+        if (missing.length > 0) {
+            resultsDiv.innerHTML += `<p class="missing">Missing: ${missing.join(', ')}</p>`;
+            return;
+        }
+
+        // Get material data
+        const data = toolType === 'HM' ? materialDataHM : materialDataHSS; 
+        
+        if (!data[materialKey]) {
+             resultsDiv.innerHTML = `<p class="missing">Selected material is not supported for this tool type.</p>`;
+             return;
+        }
+
+        const mat = data[materialKey];
+        
+        // --- Main calculations ---
+        
+        // 1. Interpolated feed value (Fd_base)
+        const Fd_base = interpolateFd(diameter, lengthType, toolType);
+        
+        // 2. Coolant factor — only applied to HM.
+        //    HSS tables are calibrated for external flood cooling,
+        //    so the coolant factor is never applied for HSS.
+        let coolantFd = 1.0;
+        let coolantVc = 1.0;
+        if (toolType === 'HM') {
+            coolantFd = coolantFactors[coolantMethod].Fd[lengthType] || 1.0;
+            coolantVc = coolantFactors[coolantMethod].Vc[lengthType] || 1.0;
+        }
+        
+        const Fd = Fd_base * coolantFd;
+        
+        // 3. Final fz (Fn = Fd * Fm)
+        const Fn = mat.Fm * Fd;
+        
+        // 4. Cutting speed adjustments (L/D + coolant)
+        const lengthFactor = lengthFactors[lengthType] || 1.0;
+        const Vc_effective = mat.Vc_safe * lengthFactor * coolantVc;
+        
+        // 5. Spindle speed (n = (Vc * 1000) / (PI * D))
+        const n_calc = (Vc_effective * 1000) / (Math.PI * diameter);
+        
+        let n_final = Math.round(n_calc);
+        let actualVc = Vc_effective;
+        
+        // 6. Feed rate (Vf = Fn * n)
+        let Vf_final = Math.round(Fn * n_calc);
+        let capped = false;
+
+        // Check against Max RPM
+        if (maxRpm && n_calc > maxRpm) {
+            n_final = Math.round(maxRpm);
+            Vf_final = Math.round(Fn * n_final);
+            actualVc = (n_final * Math.PI * diameter) / 1000;
+            capped = true;
+        }
+        
+        const adjFactorDisplay = getAdjustmentFactorDisplay(diameter, toolType);
+        const materialFactorDisplay = mat.Fm.toFixed(3);
+        
+        // Coolant row — always shown for HM, shown as locked for HSS
+        let coolantRow = '';
+        if (toolType === 'HM') {
+            const coolantLabel = coolantMethod === 'with_channel' 
+                ? 'With Coolant Channel' 
+                : 'Without Coolant Channel';
+            coolantRow = `<p><strong>Cooling Method:<span class="tooltip" data-tooltip="Selected cooling method." tabindex="0">?</span></strong><span>${coolantLabel}</span></p>`;
+        } else {
+            coolantRow = `<p><strong>Cooling Method:<span class="tooltip" data-tooltip="HSS drills are calibrated for external flood cooling (no internal channels)." tabindex="0">?</span></strong><span>Without Coolant Channel</span></p>`;
+        }
+        
+        // Coolant Fd factor row — only shown when a reduction actually applies (HM only)
+        let coolantFdRow = '';
+        if (toolType === 'HM' && coolantFd < 1.0) {
+            coolantFdRow = `<p><strong>Coolant Fd Factor:<span class="tooltip" data-tooltip="Applied reduction due to cooling method." tabindex="0">?</span></strong><span>${coolantFd.toFixed(2)}</span></p>`;
+        }
+        
+		// --- Pecking recommendation ---
+        // Always show this row to prevent layout shifts.
+        // With through-coolant (HM only): continuous chip evacuation → "Through" (only for 5xD and 8xD).
+        // Otherwise (or deep holes 12xD+): compute a recommended peck depth range (min–max).
+        let peckDisplay;
+        if (toolType === 'HM' && coolantMethod === 'with_channel' && (lengthType === '5xD' || lengthType === '8xD')) {
+            peckDisplay = 'Through';
+        } else {
+            const peckMax = peckFactors[materialKey] * peckLengthFactors[lengthType] * diameter;
+            const peckMin = peckMax * 0.5;
+            peckDisplay = `${formatDecimal(peckMin, 1)} – ${formatDecimal(peckMax, 1)} <sub>mm</sub>`;
+        }
+
+        // --- Render results ---
+        resultsDiv.classList.add('ready');
+        resultsDiv.innerHTML = `
+            <h2>Results</h2>
+            <div class="result-line"><strong>Spindle Speed N [rpm]:<span class="tooltip" data-tooltip="Calculated spindle speed. Red text = limited by Max RPM." tabindex="0">?</span></strong> 
+                <span class="value ${capped?'capped':''}">${n_final}${capped?' *':''}</span>
+            </div>
+            <div class="result-line"><strong>Feed Rate V<sub>f</sub> [mm/min]:<span class="tooltip" data-tooltip="Table feed rate (mm/min)." tabindex="0">?</span></strong> 
+                <span class="value">${Vf_final.toLocaleString('en')}</span>
+            </div>
+            ${capped ? '<p class="warning-text">* Limited by machine max RPM</p>' : ''}
+            
+            <div class="details-box">
+                ${coolantRow}
+                <p><strong>Pecking:<span class="tooltip" data-tooltip="Recommended peck depth to allow chip evacuation. Use full retract between pecks. With through-coolant, chips are continuously evacuated and no pecking is required." tabindex="0">?</span></strong><span>${peckDisplay}</span></p>
+                <p><strong>Drill Length:<span class="tooltip" data-tooltip="Selected L/D ratio." tabindex="0">?</span></strong><span>${lengthType}</span></p>
+                <p><strong>f<sub>z</sub> (Feed per rev):<span class="tooltip" data-tooltip="Feed per revolution (Fn = Fd × Fm)." tabindex="0">?</span></strong><span>${formatDecimal(Fn, 3)} <sub>mm</sub></span></p>
+                <p><strong>Cutting Speed Vc:<span class="tooltip" data-tooltip="Effective cutting speed after L/D and coolant adjustment." tabindex="0">?</span></strong><span>${formatDecimal(Vc_effective, 1)} <sub>m/min</sub></span></p>
+                <p><strong>Diameter Factor Fd:<span class="tooltip" data-tooltip="Effective feed factor (interpolated × coolant)." tabindex="0">?</span></strong><span>${formatDecimal(Fd, 4)}</span></p>
+                ${coolantFdRow}
+                <p><strong>Tool Adj. Factor:<span class="tooltip" data-tooltip="Curve adjustment factor for the tool material." tabindex="0">?</span></strong><span>${adjFactorDisplay}</span></p>
+                <p><strong>Material Adj. Factor (Fm):<span class="tooltip" data-tooltip="Material factor adjusting feed for machinability." tabindex="0">?</span></strong><span>${materialFactorDisplay}</span></p>
+                ${capped ? `<p><strong>Actual Vc:<span class="tooltip" data-tooltip="Actual cutting speed when n is limited by Max RPM." tabindex="0">?</span></strong><span class="capped">${formatDecimal(actualVc, 1)} <sub>m/min</sub></span></p>` : ''}
+            </div>
+        `;
+    }
+
+    // =====================================================================
+    // Tooltip positioning
+    // =====================================================================
+    function positionTooltip(el) {
+        const rect = el.getBoundingClientRect();
+        const bubbleWidth = Math.min(220, window.innerWidth - 16);
+        const bubbleHeight = 90;
+        const padding = 8;
+        const gap = 8;
+        const vw = window.innerWidth;
+
+        let centerX = rect.left + rect.width / 2;
+        if (centerX - bubbleWidth / 2 < padding) {
+            centerX = padding + bubbleWidth / 2;
+        } else if (centerX + bubbleWidth / 2 > vw - padding) {
+            centerX = vw - padding - bubbleWidth / 2;
+        }
+
+        let topY = rect.top - bubbleHeight - gap;
+        if (topY < padding) {
+            topY = rect.bottom + gap;
+        }
+
+        el.style.setProperty('--tt-x', centerX + 'px');
+        el.style.setProperty('--tt-y', topY + 'px');
+    }
+
+    // =====================================================================
+    // Initialization
+    // =====================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        // Modal Logic för Guide & Teori
+        const theoryModal = document.getElementById("theoryModal");
+        const theoryBtn = document.getElementById("theoryBtn");
+        const closeModal = document.getElementById("closeModal");
+        if (theoryBtn && theoryModal && closeModal) {
+            theoryBtn.addEventListener("click", () => theoryModal.style.display = "block");
+            closeModal.addEventListener("click", () => theoryModal.style.display = "none");
+            window.addEventListener("click", (event) => { 
+                if (event.target === theoryModal) theoryModal.style.display = "none"; 
+            });
+        }
+
+        // Tooltip listeners via event delegation
+        document.addEventListener('mouseover', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('focusin', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('touchstart', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        }, { passive: true });
+
+        window.addEventListener('scroll', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        });
+
+        // Input listeners
+        document.querySelectorAll('#toolType, #material, #length, #diameter, #maxRpm').forEach(el => {
+            el.addEventListener('input', calculateCuttingData);
+            el.addEventListener('change', calculateCuttingData);
+        });
+
+        // Coolant method radio buttons
+        document.querySelectorAll('input[name="coolantMethod"]').forEach(el => {
+            el.addEventListener('change', calculateCuttingData);
+        });
+
+        // Initial calculation
+        calculateCuttingData();
+    });
+</script>
+<script src="theme.js"></script>
+</body>
+</html>

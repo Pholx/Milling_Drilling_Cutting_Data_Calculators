@@ -1,0 +1,641 @@
+/* =================================================================
+   1. GLOBAL VARIABLES (THEME SETTINGS)
+   These variables control all colors in the calculator.
+   Change these to quickly switch themes.
+   ================================================================= */
+:root {
+    /* Light theme (default) */
+    --bg: #f8fafc;        /* Background color */
+    --card: #ffffff;      /* Card background (inputs/details) */
+    --text: #1e293b;      /* Main text color */
+    --text-light: #64748b; /* Lighter text (labels, footers) */
+    --primary: #3b82f6;   /* Primary color (section titles, focus rings) */
+    --primary-light: #eff6ff; /* Light tint of primary – used for hover states */
+    --success: #10b981;   /* Color for positive results/main results */
+    --warning: #f59e0b;   /* Warning color */
+    --danger: #ef4444;    /* Error/max value color */
+    --border: #e2e8f0;    /* Lines and borders */
+    --shadow: 0 20px 40px rgba(0,0,0,0.08); /* Shadow under the card */
+    --radius: 16px;       /* Default corner radius */
+}
+
+/* Always reserve space for the scrollbar so the layout doesn't jump
+   when navigating between short and long pages. */
+html {
+    scrollbar-gutter: stable;
+}
+
+/* Dark theme: activated when 'dark' is on <html>.
+   Set by an inline script in <head> (before rendering) and handled
+   by theme.js. Applying the class to <html> instead of <body>
+   allows the theme to be set before <body> exists – which
+   prevents "flash of unstyled content" (FOUC). */
+html.dark { 
+    --bg: #0f172a; 
+    --card: #1e293b; 
+    --text: #f1f5f9; 
+    --text-light: #94a3b8;
+    --primary-light: rgba(59, 130, 246, 0.15); /* Transparent blue tint for dark theme */
+    --border: #334155; 
+    --shadow: 0 20px 40px rgba(0,0,0,0.4); 
+}
+
+/* =================================================================
+   2. BASE STYLING
+   Basic reset and body settings.
+   ================================================================= */
+* { 
+    margin:0; 
+    padding:0; 
+    box-sizing:border-box; /* Includes padding/border in the width */
+}
+body { 
+    font-family:'Inter',sans-serif;
+    background:var(--bg); 
+    color:var(--text);
+    min-height:100vh; 
+    padding:20px; 
+    /* Only color-related properties are animated – prevents the layout
+       from "drifting" during navigation or window resize. */
+    transition: background-color .4s ease, color .4s ease;
+}
+       
+/* =================================================================
+   3. LAYOUT AND MAIN COMPONENTS (CONTAINER, HEADER, TOGGLE)
+   ================================================================= */
+.container { 
+    max-width:650px; 
+    margin:20px auto; /* Centers the card on the screen */
+    background:var(--card);
+    border-radius:var(--radius); 
+    overflow:hidden; 
+    box-shadow:var(--shadow);
+    position:relative; 
+}
+.theme-toggle { 
+    position:absolute; 
+    top:16px; 
+    right:16px; 
+    background:none; 
+    border:none;
+    font-size:1.5rem; 
+    cursor:pointer; 
+    padding:8px; 
+    border-radius:50%;
+    color: white; 
+    line-height: 1; 
+    z-index: 10;
+}
+.theme-toggle:hover { 
+    background:rgba(255,255,255,.1); 
+} 
+
+header { 
+    background:linear-gradient(135deg,#667eea,#764ba2); /* Purple/blue gradient */
+    color:white;
+    padding:30px 24px; 
+    text-align:center; 
+    position:relative; 
+}
+h1 { 
+    font-size:1.8rem; 
+    font-weight:700; 
+    margin-bottom:8px; 
+}
+.subtitle { 
+    font-size:0.85rem; 
+    opacity:0.9; 
+}
+
+/* Tool material badge (HM / HSS) */
+.tool-badge { 
+    position:absolute; 
+    top:16px; 
+    left:16px; 
+    padding:6px 14px;
+    border-radius:50px; 
+    font-size:0.8rem; 
+    font-weight:700;
+    text-transform:uppercase; 
+    letter-spacing:0.5px; 
+}
+.tool-hm { background:#1d4ed8; }   /* Blue for HM */
+.tool-hss { background:#ea580c; }  /* Orange for HSS */
+
+main { 
+    padding:32px 24px; 
+}
+
+/* =================================================================
+   4. FORM AND INPUTS
+   Styling for input fields and labels.
+   ================================================================= */
+.section-title { 
+    font-size:1.25rem; 
+    font-weight:600; 
+    color:var(--primary); 
+    margin:24px 0 16px; 
+}
+hr { 
+    border:none; 
+    height:2px; 
+    background:linear-gradient(to right,transparent,var(--border),transparent); 
+    margin:20px 0; 
+}
+
+.form-group { 
+    margin-bottom:20px; 
+}
+label { 
+    display:block; 
+    margin-bottom:8px; 
+    font-weight:600; 
+    font-size:0.95rem; 
+}
+select, input[type=number] { 
+    width:100%; 
+    padding:14px 16px; 
+    border:2px solid var(--border);
+    border-radius:12px; 
+    background:var(--card); 
+    color:var(--text); 
+    font-size:16px;
+    transition:all .3s; 
+}
+select:focus, input[type=number]:focus { 
+    outline:none; 
+    border-color:var(--primary); /* Highlights on focus */
+    box-shadow:0 0 0 4px rgba(59,130,246,.15); 
+    transform:translateY(-2px); /* Small lift effect on focus */
+}
+
+/* =================================================================
+   5. RESULTS SECTION
+   Styling for the results box.
+   ================================================================= */
+   
+.results { 
+    margin-top:32px; 
+    padding:24px; 
+    background:linear-gradient(to bottom,#f8fafc,#e2e8f0); /* Light gradient */
+    border-radius:14px; 
+    border:2px solid #cbd5e1; 
+    min-height:120px; 
+    /* Background is a gradient, which browsers cannot animate smoothly.
+       We animate only border-color – this gives a soft impression anyway. */
+    transition: border-color .4s ease;
+}
+
+html.dark .results { 
+    background:linear-gradient(to bottom,#1e293b,#334155); 
+    border-color:#475569; 
+}
+
+/* Color when results are calculated (green tone) */
+.results.ready { 
+    background:linear-gradient(to bottom,#ecfdf5,#d1fae5); 
+    border-color:#34d399; 
+}
+html.dark .results.ready { 
+    background:linear-gradient(to bottom,#064e3b,#065f46); 
+}
+
+.results h2 { 
+    font-size:1.4rem; 
+    color:var(--success); 
+    margin-bottom:16px; 
+    text-align:center;
+    display:block;
+}
+.result-line { 
+    display:flex; 
+    justify-content:space-between; /* Spreads text and value apart */
+    padding:10px 0;
+    font-size:1.1rem; 
+    border-bottom:1px dashed var(--border); /* Separates the result rows */
+}
+.result-line:last-child { 
+    border-bottom:none; 
+}
+        
+.result-line strong { 
+    color:var(--text-light);
+    font-weight:500; 
+}
+        
+.value { 
+    font-weight:700; 
+    color:var(--text); 
+}
+.capped { 
+    color:var(--danger); /* Highlights spindle speed if limited by Max RPM */
+}
+.warning-text { 
+    font-size:0.85rem; 
+    color:var(--warning); 
+    margin-top:12px; 
+}
+
+/* =================================================================
+   6. DETAILS BOX
+   Styling for the smaller calculation details.
+   ================================================================= */
+.details-box {
+    margin-top: 18px;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.9rem;
+    line-height: 1.35;
+}
+html.dark .details-box { 
+    background:#334155; 
+}
+.details-box p {
+    margin: 4px 0 !important;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: nowrap;
+}
+.details-box strong {
+    color: var(--text-light);
+    font-weight: 600;
+    flex-shrink: 1;
+    flex-basis: 50%;
+    white-space: normal;
+}
+.details-box span {
+    color: var(--text);
+    font-weight: 700;
+    white-space: nowrap; /* Prevents the result from wrapping */
+    text-align: right;
+    flex-shrink: 0;
+    flex-basis: auto;
+}
+.details-box span sub {
+    font-weight: normal;
+    vertical-align: middle;
+    font-size: 85%;
+    padding-left: 2px;
+}
+
+/* Message when input is missing */
+.missing { 
+    color:#dc2626; 
+    font-weight:600; 
+    text-align:center; 
+    margin-top:10px; 
+}
+
+/* =================================================================
+   7. FOOTER
+   ================================================================= */
+footer {
+    text-align:center; 
+    margin-top:30px; 
+    color:var(--text-light); 
+    font-size:0.95em; 
+    padding-bottom: 20px;
+}
+
+/* =================================================================
+   8. FACE MILLING SPECIFIC (GEOMETRY TOGGLE)
+   Styling for switching between Kappa angle and Round insert.
+   ================================================================= */
+.geometry-toggle { 
+    display:flex; 
+    gap:12px; 
+    margin:20px 0; 
+}
+.geo-btn { 
+    flex:1; 
+    padding:14px; 
+    background:var(--border); 
+    color:var(--text-light);
+    text-align:center; 
+    border-radius:12px; 
+    cursor:pointer; 
+    font-weight:600;
+    transition:all .3s; 
+    user-select: none; /* Prevents text from being selected on click */
+}
+.geo-btn:hover {
+    opacity: 0.9;
+}
+.geo-btn.active { 
+    background:var(--primary); 
+    color:white; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* =================================================================
+   9. T-SLOT & SIDE MILLING SPECIFIC
+   Additions for mode selector, subheading and warnings.
+   ================================================================= */
+
+/* Header subtext */
+.header-subtext {
+    font-size: 0.85rem;
+    font-weight: 400;
+    opacity: 0.9;
+    margin-top: 0;
+    color: white;
+}
+
+/* Mode selector */
+.mode-selector { 
+    display: flex; 
+    gap: 10px; 
+    margin-bottom: 20px; 
+}
+.mode-selector label {
+    flex-grow: 1; 
+    text-align: center; 
+    padding: 10px 15px; 
+    border-radius: 12px;
+    cursor: pointer; 
+    transition: all 0.3s; 
+    font-weight: 600;
+    border: 2px solid var(--border); 
+    background-color: var(--bg);
+    color: var(--text-light);
+}
+.mode-selector input[type="radio"] { 
+    display: none; 
+}
+.mode-selector input[type="radio"]:checked + label {
+    background-color: var(--primary); 
+    color: white; 
+    border-color: var(--primary);
+}
+.mode-selector input[type="radio"]:hover + label {
+    background-color: rgba(59, 130, 246, 0.1); /* Light theme hover */
+}
+html.dark .mode-selector input[type="radio"]:hover + label {
+    background-color: rgba(59, 130, 246, 0.3); /* Dark theme hover */
+}
+
+/* Warning box */
+.warning { 
+    color: var(--danger); 
+    font-weight: 600; 
+    margin-bottom: 15px; 
+    text-align: center; 
+    background: rgba(239, 68, 68, 0.1); 
+    border: 1px solid var(--danger);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+/* =================================================================
+   10. INDEX.HTML SPECIFIC (Layout and Navigation)
+   ================================================================= */
+
+/* Global layout for the start page: turns it into a card */
+.app-container { 
+    max-width:650px; 
+    margin: 20px auto; 
+    display:flex; 
+    flex-direction:column; 
+    background:var(--card);
+    border-radius:var(--radius); 
+    overflow:hidden; 
+    box-shadow:var(--shadow);
+    position:relative; 
+}
+
+/* === HEADER === */
+.app-container header { 
+    background:linear-gradient(135deg,#667eea,#764ba2); 
+    color:white; 
+    padding:30px 24px; 
+    text-align:center; 
+    margin-bottom: 0; 
+}
+.logo-text { 
+    font-size:1.8rem; 
+    font-weight:700; 
+    margin-bottom: 5px; 
+}
+.subtitle { 
+    font-size: 1rem; 
+    opacity: 0.9; 
+}
+
+/* === CALCULATOR LIST === */
+.calculator-list { 
+    padding: 32px 24px; 
+    flex-grow:1; 
+    background:var(--card); 
+}
+.calc-item { 
+    display:block; 
+    text-decoration:none; 
+    color:inherit; 
+    background:var(--card); 
+    border: 1px solid var(--border); 
+    padding:16px 20px; 
+    margin-bottom:12px; 
+    border-radius:var(--radius);
+    transition:background .2s, transform .1s, border-color .2s;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+}
+.calc-item:last-child {
+    margin-bottom: 30px; 
+}
+.calc-item:hover { 
+    background:var(--primary-light); 
+    border-color: var(--primary); 
+    transform: translateY(-1px); 
+}
+.calc-item:active { transform: translateY(0); }
+.calc-item:visited { color: inherit; } 
+.calc-item:visited span { color: var(--text); } 
+.calc-item:focus { 
+    outline: none; 
+    box-shadow: 0 0 0 4px rgba(59,130,246,.15); 
+    background: var(--card) !important; 
+    border-color: var(--primary) !important;
+} 
+.calc-item span { font-weight: 600; font-size: 1.1rem; color: var(--text); }
+.calc-item::after { content: '→'; font-size: 1.5rem; color: var(--primary); }
+
+/* =================================================================
+   11. TOOLTIPS
+   Small "?" bubbles that show helper text on hover (desktop) or tap (mobile).
+   Uses position:fixed to avoid being clipped by .container's
+   overflow:hidden. Position is fully calculated by JS (--tt-x, --tt-y).
+   ================================================================= */
+.tooltip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--text-light);
+    color: var(--card);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: help;
+    margin-left: 6px;
+    vertical-align: middle;
+    position: relative;
+    user-select: none;
+    transition: background-color .2s;
+}
+
+.tooltip:hover,
+.tooltip:focus {
+    background: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary);  /* synlig fokus-ring */
+}
+
+/* The bubble – position:fixed prevents it from being clipped by
+   overflow:hidden on .container. Position is fully controlled by JS
+   via --tt-x and --tt-y. transform: translateX(-50%) makes --tt-x
+   represent the center-x. */
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: fixed;
+    left: var(--tt-x, 0px);
+    top: var(--tt-y, 0px);
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--card);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.4;
+    white-space: normal;
+    width: 220px;
+    max-width: calc(100vw - 16px);
+    text-align: left;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* =================================================================
+   12. DISABLED MODE SELECTOR
+   Used when a mode selector is locked (e.g. coolant method for HSS).
+   The selector remains visible to prevent layout shifts, but is not
+   interactive. The currently active option still shows highlighted.
+   ================================================================= */
+.mode-selector.disabled {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* =================================================================
+   13. DISABLED INPUT FIELDS
+   Used when a field is locked by mode (e.g. ae = 100% during Full
+   Slotting). The field stays visible to prevent layout shifts.
+   ================================================================= */
+.form-group.disabled label {
+    opacity: 0.55;
+}
+.form-group.disabled input[type=number]:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: var(--bg);
+    color: var(--text-light);
+}
+
+.tooltip:hover::after,
+.tooltip:focus::after {
+    opacity: 1;
+}
+
+/* =========================================
+   MODAL / GUIDE & TEORI
+========================================= */
+.theory-btn {
+    background-color: var(--primary-color, #2563eb);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+.theory-btn:hover {
+    background-color: var(--primary-hover, #1d4ed8);
+}
+.theory-btn:active {
+    transform: scale(0.97);
+}
+
+.modal {
+    display: none; /* Dold som standard */
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: var(--bg-card, #ffffff);
+    color: var(--text-main, #333333);
+    margin: 5vh auto;
+    padding: 24px 32px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    position: relative;
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.close-btn {
+    color: var(--text-light, #94a3b8);
+    position: absolute;
+    right: 24px;
+    top: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+.close-btn:hover {
+    color: var(--text-main, #000000);
+}
+
+.good-value {
+    color: #16a34a;
+    font-weight: 500;
+}
+.path-guidance {
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
+.modal-content h2 { margin-top: 0; color: var(--primary-color, #2563eb); font-size: 1.4rem;}
+.modal-content h3 { margin-top: 20px; margin-bottom: 10px; font-size: 1.1rem; border-bottom: 1px solid rgba(150,150,150,0.2); padding-bottom: 4px;}
+.modal-content p, .modal-content ul { font-size: 0.95rem; line-height: 1.5; color: var(--text-main); }
+.modal-content li { margin-bottom: 10px; }

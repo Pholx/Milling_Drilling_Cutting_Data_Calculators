@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Slitting Cutter Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- FOUC fix: Apply the correct theme on <html> BEFORE the page is rendered. -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme = saved || (prefersDark ? 'dark' : 'light');
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) { /* localStorage may be blocked */ }
+        })();
+    </script>
+
+    <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
+    <link rel="apple-touch-icon" href="../icon-192.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div class="container">
+    <button class="theme-toggle" id="themeToggle">🌙</button>
+    
+    <header>
+        <div class="tool-badge tool-hm" id="toolBadge">HM</div>
+        <h1>Slitting Cutter Calculator</h1>
+        <p class="subtitle">HSS Saw · Solid Carbide Saw · Indexable Insert Cutter</p> 
+		
+		<!-- Guide & Teori Knapp -->
+        <button id="theoryBtn" class="theory-btn">📖 Guide & Teori</button>
+		
+    </header>
+    
+    <main>
+        <!-- ============================================================ -->
+        <!-- SECTION 1: Tool & Material                                    -->
+        <!-- ============================================================ -->
+        <div class="section-title">Tool & Material</div>
+
+        <div class="form-group">
+            <label for="toolType">Tool Type:<span class="tooltip" data-tooltip="Select the slitting tool type. HSS saw blades and solid carbide saws have many teeth and low fz per tooth. Indexable insert cutters have few teeth and high fz per tooth. All use the same fundamental equation, but with different Vc and fz tables." tabindex="0">?</span></label>
+            <select id="toolType">
+                <option value="hss_saw" selected>HSS Slitting Saw</option>
+                <option value="carbide_saw">Solid Carbide Saw</option>
+                <option value="indexable">Indexable Insert Cutter</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="diameterGroup">
+            <label for="diameter">Cutter Diameter D [mm]:<span class="tooltip" data-tooltip="Cutter diameter in mm. Valid range: 10–150 mm. Standard slitting saws are often 63–100 mm." tabindex="0">?</span></label>
+            <input type="number" id="diameter" value="63" step="1" min="10" max="150">
+        </div>
+
+        <div class="form-group">
+            <label for="material">Work Material:<span class="tooltip" data-tooltip="Select the workpiece material. Controls Vc and the fz table." tabindex="0">?</span></label>
+            <select id="material">
+            </select>
+        </div>
+
+        <hr>
+
+        <!-- ============================================================ -->
+        <!-- SECTION 2: Strategy                                            -->
+        <!-- ============================================================ -->
+        <div class="section-title">Strategy</div>
+
+        <div class="form-group" id="aePercentGroup">
+            <label for="aePercent">Radial Engagement a<sub>e</sub> [% of D]:<span class="tooltip" data-tooltip="Radial engagement. Typical range for slitting is 5–30% of D. Lower ae gives thinner chips and allows higher feed (chip thinning). The effect is strongest below 10%." tabindex="0">?</span></label>
+            <input type="number" id="aePercent" value="15" step="1" min="1" max="50">
+            <p style="font-size:0.8rem; color:var(--text-light); margin-top:4px; line-height:1.4;" id="aeHint"></p>
+        </div>
+        
+        <div class="form-group" id="overhangGroup">
+            <label for="overhang">Tool Overhang L [mm]:<span class="tooltip" data-tooltip="Tool overhang length. L/D ratio above 2.5 reduces cutting speed and feed to prevent chatter. Slitting cutters are especially sensitive to long overhang." tabindex="0">?</span></label>
+            <input type="number" id="overhang" value="30" step="5" min="0">
+            <p style="font-size:0.8rem; color:var(--text-light); margin-top:4px; line-height:1.4;" id="overhangHint"></p>
+        </div>
+
+        <hr>
+
+        <!-- ============================================================ -->
+        <!-- SECTION 3: Cutting Data (Editable)                            -->
+        <!-- ============================================================ -->
+        <div class="section-title">Cutting Data (Editable)</div>
+
+        <div class="form-group">
+            <label for="vc">Cutting Speed Vc [m/min]:<span class="tooltip" data-tooltip="Cutting speed. Automatically adjusted based on the selected tool type and material." tabindex="0">?</span></label>
+            <input type="number" id="vc" value="70" step="5">
+        </div>
+
+        <div class="form-group">
+            <label for="z">Number of Teeth z:<span class="tooltip" data-tooltip="Number of cutting edges. HSS saw blades and solid carbide saws have many teeth (32–100+), indexable cutters have few (5–12). Recommended value auto-fills based on diameter and tool type but can be overridden." tabindex="0">?</span></label>
+            <input type="number" id="z" value="32" step="1" min="1">
+        </div>
+
+        <div class="form-group">
+            <label for="fzInitial">Base Feed per Tooth f<sub>z</sub> [mm/z]:<span class="tooltip" data-tooltip="Reference feed per tooth. The programmed feed is this value multiplied by L/D correction and chip thinning. The value auto-adjusts when you change the tooth count — override it manually if you know the tool's specific recommendation." tabindex="0">?</span></label>
+            <input type="number" id="fzInitial" value="0.018" step="0.001">
+        </div>
+        
+        <div class="form-group">
+            <label for="maxRpm">Machine Max RPM:<span class="tooltip" data-tooltip="Maximum spindle speed of your machine. Limits n if the calculated speed exceeds this." tabindex="0">?</span></label>
+            <input type="number" id="maxRpm" value="4000" step="100">
+        </div>
+        
+        <!-- ============================================================ -->
+        <!-- RESULTS                                                        -->
+        <!-- ============================================================ -->
+        <div class="results" id="results">
+            <p style="color:var(--text-light); text-align:center; padding:20px 0;">
+                Fill in the fields above to get cutting data
+            </p>
+        </div>
+		
+		<!-- Guide & Teori Modal Rutan -->
+        <div id="theoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeModal">&times;</span>
+                <h2>Teori: Kapfräsning & Spårfräsning</h2>
+
+                <h3>Verktygstyper & Kuggantal</h3>
+                <p>Kalkylatorn hanterar tre olika typer av kap- och spårverktyg som har helt olika förutsättningar:</p>
+                <ul>
+                    <li><strong>HSS-sågklingor:</strong> Många tänder (32–180 st), låg skärhastighet och låg matning per tand ($f_z$). Segt material som tål vibrationer och förlåter en ostabil uppspänning.</li>
+                    <li><strong>Solida hårdmetallklingor:</strong> Många tänder och hög skärhastighet. Mycket styva men sköra – kräver en stabil maskin och exakt kastfri rotation (runout).</li>
+                    <li><strong>Vändskärsspårfräsar:</strong> Få tänder (5–12 st), hög skärhastighet och mycket hög matning per tand. Klarar tuffare tag och bredare spår.</li>
+                </ul>
+
+                <h3>Spånevakuering & Kylning (Standardtryck)</h3>
+                <p>Vid djupa spår (högt $a_e$) är den största risken <strong>spånpackning</strong>, vilket spränger klingan direkt. Eftersom din maskin har standard spoltryck orkar skärvätskan sällan hela vägen ner i botten av ett djupt spår. <strong>Tips:</strong> Rika munstyckena extremt noga direkt in i spåret. Om klingan låter illa eller nyper: minska det radiella ingreppet ($a_e$) och ta spåret i flera ytligare passeringar istället för ett djupt svep.</p>
+
+                <h3>Radiell Spånförtunning (RCTF)</h3>
+                <p>Vid lågt radiellt ingrepp ($a_e < 50\%$) vinklas skäreggen in i materialet så att den faktiska spåntjockleken ($h_m$) blir tunnare än din inmatade $f_z$. Kalkylatorn kompenserar detta automatiskt (RCTF) och skruvar upp matningen vid låga ingrepp för att behålla ett konstant skärtryck och förhindra att verktyget bara "gnuggar".</p>
+
+                <h3>Verktygshäng (L/D-förhållande)</h3>
+                <p>Kap- och spårfräsar är extremt känsliga för häng eftersom skivan lätt böjer sig eller börjar huttra (chatter). Om uthänget ($L$) i förhållande till diametern ($D$) överstiger 2.5×D reducerar kalkylatorn stegvis både skärhastighet ($V_c$) och matning ($f_z$) drastiskt för att garantera en säker bearbetning.</p>
+            </div>
+        </div>
+		
+    </main>
+</div>
+<footer>Slitting Cutter Calculator – created by Jimmy Rauhala</footer>
+
+<script src="slitting-cutter_tool_data.js"></script>
+<script>
+    // =====================================================================
+    // UI INITIALIZATION AND EVENT HANDLING
+    // =====================================================================
+
+    function positionTooltip(el) {
+        const rect = el.getBoundingClientRect();
+        const bubbleWidth = Math.min(220, window.innerWidth - 16);
+        const bubbleHeight = 90;
+        const padding = 8;
+        const gap = 8;
+        const vw = window.innerWidth;
+
+        let centerX = rect.left + rect.width / 2;
+        if (centerX - bubbleWidth / 2 < padding) {
+            centerX = padding + bubbleWidth / 2;
+        } else if (centerX + bubbleWidth / 2 > vw - padding) {
+            centerX = vw - padding - bubbleWidth / 2;
+        }
+
+        let topY = rect.top - bubbleHeight - gap;
+        if (topY < padding) {
+            topY = rect.bottom + gap;
+        }
+
+        el.style.setProperty('--tt-x', centerX + 'px');
+        el.style.setProperty('--tt-y', topY + 'px');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('mouseover', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('focusin', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        });
+        document.addEventListener('touchstart', (e) => {
+            const el = e.target.closest('.tooltip');
+            if (el) positionTooltip(el);
+        }, { passive: true });
+
+        window.addEventListener('scroll', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.tooltip:hover, .tooltip:focus').forEach(positionTooltip);
+        });
+		
+		// Modal Logic för Guide & Teori
+        const theoryModal = document.getElementById("theoryModal");
+        const theoryBtn = document.getElementById("theoryBtn");
+        const closeModal = document.getElementById("closeModal");
+        if (theoryBtn && theoryModal && closeModal) {
+            theoryBtn.addEventListener("click", () => theoryModal.style.display = "block");
+            closeModal.addEventListener("click", () => theoryModal.style.display = "none");
+            window.addEventListener("click", (event) => { 
+                if (event.target === theoryModal) theoryModal.style.display = "none"; 
+            });
+        }
+		
+    });
+</script>
+<script src="theme.js"></script>
+</body>
+</html>
